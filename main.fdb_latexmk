@@ -1,16 +1,16 @@
 # Fdb version 4
-["bibtex main"] 1765500270.18506 "main.aux" "main.bbl" "main" 1765500270.7381 2
+["bibtex main"] 1765500270.18506 "main.aux" "main.bbl" "main" 1765503508.35377 2
   "./references.bib" 1765443545 4312 a20c8d9915c7bd7b06f27cea12bcb17c ""
   "d:/Paper/texlive/2025/texmf-dist/bibtex/bst/els-cas-templates/cas-model2-names.bst" 1765360161 31802 28b630660245c09f173aac55be552b29 ""
-  "main.aux" 1765500262 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "main.aux" 1765503506 17649 19203b99a8284fc79364360cb07c1c34 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1765500264.98995 "d:/Paper/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/main.tex" "main.pdf" "main" 1765500269.12039 2
+["pdflatex"] 1765503504.28175 "d:/Paper/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/main.tex" "main.pdf" "main" 1765503508.35449 2
   "cas-common.sty" 1765331210 76661 edd5b8a98de28a359bf90630ef49c969 ""
   "cas-dc.cls" 1765331210 4131 cd339ce7718d9133dc8cc5e56b7202a8 ""
-  "d:/Paper/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/main.tex" 1765500263 89508 17b09d4f1db1d02205683a1be76f14c4 ""
+  "d:/Paper/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/main.tex" 1765503498 89575 12b6ffe91948d8b7c3bffe610144ec11 ""
   "d:/Paper/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1765358800 2971 def0b6c1f0b107b3b936def894055589 ""
   "d:/Paper/texlive/2025/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-0.enc" 1765361746 7631 5169ff1acd97ff1c4ab83563c99f96f4 ""
   "d:/Paper/texlive/2025/texmf-dist/fonts/enc/dvips/stix/stix-t1.enc" 1765364760 7013 c55cc8669071ac14036c4a0c96c16202 ""
@@ -274,12 +274,11 @@
   "d:/Paper/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1765366179 5587496 f9f7fe7f5acd921e49e7e95ec02cd480 ""
   "d:/Paper/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1765366455 3635807 e808aa722fdf4cb33b8a53273ff87745 ""
   "d:/Paper/texlive/2025/texmf.cnf" 1765366158 713 e69b156964470283e0530f5060668171 ""
-  "main.abs" 1765500266 1006 83fc8c2637904a665e8a2aee3d688b6c "pdflatex"
-  "main.aux" 1765500262 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "main.abs" 1765503505 1006 83fc8c2637904a665e8a2aee3d688b6c "pdflatex"
+  "main.aux" 1765503506 17649 19203b99a8284fc79364360cb07c1c34 "pdflatex"
   "main.bbl" 1765500270 0 d41d8cd98f00b204e9800998ecf8427e "bibtex main"
-  "main.out" 0 -1 0 "pdflatex"
-  "main.tex" 1765500263 89508 17b09d4f1db1d02205683a1be76f14c4 ""
-  "thumbnails/cas-email.jpeg" 1765331210 8764 ae276cc9956197082d008c18ae4cbb28 ""
+  "main.out" 1765503506 5423 5a4e9935f3b748f172cc586ee1fd195f "pdflatex"
+  "main.tex" 1765503498 89575 12b6ffe91948d8b7c3bffe610144ec11 ""
   (generated)
   "main.abs"
   "main.aux"
