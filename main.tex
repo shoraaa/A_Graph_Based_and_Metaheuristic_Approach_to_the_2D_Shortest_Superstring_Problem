@@ -1,7 +1,8 @@
-%% Elsevier cas-dc version of your paper
+%% Elsevier elsarticle template for Computers & Operations Research
 
-\documentclass[review,5p]{cas-dc}
+\documentclass[a4paper,fleqn]{cas-dc}
 
+% Bibliography options - Harvard style for CAOR
 % \biboptions{authoryear,longnamesfirst}
 \usepackage[authoryear,longnamesfirst]{natbib}
 
@@ -11,42 +12,44 @@
 \usepackage{algorithm}    % defines the algorithm float
 \usepackage{algpseudocode}  % defines \begin{algorithmic}, \State, ...
 \usepackage{float}        % (optional) for [!t] placement specifier
-\usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{pgfplots}
-\usepackage{tabularx}  
-\usepackage{caption}  % or capt-of if caption clashes with the class
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{matrix,calc}
 \pgfplotsset{compat=1.18}
 
-% \usepackage[section]{placeins}
-
 % ---------- Theorem-like environments ----------
+\usepackage{amsthm}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
-\newdefinition{definition}{Definition}
-\newdefinition{remark}{Remark}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+\newenvironment{pf}[1][Proof]{\begin{proof}[#1]}{\end{proof}}
 
 \newcommand{\Occ}{\operatorname{Occ}}
 
 \begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
 
 % Main title
-\title{A Graph-Based and Metaheuristic Approach to the 2D Shortest Superstring Problem}
+\title [mode = title]{A Graph-Based and Metaheuristic Approach to the 2D Shortest Superstring Problem}
 
-\author[1]{Dat Thanh Tran\corref{cor1}}
+\author[vinuni]{Dat Thanh Tran\corref{cor1}}
 \ead{dat.tt3@vinuni.edu.vn}
-\author[1]{Khai Quang Tran}
+\author[vinuni]{Khai Quang Tran}
 \ead{khai.tq@vinuni.edu.vn}
-\author[1]{Van Khu Vu}
+\author[vinuni]{Van Khu Vu}
 \ead{khu.vv@vinuni.edu.vn}
 
-\affiliation[1]{
-  organization={VinUniversity},
-  city={Hanoi},
-  country={Vietnam}
-}
-
 \cortext[cor1]{Corresponding author}
+
+\address[vinuni]{VinUniversity, Hanoi, Vietnam}
 
 \begin{abstract}
 We investigate a two-dimensional generalization of the Shortest Superstring Problem (SSP): given a set of 2D strings (symbol arrays), place them on the integer grid with symbol-consistent overlaps to minimize a bounding-box cost. We study two cost variants: a \emph{square} objective minimizing $\max\{H,W\}$, and an \emph{area} objective minimizing $H \cdot W$.
@@ -56,7 +59,9 @@ Our key modelling insight is to represent solutions as trees of relative offsets
 Experiments show that the GA matches ILP-optimal solutions on small instances and outperforms greedy by 6--12\% on larger instances, while remaining orders of magnitude faster than ILP.
 \end{abstract}
 
-
+\begin{keywords}
+Shortest superstring problem \sep Two-dimensional strings \sep Genetic algorithm \sep Integer linear programming \sep Combinatorial optimization \sep Metaheuristics
+\end{keywords}
 
 \maketitle
 
@@ -89,7 +94,6 @@ minimizing a bounding-box cost derived from the minimal axis-aligned bounding re
     \item an \emph{area objective}, which minimizes the rectangle area $H \cdot W$.
 \end{itemize}
 
-\paragraph{Why tree-based representations?}
 Our central modelling choice is to represent a solution as a \emph{tree of
 relative offsets between 2D strings} rather than as an explicit 2D array or a vector of absolute coordinates. This choice is motivated by both theoretical and algorithmic considerations.
 
@@ -122,10 +126,10 @@ Two-dimensional generalizations of string concepts appear in several areas:
     considers how a small pattern can cover a larger 2D string with overlaps,
     generalizing the notion of a cover in 1D~\citep{charalampopoulos2021covers}.
     \item \emph{Covering sequences and 2D covering sequences.} Recent research
-    introduces covering sequences~\citep{yehezkeally2025covering} and covering 2D-sequences, where all
+    introduces covering sequences and covering 2D-sequences, where all
     $m \times n$ windows of a large 2D array form a covering code for patterns
     of that size up to a given radius. These provide natural sources of
-    structured test instances.
+    structured test instances~\citep{yehezkeally2025covering}.
 \end{itemize}
 
 These works focus on covering combinatorial spaces, whereas we focus on
@@ -150,16 +154,12 @@ absent from standard 2D bin packing.
 
 While 2D-SSP is distinct in its requirement for exact symbol consistency, it shares significant structural similarities with problems in VLSI design, computer graphics, and molecular computing.
 
-\paragraph{VLSI Floorplanning.}
 In Very Large Scale Integration (VLSI) physical design, the floorplanning stage seeks to arrange rectangular modules without overlap to minimize total area and wirelength \citep{wong1986new}. This problem is a close cousin to 2D bin packing, but the methodological overlap with our work lies in the \emph{representation} of solutions. Topological representations such as Sequence Pairs \citep{murata1995sequence} and B*-trees \citep{chang2000b} encode relative positions of rectangles to explore the search space efficiently. Our use of placement trees (Section~\ref{sec:problem}) is conceptually related to these nonslicing floorplan representations, adapted to the regime where adjacency is defined by content overlap rather than physical interconnects.
 
-\paragraph{Texture Synthesis and Image Stitching.}
 In computer graphics, patch-based texture synthesis aims to generate large textures by stitching together small sample patches \citep{efros2001image, kwatra2003graphcut}. Algorithms in this domain typically place patches greedily or via graph cuts to minimize the visual error in the overlapping regions. 2D-SSP can be viewed as the discrete, lossless limit of these problems: instead of minimizing a pixel-difference norm (soft constraint), we require zero Hamming distance in the overlap (hard constraint) and optimize for maximum compression.
 
-\paragraph{DNA Self-Assembly.}
 The constraints of 2D-SSP strongly resemble the algorithmic self-assembly of DNA tiles. In the Tile Assembly Model (TAM) introduced by \citet{winfree1998algorithmic}, square tiles (Wang tiles) attach to a growing crystal lattice only if their edges match the specific "sticky ends" (symbols) of neighbors. While DNA self-assembly focuses on the forward kinetic process of crystallization or the computational power of the resulting tiling, 2D-SSP effectively asks for the most compact configuration (or "seed") that could theoretically be assembled from a given multiset of patterned tiles.
 
-\paragraph{Jigsaw Puzzle Assembly and Polyomino Packing.}
 2D-SSP can also be viewed through the lens of computational jigsaw puzzle assembly, where the goal is to reconstruct an image from a set of pieces based on visual compatibility at boundaries \citep{sholomon2013genetic}. In our setting, the "pieces" are 2D strings and the compatibility constraint is exact symbol matching rather than visual similarity. A key difference is that in classical jigsaw puzzles each piece has a unique location, whereas in 2D-SSP multiple valid placements may exist and the objective is to minimize the bounding box rather than reconstruct a known target. The problem also relates to polyomino packing \citep{golomb1994polyominoes}, which asks whether a given set of polyomino shapes can tile a region. However, polyomino packing typically assumes non-overlapping pieces with geometric interlocking, while 2D-SSP permits symbol-consistent overlaps that effectively "merge" the content of multiple strings---a feature that enables compression beyond what pure geometric packing allows.
 
 \section{Problem Definition and Structural Properties}
@@ -220,8 +220,8 @@ Thus $|S|_{\mathrm{area}}$ is the natural 2D analogue of superstring length
 (area of the bounding box), while $|S|_{\square}$ focuses on the longest side
 of the enclosing square.
 
-\usetikzlibrary{matrix,calc}
-
+\begin{figure}[t]
+\centering
 \begin{tikzpicture}[
   letter/.style={font=\small, inner sep=1pt},
   tile/.style={draw,thick},
@@ -281,9 +281,7 @@ variants of the Two-Dimensional Shortest Superstring Problem:
 Both objectives depend only on the minimal axis-aligned bounding rectangle of $S$ and penalize all empty cells inside it.
 \end{definition}
 
-Whenever the distinction between the two variants is not important, we simply refer to either as \emph{2D-SSP}.
-
-\paragraph{Terminology.} Hereafter, we use \emph{string} to mean \emph{2D string} unless otherwise specified.
+Whenever the distinction between the two variants is not important, we simply refer to either as \emph{2D-SSP}. Hereafter, we use \emph{string} to mean \emph{2D string} unless otherwise specified.
 
 We assume throughout that strings are axis-aligned rectangles and cannot be
 rotated or reflected; repeated strings in $\mathcal{T}$ are treated as distinct
@@ -382,14 +380,14 @@ The following lemma shows that this assumption is without loss of generality: an
 Let $p$ be an optimal symbol-consistent placement for 2D-SSP (under either $\mathrm{cost}_{\mathrm{area}}$ or $\mathrm{cost}_{\square}$). If $R(p)$ is not 4-connected, then there exists an optimal symbol-consistent placement $p'$ such that $R(p')$ is 4-connected and $\mathrm{cost}(p') \le \mathrm{cost}(p)$.
 \end{lemma}
 
-\begin{proof}
+\begin{pf}
 Suppose $R(p)$ is not 4-connected. Then the occupied region decomposes into $k \geq 2$ maximal 4-connected components $R_1, R_2, \ldots, R_k$. Each component $R_\ell$ corresponds to a subset $\mathcal{T}_\ell \subseteq \mathcal{T}$ of strings whose footprints are entirely contained in $R_\ell$. Let $B_\ell$ denote the axis-aligned bounding box of $R_\ell$, with width $W_\ell$ and height $H_\ell$.
 
 We construct $p'$ by translating the components to merge them while ensuring their bounding boxes become adjacent without interpenetration. Without loss of generality, consider merging $R_2$ into the region containing $R_1$. Let
-\[
-  x_1^{\max} = \max\{x : (x,y) \in B_1 \text{ for some } y\}, \quad
-  x_2^{\min} = \min\{x : (x,y) \in B_2 \text{ for some } y\}.
-\]
+\begin{align*}
+  x_1^{\max} &= \max\{x : (x,y) \in B_1 \text{ for some } y\}, \\
+  x_2^{\min} &= \min\{x : (x,y) \in B_2 \text{ for some } y\}.
+\end{align*}
 We choose the translation vector $\tau = (x_1^{\max} - x_2^{\min} + 1, \delta_y)$, where:
 \begin{itemize}
     \item The horizontal component $x_1^{\max} - x_2^{\min} + 1$ is the unique value that places the leftmost column of the translated $B_2$ immediately to the right of the rightmost column of $B_1$, ensuring the two bounding boxes are horizontally adjacent but do not overlap.
@@ -420,7 +418,7 @@ We now verify that:
 \end{enumerate}
 
 Repeating this process for all remaining components yields a placement $p'$ with $R(p')$ 4-connected and $\mathrm{cost}(p') \le \mathrm{cost}(p)$. Since $p$ was optimal, we have $\mathrm{cost}(p') = \mathrm{cost}(p)$, so $p'$ is also optimal.
-\end{proof}
+\end{pf}
 
 \begin{corollary}
 For any instance of 2D-SSP, there exists an optimal placement whose occupied region is 4-connected. Consequently, Assumption~\ref{ass:connected-union} holds for all instances.
@@ -437,7 +435,7 @@ Let $p$ be a symbol-consistent placement such that $R(p)$ is 4-connected.
 Then the contact graph $G^{\mathrm{ct}}(p)$ is connected.
 \end{lemma}
 
-\begin{proof}
+\begin{pf}
 If $G^{\mathrm{ct}}(p)$ were disconnected, we could partition the strings into
 two nonempty sets $A$ and $B$ with no edge between them. For each string $T_i$, let $R_i$ be the set of global cells covered by $T_i$
 under $p$. Define
@@ -449,7 +447,7 @@ under $p$. Define
 so that $R(p) = R_A \cup R_B$ and $R_A \cap R_B = \emptyset$.
 By construction there is no pair of 4-adjacent cells across $R_A$ and $R_B$,
 which contradicts 4-connectivity of $R(p)$.
-\end{proof}
+\end{pf}
 
 Under Assumption~\ref{ass:connected-union} and Lemma~\ref{lem:contact-connected},
 we obtain the following.
@@ -557,7 +555,7 @@ Then:
 \end{enumerate}
 \end{lemma}
 
-\begin{proof}
+\begin{pf}
 By definition of the labels, for every edge $(i,j)$ the placement $p$
 satisfies $p(j) = p(i) + \delta_{ij}$.
 Consequently, for any vertex $i$ and any path $r=v_0,\dots,v_\ell=i$ in $F$,
@@ -572,7 +570,7 @@ $p(r)$.
 Since $p$ is symbol-consistent, this shows that $F$ is feasible.
 Changing $p(r)$ to $p(r)+\Delta$ for some $\Delta \in \mathbb{Z}^2$ adds
 $\Delta$ to all positions, yielding a global translation of $p$.
-\end{proof}
+\end{pf}
 
 \begin{lemma}
 \label{lem:tree-to-placement}
@@ -582,12 +580,12 @@ symbol-consistent placement whose induced array $T_{p_F}$ is a 2D-superstring
 of $\mathcal{T}$.
 \end{lemma}
 
-\begin{proof}
+\begin{pf}
 By feasibility, the realization $p_F$ is symbol-consistent.
 Every string $T_i$ is placed exactly once, so $T_i$ occurs as a 2D substring
 of the induced array $T_{p_F}$.
 Therefore $T_{p_F}$ is a 2D-superstring of $\mathcal{T}$.
-\end{proof}
+\end{pf}
 
 Combining Assumption~\ref{ass:connected-union} with
 Lemmas~\ref{lem:contact-connected},
@@ -619,7 +617,6 @@ derived from the bounding box $B(p)$. Consequently, the structural statements
 apply verbatim to both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\square}$.
 \end{remark}
 
-\paragraph{Implications for algorithm design.}
 Theorem~\ref{thm:tree-optimal} establishes that placement trees provide a complete encoding of connected placements, but the theorem's value extends beyond mere equivalence. The tree structure has three properties that make it particularly suitable for metaheuristic optimization:
 
 \begin{enumerate}
@@ -681,7 +678,6 @@ Having established the structural foundation linking placements and trees, we no
 
 All three methods can be instantiated with either of the two bounding-box cost variants, 2D-SSP$_{\mathrm{area}}$ or 2D-SSP$_{\square}$.
 
-\paragraph{Choice of solution representation.}
 The genetic algorithm uses placement trees rather than the more obvious coordinate-based representation (where each individual is a vector of $(x,y)$ coordinates for each string). This choice is motivated by several considerations. First, in the coordinate representation, an offspring produced by crossover rarely inherits good local structure from its parents: if parent~1 places strings $A$ and $B$ in a well-overlapping configuration, and parent~2 places strings $B$ and $C$ similarly, a crossover that takes $A$ from parent~1 and $C$ from parent~2 will likely place them far apart, destroying both favorable overlaps. In contrast, our tree-based crossover transplants entire subtrees, preserving the relative offsets among all strings in the subtree. Second, the coordinate representation is highly redundant: any global translation of a placement yields the same objective value, so the search space contains infinitely many equivalent solutions. The tree representation eliminates this redundancy by encoding only the pairwise offsets that matter. Third, the tree structure aligns naturally with the connectivity requirement: a spanning tree automatically ensures that all strings are geometrically connected, whereas the coordinate representation requires additional constraints or repair operators to enforce connectivity.
 
 \subsection{Exact Verification via ILP}
@@ -710,7 +706,6 @@ and its width and height by
   h_i = y_i^{\max} - y_i^{\min} + 1.
 \]
 
-\paragraph{Global grid, symmetry breaking, and greedy-based bounds.}
 We embed all strings into a common rectangular grid
 $[0,W_g] \times [0,H_g] \subset \mathbb{Z}^2$, where $W_g$ and $H_g$ are derived from a greedy solution computed as a preprocessing step. Specifically, we first run the greedy heuristic (Section~\ref{sec:greedy-impl}) to obtain a feasible placement with bounding-box dimensions $W_{\text{greedy}} \times H_{\text{greedy}}$. Since any optimal solution cannot have a larger bounding box than this greedy solution, we set
 \[
@@ -735,7 +730,6 @@ Recall that $\mathcal{O}_1 = \{(0,0)\}$ by the symmetry-breaking constraint.
 When $T_i$ is placed at an origin $o = (x,y)$, each local cell
 $(u,v)\in C_i$ is mapped to global coordinates $(x+u,y+v)$.
 
-\paragraph{Symbol conflicts.}
 Two candidate placements $(i,o)$ and $(j,o')$ are incompatible if they assign
 different symbols to the same global coordinate. Formally, we precompute a
 Boolean conflict indicator
@@ -756,7 +750,6 @@ for all $i<j$, $o\in\mathcal{O}_i$, and $o'\in\mathcal{O}_j$.
 This preprocessing reduces symbol consistency to simple pairwise
 constraints in the ILP.
 
-\paragraph{Decision variables.}
 The model uses the following variables.
 \begin{itemize}
   \item For each string $i \in \{1,\dots,n\}$ and each origin
@@ -793,7 +786,6 @@ In the implementation we bound these variables by a constant
 so that $X_{\min},X_{\max},Y_{\min},Y_{\max} \in [-M,M]$ and
 $W,H,L \in [0,M]$, $A \in [0,M^2]$.
 
-\paragraph{Common constraints.}
 Both objective variants share the following groups of constraints.
 
 \medskip
@@ -866,7 +858,7 @@ individual 2D string:
   \label{eq:ilp-WH-lb}
 \end{equation}
 
-\paragraph{Variant 1: square objective.}
+\subsubsection{Square Objective}
 The square-based variant minimises the side length of the smallest enclosing square. We link $L$ to $W$ and $H$ via
 \begin{equation}
   L \;\ge\; W,
@@ -886,7 +878,7 @@ The \emph{bounding square} ILP is
    X_{\min},X_{\max},Y_{\min},Y_{\max},W,H,L \in \mathbb{Z}. \nonumber
 \end{align}
 
-\paragraph{Variant 2: area objective and linearization.}
+\subsubsection{Area Objective}
 The area-based variant uses the product $W\cdot H$ as its cost. Conceptually we want
 \begin{equation}
   A = W \cdot H.
@@ -947,7 +939,6 @@ We also use greedy construction heuristics that build a placement incrementally
 on a global \emph{canvas}. Strings are placed one by one, always maintaining symbol-consistency and trying to keep the current bounding-box cost (either side length $\max\{\text{width},\text{height}\}$ for the square objective or area $\text{width}\times\text{height}$ for the area objective)
 as small as possible. All variants start from a chosen ``root'' string and then attach the remaining strings.
 
-\paragraph{Canvas view.}
 Conceptually, the current solution is represented by:
 \begin{itemize}
     \item a set of occupied global cells with their symbols; and
@@ -969,7 +960,6 @@ and we can define either
 depending on the chosen objective. For any candidate placement of a string, we can (i) check whether overlapping
 cells agree symbolically, and (ii) compute the resulting bounding-box cost.
 
-\paragraph{Candidate positions.}
 For a given target side length $L$ in the square-based case, we enumerate translations
 $(\Delta x,\Delta y)$ of a string $T$ that would result in a bounding box of side length
 exactly $L$ when combined with the current canvas. Intuitively:
@@ -1016,7 +1006,6 @@ $(u \to v)$ are annotated by integer offsets $(\Delta x,\Delta y)$,
 and whose root $r$ is the string placed at the origin.
 Decoding such a tree yields a concrete placement and an objective value.
 
-\paragraph{Placement graph.}
 As a preprocessing step we build a \emph{placement graph}
 $G = (V,E_G)$ on the strings, whose directed edges encode all locally
 valid relative placements between string pairs.
@@ -1024,7 +1013,6 @@ For each ordered pair of distinct strings $(u,v)$ we enumerate a finite
 search window of translations of $v$ relative to $u$ and collect
 all offsets that yield symbol-consistent overlaps or 4-adjacent contact.
 
-\paragraph{Decoding a placement tree.}
 To evaluate a tree $F = (V,E,r)$ we traverse it from the root $r$, assign absolute 
 coordinates $p_F(i)$ to every 2D string $T_i$ by summing
 the edge offsets along the unique path from $r$ to $i$, and construct the
@@ -1037,7 +1025,6 @@ The fitness is then the bounding-box cost of the resulting placement, either
 \]
 depending on which objective variant is being optimized.
 
-\paragraph{Initialization from greedy placements.}
 Each individual in the initial population is obtained by first running
 a greedy constructive heuristic (deterministic or stochastic) from a
 given start string, which produces a full placement with absolute
@@ -1045,7 +1032,6 @@ coordinates. We then extract a spanning tree of relative offsets
 from this placement. Thus every individual is a tree that faithfully encodes the relative
 structure of a greedy solution.
 
-\paragraph{Tree-based crossover with greedy completion.}
 Our crossover operator combines two parent trees by \emph{alternating}
 their local tree structures while maintaining geometric feasibility.
 Starting from the root, we expand a child tree by re-using parent
@@ -1058,7 +1044,6 @@ We additionally keep track of how many strings had to be attached
 via greedy completion, which serves as a diagnostic of how often the
 parental structures alone suffice.
 
-\paragraph{Main evolutionary loop.}
 The full GA is summarized in Algorithm~\ref{alg:ga}. We maintain a
 population of trees, initialized from multiple greedy placements with
 different starting strings and (optionally) stochastic perturbations.
@@ -1066,7 +1051,6 @@ In each generation we decode all individuals, rank them by fitness,
 copy the best few (elitism~\citep{dejong1975phd}), and fill the remaining slots by
 crossover or by copying fit parents.
 
-\paragraph{Design choice: no explicit mutation operator.}
 Our GA deliberately omits a dedicated mutation operator. This design choice is motivated by two considerations. First, when crossover is carefully designed to recombine meaningful building blocks---as our subtree-based crossover does---explicit mutation often provides diminishing returns or can even be counterproductive by disrupting well-structured solutions. This observation aligns with findings in other combinatorial optimization domains where problem-specific crossover operators dominate the search dynamics \citep{sholomon2013genetic}. Second, maintaining feasibility under traditional mutation is non-trivial in our setting: a random perturbation of edge offsets in a placement tree can easily introduce symbol conflicts or break connectivity.
 
 However, we observe that the \emph{greedy completion} step in our crossover operator (Algorithm~\ref{alg:tree-crossover}, lines 18--22) implicitly serves as a \emph{feasibility-preserving mutation mechanism}. When crossover produces an incomplete offspring---one that does not contain all strings---the greedy completion step attaches the missing strings using fresh, locally-optimal placements that differ from both parents. In the stochastic variant (\textsc{GA (Stochastic)}), this completion step uses \emph{stochastic greedy} placement, which randomly samples among equally-good candidate positions rather than deterministically choosing one. This randomization introduces genuine variation: even when the same set of strings must be completed, different runs may attach them at different positions, exploring alternative regions of the solution space.
@@ -1183,7 +1167,6 @@ Greedy (Stochastic)  & 8.33 &   $8.2\times 10^{-4}$ \\
 \caption{Square objective, small instances ($N \in \{6,8,10\}$ strings). The ILP provides optimal solutions for verification; its runtime is omitted as it is used only for offline ground-truth generation.}
 \label{tab:square-small}
 \end{table}
-\end{table}
 
 On \emph{small} instances (Table~\ref{tab:square-small}), the ILP
 provides optimal solutions with mean max side $7.32$, serving as the ground-truth benchmark. Both genetic algorithms closely approach
@@ -1208,7 +1191,6 @@ Greedy (Stochastic)  & 13.75 &   $4.2\times 10^{-3}$ \\
 \caption{Square objective, medium instances ($N \in \{20,30,50\}$ strings). Mean over all sizes and seeds. ILP verification is not available at this scale.}
 \label{tab:square-medium}
 \end{table}
-\end{table}
 
 On \emph{medium} instances (Table~\ref{tab:square-medium}), the ILP is no longer tractable for verification. Both genetic variants achieve mean max side around $12.1$, outperforming the greedy heuristics by roughly $7$--$13\%$. The GA runtimes (5--9\,s) remain practical for these instance sizes.
 
@@ -1230,19 +1212,13 @@ Greedy (Stochastic)  & 17.97 &    $2.8\times 10^{-2}$ \\
 \caption{Square objective, large instances ($N \in \{60,80,100\}$ strings). Mean over all sizes and seeds.}
 \label{tab:square-large}
 \end{table}
-\end{table}
 
 On \emph{large} instances (Table~\ref{tab:square-large}), the
 tree-based GAs consistently achieve the best max side (around $16.2$--$16.4$),
 improving on deterministic greedy by about $6\%$ on average. The GA runtimes
 (tens of seconds) are substantially higher than greedy (tens of milliseconds)
 but remain practical for offline optimization.
-improving on deterministic greedy by about $6\%$ on average, at the cost of
-one to two orders of magnitude more runtime (tens of seconds vs.\ a few
-tens of milliseconds).  The greedy heuristics remain essentially linear-time
-and are preferred when runtime is the dominant concern.
 
-\paragraph{Scaling curves.}
 Figure~\ref{fig:square-cost-vs-tiles} plots the mean square cost as a function
 of the number of strings, while Figure~\ref{fig:square-time-vs-tiles} shows the
 corresponding runtimes on a logarithmic scale.
@@ -1367,7 +1343,6 @@ These plots highlight a clear Pareto frontier:
 
 We now turn to the area-based objective $f_{\mathrm{area}}(p) = W(p) \cdot H(p)$, which is the direct 2D analogue of classical superstring length. Tables~\ref{tab:small-results}--\ref{tab:large-results} summarize the average placement cost for each algorithm, grouped by instance scale. Figure~\ref{fig:cost-vs-2Dstrings} visualizes the scaling behavior across all instance sizes.
 
-\paragraph{Small instances.}
 On small instances (6--10 strings, Table~\ref{tab:small-results}), the ILP provides optimal solutions with mean cost $7.32$, serving as ground truth. The genetic variants are very close to optimal: \textsc{GA (Stochastic)} and \textsc{GA} are only about $2.3\%$ and $4.2\%$ worse than the optimum, respectively. The purely greedy heuristics sacrifice about $12$--$14\%$ in solution quality compared to optimal.
 
 \begin{table}[t]
@@ -1390,7 +1365,6 @@ Greedy (Stochastic)  & 8.32 & 0.91 \\
 \label{tab:small-results}
 \end{table}
 
-\paragraph{Medium instances.}
 On medium instances (20--50 strings, Table~\ref{tab:medium-results}), \textsc{GA (Stochastic)} attains the lowest average cost, with \textsc{GA} being essentially indistinguishable (within $0.1\%$). The greedy baselines are roughly $8\%$ (\textsc{greedy}) and $11.5\%$ (\textsc{Greedy (Stochastic)}) worse in cost.
 
 \begin{table}[t]
@@ -1412,7 +1386,6 @@ Greedy (Stochastic)  & 13.56 & 1.77 \\
 \label{tab:medium-results}
 \end{table}
 
-\paragraph{Large instances.}
 On large instances (60--100 strings, Table~\ref{tab:large-results}), \textsc{GA} consistently achieves the best average cost. The cost gap between the GA and the deterministic greedy baseline is around $6$--$7\%$ on average, and around $11\%$ for \textsc{Greedy (Stochastic)}.
 
 \begin{table}[t]
@@ -1671,7 +1644,6 @@ considered two natural cost variants: a \emph{square} objective, minimizing the
 side length $\max\{H,W\}$ of the smallest enclosing square, and an \emph{area}
 objective, minimizing the rectangle area $H\cdot W$.
 
-\paragraph{Main contributions.}
 Our work makes three primary contributions:
 \begin{enumerate}
     \item \emph{Problem formalization.} We introduce the 2D-SSP as a natural two-dimensional generalization of the classical SSP, with two bounding-box cost variants. We establish the equivalence between optimizing over 2D-superstrings and optimizing over symbol-consistent placements.
@@ -1681,10 +1653,8 @@ Our work makes three primary contributions:
     \item \emph{Algorithmic framework.} We develop three algorithmic approaches---an exact ILP formulation, a fast greedy heuristic, and a problem-specific tree-based genetic algorithm---that exploit the placement-tree structure. The GA achieves near-optimal quality with substantially lower runtime than ILP and $6$--$12\%$ better quality than greedy on medium and large instances.
 \end{enumerate}
 
-\paragraph{Limitations.}
 Several limitations of the current work merit discussion. First, our ILP formulation, while exact, does not scale beyond small instances ($n \le 10$ strings) due to the combinatorial explosion of candidate placements. Second, the connectivity assumption (Assumption~\ref{ass:connected-union}) excludes instances where optimal solutions consist of disconnected components. Third, our experimental evaluation uses only $3 \times 3$ strings over small alphabets; the behavior on larger or more varied string shapes remains unexplored. Finally, the GA's performance depends on parameter choices (population size, crossover rate) that we have not systematically tuned.
 
-\paragraph{Future directions.}
 Several directions for future research emerge from this work:
 \begin{itemize}
     \item \emph{Approximation algorithms.} Can the greedy $2.5$-approximation for 1D-SSP be generalized to the 2D setting? What approximation ratios are achievable for 2D-SSP?
@@ -1711,11 +1681,8 @@ More broadly, the placement-tree representation and tree-based GA operators deve
 
 % ===================== BACK MATTER =====================
 
-\printcredits
-
-%% Bibliography
-%% You can change style and bib file name as needed
-\bibliographystyle{cas-model2-names}
+%% Bibliography - Harvard style for Computers & Operations Research
+\bibliographystyle{elsarticle-harv}
 \bibliography{references}
 
 \end{document}

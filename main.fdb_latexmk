@@ -1,16 +1,16 @@
 # Fdb version 4
-["bibtex main"] 1765500270.18506 "main.aux" "main.bbl" "main" 1765503508.35377 2
+["bibtex main"] 1765514359.83426 "main.aux" "main.bbl" "main" 1765514364.75023 0
   "./references.bib" 1765443545 4312 a20c8d9915c7bd7b06f27cea12bcb17c ""
-  "d:/Paper/texlive/2025/texmf-dist/bibtex/bst/els-cas-templates/cas-model2-names.bst" 1765360161 31802 28b630660245c09f173aac55be552b29 ""
-  "main.aux" 1765503506 17649 19203b99a8284fc79364360cb07c1c34 "pdflatex"
+  "d:/Paper/texlive/2025/texmf-dist/bibtex/bst/elsarticle/elsarticle-harv.bst" 1765360163 30002 e0380d61aa45e0af6c9b40308561c934 ""
+  "main.aux" 1765514363 15492 6faacf37885c48800b00aa15f6f977fa "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1765503504.28175 "d:/Paper/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/main.tex" "main.pdf" "main" 1765503508.35449 2
+["pdflatex"] 1765514360.36233 "d:/Paper/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/main.tex" "main.pdf" "main" 1765514364.75162 0
   "cas-common.sty" 1765331210 76661 edd5b8a98de28a359bf90630ef49c969 ""
   "cas-dc.cls" 1765331210 4131 cd339ce7718d9133dc8cc5e56b7202a8 ""
-  "d:/Paper/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/main.tex" 1765503498 89575 12b6ffe91948d8b7c3bffe610144ec11 ""
+  "d:/Paper/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/main.tex" 1765507175 88624 efa0d4660c7d09179b13e3aecc538805 ""
   "d:/Paper/texlive/2025/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1765358800 2971 def0b6c1f0b107b3b936def894055589 ""
   "d:/Paper/texlive/2025/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-0.enc" 1765361746 7631 5169ff1acd97ff1c4ab83563c99f96f4 ""
   "d:/Paper/texlive/2025/texmf-dist/fonts/enc/dvips/stix/stix-t1.enc" 1765364760 7013 c55cc8669071ac14036c4a0c96c16202 ""
@@ -180,6 +180,7 @@
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/algorithmicx/algorithmicx.sty" 1765356925 26750 ce139c05a983e19ddca355b43e29c395 ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/algorithmicx/algpseudocode.sty" 1765356925 3457 d9077efe6b74c5a094199256af8d7d9a ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/algorithms/algorithm.sty" 1765356927 3249 15763257e50278eef5db1952ccde229c ""
+  "d:/Paper/texlive/2025/texmf-dist/tex/latex/amscls/amsthm.sty" 1765356978 12594 0d51ac3a545aaaa555021326ff22a6cc ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/amsfonts/amsfonts.sty" 1765356986 5949 3f3fd50a8cc94c3d4cbf4fc66cd3df1c ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/amsfonts/amssymb.sty" 1765356986 13829 94730e64147574077f8ecfea9bb69af4 ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/amsfonts/umsa.fd" 1765356986 961 6518c6525a34feb5e8250ffa91731cff ""
@@ -190,13 +191,12 @@
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/amsmath/amsopn.sty" 1765356996 4474 c510a88aa5f51b8c773b50a7ee92befd ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/amsmath/amstext.sty" 1765356996 2444 9983e1d0683f102e3b190c64a49313aa ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/base/article.cls" 1765362095 20144 b966087dda3b194755eb460d32e2ef75 ""
+  "d:/Paper/texlive/2025/texmf-dist/tex/latex/base/fleqn.clo" 1765362095 4832 b9e68358aa4c47c980e091e661f12c63 ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/base/fontenc.sty" 1765362095 5275 6f9d359641b36842524cdb97716ab75f ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/base/ifthen.sty" 1765362095 5525 1593ca62a2554dd7423fc8a4e5a82125 ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/base/size10.clo" 1765362095 8448 686612a86f0e04f41ea577f5ec7e83d8 ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/base/textcomp.sty" 1765362095 2846 e26604d3d895e65d874c07f30c291f3f ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/booktabs/booktabs.sty" 1765358179 6078 f1cb470c9199e7110a27851508ed7a5c ""
-  "d:/Paper/texlive/2025/texmf-dist/tex/latex/caption/caption.sty" 1765358388 56128 c2ccf1a29d78c33bc553880402e4fb9a ""
-  "d:/Paper/texlive/2025/texmf-dist/tex/latex/caption/caption3.sty" 1765358388 72619 ee90b6612147680fd73c3b1406a74245 ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/colortbl/colortbl.sty" 1765358964 12709 4ca3cf5f9f1d551b8a1090fba11ac95d ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty" 1765360317 13886 d1306dcf79a944f6988e688c1785f9ce ""
   "d:/Paper/texlive/2025/texmf-dist/tex/latex/etoolbox/etoolbox.sty" 1765360438 46885 8953c67ffba03252c6090aa19568b8ba ""
@@ -274,11 +274,12 @@
   "d:/Paper/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1765366179 5587496 f9f7fe7f5acd921e49e7e95ec02cd480 ""
   "d:/Paper/texlive/2025/texmf-var/web2c/pdftex/pdflatex.fmt" 1765366455 3635807 e808aa722fdf4cb33b8a53273ff87745 ""
   "d:/Paper/texlive/2025/texmf.cnf" 1765366158 713 e69b156964470283e0530f5060668171 ""
-  "main.abs" 1765503505 1006 83fc8c2637904a665e8a2aee3d688b6c "pdflatex"
-  "main.aux" 1765503506 17649 19203b99a8284fc79364360cb07c1c34 "pdflatex"
-  "main.bbl" 1765500270 0 d41d8cd98f00b204e9800998ecf8427e "bibtex main"
-  "main.out" 1765503506 5423 5a4e9935f3b748f172cc586ee1fd195f "pdflatex"
-  "main.tex" 1765503498 89575 12b6ffe91948d8b7c3bffe610144ec11 ""
+  "main.abs" 1765514362 1006 83fc8c2637904a665e8a2aee3d688b6c "pdflatex"
+  "main.aux" 1765514363 15492 6faacf37885c48800b00aa15f6f977fa "pdflatex"
+  "main.bbl" 1765514360 6626 0e51a71fc774ff8d1ce97bc0189c29e2 "bibtex main"
+  "main.out" 1765514362 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "main.tex" 1765507175 88624 efa0d4660c7d09179b13e3aecc538805 ""
+  "thumbnails/cas-email.jpeg" 1765331210 8764 ae276cc9956197082d008c18ae4cbb28 ""
   (generated)
   "main.abs"
   "main.aux"
