@@ -1,0 +1,5 @@
+We investigate a two-dimensional generalization of the Shortest Superstring Problem (SSP): given a set of 2D strings (symbol arrays), place them on the integer grid with symbol-consistent overlaps to minimize a bounding-box cost. We study two cost variants: a \emph{square} objective minimizing $\max\{H,W\}$, and an \emph{area} objective minimizing $H \cdot W$.
+
+Our key modelling insight is to represent solutions as trees of relative offsets in a \emph{placement graph}, capturing local adjacency structure. We prove that connected placements correspond bijectively to feasible spanning trees, enabling an ILP formulation for exact solutions on small instances. Building on this structure, we develop a greedy heuristic and a tree-based genetic algorithm (GA) whose crossover preserves coherent local neighborhoods.
+
+Experiments show that the GA matches ILP-optimal solutions on small instances and outperforms greedy by 6--12\% on larger instances, while remaining orders of magnitude faster than ILP.
