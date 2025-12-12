@@ -59,6 +59,49 @@
 
 \end{tikzpicture}
 
+\begin{tikzpicture}[scale=0.8]
+    % Grid
+    \draw[step=1cm,gray!20,very thin] (-1,-1) grid (6,4);
+
+    % String T1 (Blue) at (0,1) size 3x2
+    \fill[blue!10] (0,1) rectangle (3,3);
+    \draw[blue, thick] (0,1) grid (3,3);
+    \draw[blue, thick] (0,1) rectangle (3,3);
+    \node[blue] at (1.5, 3.3) {$T_1$ (placed at 0,1)};
+    % Symbols for T1
+    \node at (0.5,1.5) {b}; \node at (1.5,1.5) {a}; \node at (2.5,1.5) {b};
+    \node at (0.5,2.5) {a}; \node at (1.5,2.5) {a}; \node at (2.5,2.5) {a};
+
+    % String T2 (Red) at (2,0) size 3x2
+    \fill[red!10] (2,0) rectangle (5,2);
+    \draw[red, thick] (2,0) grid (5,2);
+    \draw[red, thick] (2,0) rectangle (5,2);
+    \node[red] at (3.5, -0.3) {$T_2$ (placed at 2,0)};
+    % Symbols for T2
+    \node at (2.5,0.5) {b}; \node at (3.5,0.5) {a}; \node at (4.5,0.5) {b};
+    \node at (2.5,1.5) {b}; \node at (3.5,1.5) {a}; \node at (4.5,1.5) {a};
+
+    % Intersection Highlight
+    \draw[green!60!black, line width=2pt] (2,1) rectangle (3,2);
+    \node[green!60!black, font=\bfseries] at (2.5,1.5) {b};
+    \node[green!60!black, scale=0.6, align=center] at (2.5, 3.8) {Symbol\\Consistent\\Overlap};
+    \draw[->, green!60!black] (2.5, 3.5) -- (2.5, 2.1);
+
+    % Bounding Box
+    \draw[dashed, ultra thick, black] (0,0) rectangle (5,3);
+    \node[anchor=south west] at (5,0) {Bounding Box $B(p)$};
+    
+    % Dimensions
+    \draw[<->] (-0.5,0) -- (-0.5,3) node[midway, left] {$H=3$};
+    \draw[<->] (0,4.2) -- (5,4.2) node[midway, above] {$W=5$};
+
+    % Cost Text
+    \node[align=left, anchor=west] at (6,2.5) {\textbf{Costs:}\\ Area = $5 \times 3 = 15$\\ Square = $\max(5,3) = 5$};
+
+\end{tikzpicture}
+
+
+
 % \begin{tikzpicture}[
 %     scale=0.8,
 %     cell/.style={draw, minimum size=1cm, anchor=center, font=\sffamily\Large},

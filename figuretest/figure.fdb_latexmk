@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1765532979.10839 "c:/Coding/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/figuretest/figure.tex" "figure.pdf" "figure" 1765532980.61702 0
+["pdflatex"] 1765533562.69191 "c:/Coding/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/figuretest/figure.tex" "figure.pdf" "figure" 1765533564.29644 0
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1765530636 91620 7a57a1f8766c3b0e3fb60c506b76c594 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1765519234 13338388 dd7f11c6608b24485b432d3880ffcb41 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmbx10.tfm" 1136765053 1328 c834bbb027764024c09d3d2bf908b5f0 ""
@@ -13,9 +13,11 @@
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb" 1247596666 34811 78b52f49e893bcba91bd7581cdc144c0 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb" 1247596667 36299 5f9df58c2139e7edcf37c8fca4bd384d ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi9.pfb" 1247596667 36094 798f80770b3b148ceedd006d487db67c ""
+  "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb" 1247596667 35752 024fb6c41858982481f6968b5fc26508 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr6.pfb" 1247596667 32734 69e00a6b65cedb993666e42eedb3d48f ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb" 1247596667 32762 7fee39e011c23b3589931effd97b9702 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmr9.pfb" 1247596666 33993 9b89b85fd2d9df0482bd47194d1d3bf3 ""
+  "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb" 1247596667 32569 5e5ddc8df908dea60932f3c484a54c0d ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy9.pfb" 1247596666 32442 c975af247b6702f7ca0c299af3616b80 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti9.pfb" 1247596667 36310 f5ddc6715cc60deb16d9db5ded6a9391 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/context/base/mkii/supp-pdf.mkii" 1580390158 71627 94eb9990bed73c364d7f53f960cc8c5b ""
@@ -121,9 +123,9 @@
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/latex/tools/shellesc.sty" 1761901070 4121 d611256e8b768e99aa5a680aad44990d ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/latex/xkeyval/xkeyval.sty" 1656236919 4937 4ce600ce9bd4ec84d0250eb6892fcf4f ""
-  "c:/Coding/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/figuretest/figure.tex" 1765532977 4308 579d234ed9023e7e3fc6e4f9110ed421 ""
-  "figure.aux" 1765532980 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
-  "figure.tex" 1765532977 4308 579d234ed9023e7e3fc6e4f9110ed421 ""
+  "c:/Coding/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/figuretest/figure.tex" 1765533561 6001 0db07df612d08c088ad3666f2b06d0e7 ""
+  "figure.aux" 1765533563 32 3985256e7290058c681f74d7a3565a19 "pdflatex"
+  "figure.tex" 1765533561 6001 0db07df612d08c088ad3666f2b06d0e7 ""
   (generated)
   "figure.aux"
   "figure.log"
