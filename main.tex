@@ -364,7 +364,7 @@ side.
 Our cost functionals depend only on the bounding rectangle $B(p)$, not directly on the cardinality of $R(p)$. In particular, two placements with the same bounding box have the same cost for both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\square}$. This choice mirrors the 1D shortest superstring objective (string length) in the area-based case and a natural ``square'' version in the other case, and differs from geometric covering formulations that minimize the area of the union $R(p)$.
 \end{remark}
 
-\begin{assumption}[Connectivity of optimal unions]
+\begin{assumption}
 \label{ass:connected-union}
 In the structural discussion below we restrict attention to instances
 for which there exists an optimal symbol-consistent placement $p^\ast$
@@ -393,7 +393,7 @@ We choose the translation vector $\tau = (x_1^{\max} - x_2^{\min} + 1, \delta_y)
     \item The horizontal component $x_1^{\max} - x_2^{\min} + 1$ is the unique value that places the leftmost column of the translated $B_2$ immediately to the right of the rightmost column of $B_1$, ensuring the two bounding boxes are horizontally adjacent but do not overlap.
     \item The vertical component $\delta_y$ is chosen to ensure vertical overlap: if the $y$-projections of $B_1$ and $B_2$ already intersect, we set $\delta_y = 0$; otherwise, we set $\delta_y$ to the minimum shift needed to make them share at least one row.
 \end{itemize}
-This construction guarantees that the translated $B_2$ and $B_1$ share a common edge (or at least a corner), making the combined region 4-connected.
+This construction guarantees that the translated $B_2$ and $B_1$ share a common edge, making the combined region 4-connected.
 
 We now verify that:
 \begin{enumerate}
@@ -410,10 +410,10 @@ We now verify that:
     \end{itemize}
     
     Since $W' < W$ and $H' \le H$, we have coordinate-wise strict improvement in at least one dimension:
-    \begin{align*}
+    \begin{align}
         \mathrm{cost}_{\mathrm{area}}(p') &= W' \cdot H' < W \cdot H = \mathrm{cost}_{\mathrm{area}}(p), \\
         \mathrm{cost}_{\square}(p') &= \max(W', H') \le \max(W, H) = \mathrm{cost}_{\square}(p).
-    \end{align*}
+    \end{align}
     The area inequality is strict; the square inequality may be an equality (if the original $\max$ was determined by $H$ and $H' = H$), but in no case does the cost increase.
 \end{enumerate}
 
@@ -454,8 +454,7 @@ we obtain the following.
 
 \begin{theorem}
 \label{thm:growing-optimal}
-Let $\mathcal{T}$ be an instance of 2D-SSP (either 2D-SSP$_{\mathrm{area}}$ or 2D-SSP$_{\square}$) that satisfies
-Assumption~\ref{ass:connected-union}, and let $p^*$ be an optimal
+Let $\mathcal{T}$ be an instance of 2D-SSP (either 2D-SSP$_{\mathrm{area}}$ or 2D-SSP$_{\square}$), and let $p^*$ be an optimal
 symbol-consistent placement (with respect to the chosen cost) whose occupied region $R(p^*)$ is 4-connected.
 Then the contact graph $G^{\mathrm{ct}}(p^*)$ is connected and hence admits a
 spanning tree. Equivalently, there is an ordering of the strings
