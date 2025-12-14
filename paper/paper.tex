@@ -27,7 +27,8 @@
     shapes,                 % For node shapes
     backgrounds,            % For background layers
     fit,                    % To draw boxes around groups
-    shadows.blur            % For soft shadows (requires pgf-blur package)
+    shadows.blur,            % For soft shadows (requires pgf-blur package)
+    patterns                % For filling shapes with patterns
 }
 
 % CUSTOM COLORS (High-Fashion Palette)
@@ -142,6 +143,105 @@ NP-hard, and there is a substantial literature on constant-factor
 approximations (e.g., greedy maximum-overlap merging, cycle-cover-based
 algorithms) and heuristic implementations used in practice.
 
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.9,
+    every node/.style={font=\small},
+    1d_box/.style={draw=black, minimum height=0.6cm, minimum width=0.6cm, anchor=west},
+    2d_box/.style={draw=black, fill=myblue!20, minimum size=0.6cm},
+    label_style/.style={font=\bfseries\scriptsize, color=gray}
+]
+
+% --- 1D SSP ---
+\begin{scope}[shift={(0,3)}]
+    \node[anchor=west, text=black] at (-1, 1) {1D SSP};
+
+    % Input Strings
+    \node[1d_box, fill=myblue!20] (s1) at (0,0) {A};
+    \node[1d_box, fill=myblue!20] at (0.6,0) {B};
+    \node[1d_box, fill=myblue!20] at (1.2,0) {C};
+    \node[right, font=\scriptsize, color=myblue] at (1.8,0) {$s_1$};
+
+    \node[1d_box, fill=myorange!20] (s2) at (3,0) {B};
+    \node[1d_box, fill=myorange!20] at (3.6,0) {C};
+    \node[1d_box, fill=myorange!20] at (4.2,0) {D};
+     \node[right, font=\scriptsize, color=myorange] at (4.8,0) {$s_2$};
+
+    % Merged Result
+    \draw[->, thick, gray] (5.5,0) -- (6.5,0);
+
+    \node[1d_box, fill=myblue!20] at (7,0) {A};
+    \node[1d_box, top color=myblue!20, bottom color=myorange!20] at (7.6,0) {B};
+    \node[1d_box, top color=myblue!20, bottom color=myorange!20] at (8.2,0) {C};
+    \node[1d_box, fill=myorange!20] at (8.8,0) {D};
+
+    \draw[decorate, decoration={brace, amplitude=3pt}, thick, mygreen] (7,-0.4) -- (9.4,-0.4) node[midway, below=3pt, font=\scriptsize, color=mygreen] {Length minimized};
+\end{scope}
+
+% --- Separator ---
+\draw[dashed, gray!50] (-1, 1.8) -- (10, 1.8);
+
+% --- 2D SSP ---
+\begin{scope}[shift={(0,-0.5)}]
+    \node[anchor=west, text=black] at (-1, 1.7) {2D SSP};
+
+    % String T1
+    \begin{scope}[shift={(0,-0.5)}]
+        \fill[myblue!20] (0,0) rectangle (1.2, 1.2);
+        \draw[step=0.6, white] (0,0) grid (1.2, 1.2);
+        \node at (0.3, 0.9) {A}; \node at (0.9, 0.9) {B};
+        \node at (0.3, 0.3) {C}; \node at (0.9, 0.3) {D};
+        \node[above, font=\scriptsize, color=myblue] at (0.6, 1.2) {$T_1$};
+    \end{scope}
+
+    % String T2
+    \begin{scope}[shift={(2.5,-0.5)}]
+        \fill[myorange!20] (0,0) rectangle (1.2, 1.2);
+        \draw[step=0.6, white] (0,0) grid (1.2, 1.2);
+        \node at (0.3, 0.9) {B}; \node at (0.9, 0.9) {X};
+        \node at (0.3, 0.3) {D}; \node at (0.9, 0.3) {Y};
+        \node[above, font=\scriptsize, color=myorange] at (0.6, 1.2) {$T_2$};
+    \end{scope}
+
+    % Merged Result
+    \draw[->, thick, gray] (5.5,0.1) -- (6.5,0.1);
+
+    \begin{scope}[shift={(7,-0.5)}]
+        % Underlying grid
+        \fill[gray!10] (0,0) rectangle (1.8, 1.2);
+
+        % T1 part
+        \fill[myblue!20] (0,0) rectangle (1.2, 1.2);
+
+        % T2 part (offset)
+        \fill[myorange!20, opacity=0.7] (0.6,0) rectangle (1.8, 1.2);
+
+        % Grid lines
+        \draw[step=0.6, white, line width=1pt] (0,0) grid (1.8, 1.2);
+
+        % Symbols
+        \node at (0.3, 0.9) {A};
+        \node[top color=myblue!20, bottom color=myorange!20] at (0.9, 0.9) {B}; % Overlap
+        \node at (1.5, 0.9) {X};
+
+        \node at (0.3, 0.3) {C};
+        \node[top color=myblue!20, bottom color=myorange!20] at (0.9, 0.3) {D}; % Overlap
+        \node at (1.5, 0.3) {Y};
+
+        % Dimensions
+        \draw[<->, >=stealth, mygreen] (0, 1.4) -- (1.8, 1.4) node[midway, fill=white, font=\scriptsize] {$W$};
+        \draw[<->, >=stealth, mygreen] (2.0, 0) -- (2.0, 1.2) node[midway, fill=white, font=\scriptsize] {$H$};
+
+        \node[anchor=north, font=\scriptsize, color=mygreen] at (0.9, -0.1) {Area/Square minimized};
+    \end{scope}
+\end{scope}
+
+\end{tikzpicture}
+\caption{Conceptual comparison between 1D and 2D Superstring Problems.}
+\label{fig:1d_vs_2d}
+\end{figure}
+
 \subsection{2D Strings and Covering Structures}
 
 Two-dimensional generalizations of string concepts appear in several areas:
@@ -202,7 +302,7 @@ The constraints of 2D-SSP strongly resemble the algorithmic self-assembly of DNA
 \begin{scope}[shift={(0,0.8)}]
     \fill[myblue!20] (0,0) rectangle (2.4, 1.6);
     \draw[step=0.8cm, white, line width=1pt] (0,0) grid (2.4, 1.6);
-    \node[cell] at (0.4, 1.2) {A}; \node[cell] at (1.2, 1.2) {A}; \node[cell] at (2.0, 1.2) {B};
+    \node[cell] at (0.4, 1.2) {A}; \node[cell] at (1.2, 1.2) {D}; \node[cell] at (2.0, 1.2) {B};
     \node[cell] at (0.4, 0.4) {B}; \node[cell] at (1.2, 0.4) {A}; \node[cell] at (2.0, 0.4) {C};
     \node[right, myblue] at (2.4, 1.3) {$T_1$};
 \end{scope}
@@ -211,18 +311,18 @@ The constraints of 2D-SSP strongly resemble the algorithmic self-assembly of DNA
 \begin{scope}[shift={(1.6,-0.8)}]
     \fill[myorange!20] (0,0) rectangle (1.6, 2.4);
     \draw[step=0.8cm, white, line width=1pt] (0,0) grid (1.6, 2.4);
-    \node[cell] at (0.4, 1.2) {A}; \node[cell, text=myred] at (1.2, 1.2) {C}; % Overlap Region
-    \node[cell] at (0.4, 2.0) {B};
+    \node[cell, text=myred, top color=myblue!20, bottom color=myorange!20] at (0.4, 2.0) {B}; \node[cell] at (1.2, 2.0) {E};
+    \node[cell] at (0.4, 1.2) {A}; \node[cell] at (1.2, 1.2) {C};
     \node[cell] at (0.4, 0.4) {B}; \node[cell] at (1.2, 0.4) {B};
     \node[right, myorange] at (1.6, 0.4) {$T_2$};
 \end{scope}
 
 % --- Overlap ---
-\draw[myred, line width=1.5pt] (1.6, 0.8) rectangle (3.2, 1.6);
+\draw[myred, line width=1.5pt] (1.6, 0.8) rectangle (2.4, 1.6);
 
 % Adjusted position: Moved text to x=5.0 to give breathing room
 \node[text=myred, align=left, anchor=west] at (4.2, 1.2) {Symbol-Consistent\\Overlap Region};
-\draw[->, >=stealth, myred] (4.1, 1.2) -- (3.2, 1.2);
+\draw[->, >=stealth, myred] (4.1, 1.5) -- (2.4, 1.5);
 
 % --- Bounding Box ---
 \draw[black, dashed, line width=1pt] (0,-0.8) rectangle (3.2, 2.4);
@@ -276,6 +376,56 @@ bounding rectangle of a placement, and consider two variants:
 one that minimizes the area and one that minimizes the side length of the smallest enclosing square.
 
 \subsection{Formal problem definition}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.7,
+    every node/.style={font=\small},
+    string/.style={fill=myblue!30, draw=white, line width=1pt},
+    dim_line/.style={<->, >=stealth, line width=1pt},
+    dashed_box/.style={dashed, thick, color=myred}
+]
+
+% Define the mixed color explicitly to avoid parsing issues inside the pattern key
+\colorlet{myfillred}{myred!30}
+
+% --- The Placement Strings ---
+\draw[string] (0,0) rectangle (3,2); \node at (1.5,1) {$T_1$};
+\draw[string] (2,1) rectangle (5,3); \node at (3.5,2) {$T_2$};
+\draw[string] (4,0) rectangle (7,2); \node at (5.5,1) {$T_3$};
+
+% --- Bounding Box (Area) ---
+\draw[thick, myblue, rounded corners=2pt] (0,0) rectangle (7,3);
+\node[text=myblue, anchor=south west] at (0,3) {Area Bounding Box ($7 \times 3$)};
+
+% --- Square Box ---
+\draw[dashed_box, rounded corners=2pt] (0,-2) rectangle (7,5);
+\node[text=myred, anchor=south east] at (7,-2) {Square Cost Box ($7 \times 7$)};
+
+% --- Dimensions ---
+\draw[dim_line] (0, 5.5) -- (7, 5.5) node[midway, fill=white] {$W=7$};
+\draw[dim_line] (-1.2, 0) -- (-1.2, 3) node[midway, fill=white] {$H=3$};
+
+% --- The Penalty Region ---
+% Use the pre-defined color variable
+\fill[pattern=north east lines, pattern color=myfillred] (0,3) rectangle (7,5);
+\fill[pattern=north east lines, pattern color=myfillred] (0,-2) rectangle (7,0);
+
+\node[align=center, font=\small] at (11, 1.5) {
+    $W=7, H=3$\\[0.5em]
+    \textcolor{myblue}{Area Cost} $= 21$\\
+    \textcolor{myred}{Square Cost} $= 49$\\
+    ($\max(7,3)^2$)\\[1em]
+    \textit{Hatched region shows}\\
+    \textit{extra penalty under}\\
+    \textit{Square objective.}
+};
+
+\end{tikzpicture}
+\caption{Comparison of Objective Functions.}
+\label{fig:obj_comparison}
+\end{figure}
 
 \begin{definition}\label{def:2d-superstring}
 Let $\mathcal{T} = \{T_1,\dots,T_n\}$ be a finite multiset of 2D strings over
@@ -482,27 +632,27 @@ $x,y\in\mathbb{Z}^2$ overlap if $x=y$.
 % LEFT: Geometric Placement
 \begin{scope}
     % T1
-    \fill[myblue!50] (0,1.2) rectangle (1.8,2.4);
-    \draw[myblue, thick] (0,1.2) rectangle (1.8,2.4);
-    \node[black, font=\bfseries\scriptsize] at ($(0,1.2)!0.5!(1.5,2.4)$) {$T_1$};
+    \fill[myblue!30] (0,1.2) rectangle (1.8,2.4);
+    \draw[myblue, thick, rounded corners=2pt] (0,1.2) rectangle (1.8,2.4);
+    \node[black, font=\bfseries] at ($(0,1.2)!0.5!(1.5,2.4)$) {$T_1$};
 
     % T2
-    \fill[myorange!50] (1.2,1.2) rectangle (3.0,2.4);
-    \draw[myorange, thick] (1.2,1.2) rectangle (3.0,2.4);
-    \node[black, font=\bfseries\scriptsize] at ($(1.2,1.2)!0.5!(3.0,2.4)$) {$T_2$};
+    \fill[myorange!30] (1.2,1.2) rectangle (3.0,2.4);
+    \draw[myorange, thick, rounded corners=2pt] (1.2,1.2) rectangle (3.0,2.4);
+    \node[black, font=\bfseries] at ($(1.2,1.2)!0.5!(3.0,2.4)$) {$T_2$};
 
     % Overlap region
-    \fill[myred!50] (1.2,1.2) rectangle (1.8,2.4);
+    \fill[left color=myblue!30, right color=myorange!30, rounded corners=2pt, thick] (1.2,1.2) rectangle (1.8,2.4);
 
     % T3
-    \fill[mygreen!50] (1.2,0) rectangle (3.0,1.2);
-    \draw[mygreen, thick] (1.2,0) rectangle (3.0,1.2);
-    \node[black, font=\bfseries\scriptsize] at ($(1.2,0)!0.5!(3.0,1.2)$) {$T_3$};
+    \fill[mygreen!30] (1.2,0) rectangle (3.0,1.2);
+    \draw[mygreen, thick, rounded corners=2pt] (1.2,0) rectangle (3.0,1.2);
+    \node[black, font=\bfseries] at ($(1.2,0)!0.5!(3.0,1.2)$) {$T_3$};
 
     % T4
-    \fill[gray!50] (0,-1.6) rectangle (1.4,-0.6);
-    \draw[gray, thick] (0,-1.6) rectangle (1.4,-0.6);
-    \node[black, font=\bfseries\scriptsize] at ($(0,-1.6)!0.5!(1.4,-0.6)$) {$T_4$};
+    \fill[gray!30] (0,-1.6) rectangle (1.4,-0.6);
+    \draw[gray, thick, rounded corners=2pt] (0,-1.6) rectangle (1.4,-0.6);
+    \node[black, font=\bfseries] at ($(0,-1.6)!0.5!(1.4,-0.6)$) {$T_4$};
 \end{scope}
 
 % RIGHT: Contact Graph (dots + thin edges)
@@ -538,9 +688,7 @@ $x,y\in\mathbb{Z}^2$ overlap if $x=y$.
 
 \end{tikzpicture}
 }
-\caption{Left: geometric placement. Right: abstract contact graph $G^{ct}(p)$.
-Nodes correspond to strings; edges indicate symbol-consistent overlap (red)
-or geometric adjacency (black) or disconnected (gray).}
+\caption{Left: geometric placement. Right: abstract contact graph $G^{ct}(p)$.}
 \label{fig:contact_graph}
 \end{figure}
 
@@ -633,11 +781,11 @@ Repeating this process for all remaining components yields a placement $p'$ with
 % --- BEFORE STATE ---
 \begin{scope}[shift={(0,0)}]
     % Component R1
-    \draw[fill=myblue!50, draw=myblue] (0,0) rectangle (2,3);
+    \draw[fill=myblue!30, draw=myblue, rounded corners=2pt] (0,0) rectangle (2,3);
     \node[black, font=\bfseries] at (1, 1.5) {$R_1$};
 
     % Component R2 (Disconnected)
-    \draw[fill=myred!50, draw=myred] (3.5, 0.5) rectangle (5, 2.5);
+    \draw[fill=myred!30, draw=myred, rounded corners=2pt] (3.5, 0.5) rectangle (5, 2.5);
     \node[black, font=\bfseries] at (4.25, 1.5) {$R_2$};
 
     % Gap
@@ -657,12 +805,12 @@ Repeating this process for all remaining components yields a placement $p'$ with
 % --- AFTER STATE ---
 \begin{scope}[shift={(8,0)}]
     % Component R1 (Stationary)
-    \draw[fill=myblue!50, draw=myblue] (0,0) rectangle (2,3);
+    \draw[fill=myblue!30, draw=myblue, rounded corners=2pt] (0,0) rectangle (2,3);
     \node[black, font=\bfseries] at (1, 1.5) {$R_1$};
 
     % Component R2 (Shifted)
     % Shifted to touch R1
-    \draw[fill=myred!50, draw=myred] (2, 0.5) rectangle (3.5, 2.5);
+    \draw[fill=myred!30, draw=myred, rounded corners=2pt] (2, 0.5) rectangle (3.5, 2.5);
     \node[black, font=\bfseries] at (2.75, 1.5) {$R_2$};
 
     % New Bounding Box
@@ -677,7 +825,7 @@ Repeating this process for all remaining components yields a placement $p'$ with
 \end{scope}
 
 \end{tikzpicture}
-\caption{\textbf{Merging Logic (Lemma 1).} Any optimal placement with disconnected components ($R_1, R_2$) can be improved or maintained by shifting components until they touch, eliminating empty gaps and reducing the bounding box.}
+\caption{Merging Logic}
 \label{fig:merging_logic}
 \end{figure}
 
@@ -755,9 +903,9 @@ relative offsets.
     scale=1.0,
     every node/.style={font=\small},
     % Styles
-    ref/.style={draw=myblue, fill=myblue!50, line width=1.2pt},
-    ghost/.style={draw=myred!60, fill=myred!10, dashed, line width=0.8pt},
-    solid/.style={draw=myred, fill=myred!50, line width=1.2pt},
+    ref/.style={draw=myblue, fill=myblue!30, line width=1.2pt, rounded corners=2pt},
+    ghost/.style={draw=myred!60, fill=myred!10, dashed, line width=0.8pt, rounded corners=2pt},
+    solid/.style={draw=myred, fill=myred!30, line width=1.2pt, rounded corners=2pt},
     arrow_opt/.style={->, >=stealth, dashed, color=myorange!80, line width=0.8pt},
     arrow_sel/.style={->, >=stealth, color=mygreen, line width=1.2pt}
 ]
@@ -808,12 +956,12 @@ relative offsets.
     \draw[arrow_sel] (1, 1.1) -- (1.5, 1.1) node[midway, above, font=\tiny, text=black] {$\delta_{12}$};
 
     % Ghost outlines of rejected options (very faint)
-    \draw[gray, dashed] (1.8, -0.5) rectangle (3.8, 0.5);
-    \draw[gray, dashed] (0.5, -1.2) rectangle (2.5, -0.2);
+    \draw[gray, dashed, rounded corners=2pt] (1.8, -0.5) rectangle (3.8, 0.5);
+    \draw[gray, dashed, rounded corners=2pt] (0.5, -1.2) rectangle (2.5, -0.2);
 \end{scope}
 
 \end{tikzpicture}
-\caption{Placement Graph vs. Placement Tree. (a) The graph $G^{pl}$ contains \textit{all} possible valid relative positions (offsets) for $T_2$ relative to $T_1$. (b) The tree $F$ selects exactly \textit{one} of these edges to fix the final physical position.}
+\caption{(a) The Placement Graph $G^{pl}$ contains \textit{all} possible valid relative positions (offsets) for $T_2$ relative to $T_1$. (b) The Placement Tree $F$ selects exactly \textit{one} of these edges to fix the final physical position.}
 \label{fig:placement_graph_explained}
 \end{figure}
 
@@ -867,23 +1015,23 @@ be the unique simple path from $r$ to $i$ in $F$.
     \draw[step=0.5, gray!10, thin] (-0.5,-2.5) grid (4.5, 1.5);
 
     % T1 Placement (Root at 0,0)
-    \fill[myblue!50, opacity=0.8] (0,0) rectangle (2,1);
-    \draw[myblue, thick] (0,0) rectangle (2,1);
-    \node[font=\tiny] at (0.2, 0.8) {$T_1$};
-    % Origin marker
+    \fill[myblue!30, opacity=0.8] (0,0) rectangle (2,1);
+    \draw[myblue, thick, rounded corners=2pt] (0,0) rectangle (2,1);
+    \node at ($(0,0)!0.5!(2,1)$) {$T_1$};
     \fill[black] (0,1) circle (1.5pt) node[above left, scale=0.7] {$(0,0)$};
 
     % T2 Placement (Offset 3,0)
-    \fill[myred!50, opacity=0.8] (3,0) rectangle (4.5,1);
-    \draw[myred, thick] (3,0) rectangle (4.5,1);
-    \node[font=\tiny] at (3.2, 0.8) {$T_2$};
-    % Visual Vector for T2
+    \fill[myred!30, opacity=0.8] (3,0) rectangle (4.5,1);
+    \draw[myred, thick, rounded corners=2pt] (3,0) rectangle (4.5,1);
+    \node at ($(3,0)!0.5!(4.5,1)$) {$T_2$};
     \draw[->, myblue, dashed, thick] (0,1) -- (3,1);
 
     % T3 Placement (Offset 1,-2)
-    \fill[mygreen!50, opacity=0.8] (1,-2) rectangle (3,-1);
-    \draw[mygreen, thick] (1,-2) rectangle (3,-1);
-    \node[font=\tiny] at (1.2, -1.2) {$T_3$};
+    \fill[mygreen!30, opacity=0.8] (1,-2) rectangle (3,-1);
+    \draw[mygreen, thick, rounded corners=2pt] (1,-2) rectangle (3,-1);
+    \node at ($(1,-2)!0.5!(3,-1)$) {$T_3$};
+    \draw[->, myblue, dashed, thick] (0,1) -- (1,-1);
+
     % Visual Vector for T3
     \draw[->, myblue, dashed, thick] (0,1) -- (1,-1);
 
@@ -892,7 +1040,7 @@ be the unique simple path from $r$ to $i$ in $F$.
 \end{scope}
 
 \end{tikzpicture}
-\caption{The Bijection between Trees and Placements. (a) A solution represented as a tree. (b) The realization on the grid. The position of $T_3$ is determined by the vector sum of offsets from the root $T_1$.}
+\caption{The Bijection between Trees and Placements.}
 \label{fig:tree_rep}
 \end{figure}
 
@@ -1010,6 +1158,124 @@ derived from the bounding box $B(p)$. Consequently, the structural statements
 apply verbatim to both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\square}$.
 \end{remark}
 
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.9,
+    every node/.style={font=\small},
+    % --- STYLES ---
+    stringnode/.style={circle, draw=black, fill=white, line width=1pt, minimum size=1cm, drop shadow},
+    rootnode/.style={stringnode, fill=myblue!30},
+    % Edge Styles
+    edge_p1/.style={->, >=stealth, line width=1.5pt, color=black},
+    edge_p2/.style={->, >=stealth, line width=1.5pt, color=black},
+    edge_repair/.style={->, >=stealth, line width=2pt, color=mygreen, dashed},
+    % Box Styles
+    highlight_box/.style={draw=myblue!30, fill=myblue!10, dashed, rounded corners, inner sep=8pt},
+    logic_box/.style={rectangle, draw=gray!30, fill=white, rounded corners, align=left, font=\scriptsize, inner sep=8pt}
+]
+
+% ROW 1: PARENTS
+
+% --- PARENT 1 (Left) ---
+\begin{scope}[shift={(0,0)}]
+    \node[anchor=south] at (2, 2) {Parent 1 (Structure A)};
+
+    % Nodes
+    \node[stringnode, fill=myblue!50] (P1_1) at (0,0) {$T_1$};
+    \node[stringnode, fill=myred!50] (P1_2) at (2,0.8) {$T_2$};
+    \node[stringnode, fill=mygreen!50] (P1_3) at (2,-0.8) {$T_3$};
+    \node[stringnode, fill=myorange!50] (P1_4) at (4,0.8) {$T_4$};
+
+    % Edges
+    \draw[edge_p1] (P1_1) -- (P1_2);
+    \draw[edge_p1] (P1_1) -- (P1_3);
+    \draw[edge_p1] (P1_2) -- (P1_4);
+
+    % Highlight Subtree (Background layer)
+    \begin{scope}[on background layer]
+        \node[highlight_box, fit=(P1_2)(P1_4)] (HL) {};
+        \node[text=myblue, font=\scriptsize, anchor=south east] at (HL.north east) {Subtree A};
+    \end{scope}
+\end{scope}
+
+% --- PARENT 2 (Right) ---
+\begin{scope}[shift={(7,0)}]
+    \node[anchor=south] at (2, 2) {Parent 2 (Structure B)};
+
+    % Nodes
+    \node[stringnode, fill=myblue!50] (P2_1) at (0,0) {$T_1$};
+    \node[stringnode, fill=mygreen!50] (P2_3) at (2,0) {$T_3$};
+    \node[stringnode, fill=myorange!50] (P2_4) at (4,0.8) {$T_4$};
+    \node[stringnode, fill=myred!50] (P2_2) at (4,-0.8) {$T_2$};
+
+    % Edges (Red)
+    \draw[edge_p2] (P2_1) -- (P2_3);
+    \draw[edge_p2] (P2_3) -- (P2_4);
+    \draw[edge_p2] (P2_3) -- (P2_2);
+\end{scope}
+
+% TRANSITION: CROSSOVER ARROW
+
+\draw[
+    ->,
+    line width=1.2pt,
+    gray!70
+] (5.6,-1) -- (5.6,-2.6)
+node[
+    midway,
+    fill=white,
+    text=black,
+    rounded corners=3pt,
+    font=\scriptsize\bfseries,
+    inner sep=4pt
+] {Crossover Operator};
+
+% ROW 2: OFFSPRING & LOGIC
+
+
+% --- OFFSPRING (Centered below) ---
+\begin{scope}[shift={(2.5, -5)}]
+    \node[anchor=south] at (2, 1.2) {Offspring Result};
+
+    % Nodes
+    \node[rootnode, fill=myblue!50] (C_1) at (0,0) {$T_1$};
+
+    % Inherited Branch (From P1)
+    \node[stringnode, fill=myred!50] (C_2) at (2,0) {$T_2$};
+    \node[stringnode, fill=myorange!50] (C_4) at (4,0) {$T_4$};
+
+    % Repaired Node (Greedy)
+    \node[stringnode, fill=mygreen!50, line width=1.5pt, text=black] (C_3) at (1,-1.8) {$T_3$};
+
+    % Edges
+    \draw[edge_p1] (C_1) -- (C_2) node[midway, above, yshift=6pt, font=\tiny, text=black] {Inherited};
+    \draw[edge_p1] (C_2) -- (C_4);
+
+    % Repair Edge
+    \draw[edge_repair] (C_1) -- (C_3) node[midway, right, font=\tiny, text=black, align=left, xshift=2pt] {Greedy\\Repair};
+\end{scope}
+
+% --- LOGIC EXPLANATION BOX (Right side) ---
+\node[logic_box, anchor=north west] at (8, -2.5) {
+    Operation Logic:\\[0.5em]
+    \textcolor{myblue}{$\bullet$} Inheritance:\\
+    Subtree $1 \to 2 \to 4$ is copied\\
+    directly from Parent 1 to\\
+    preserve local structure.\\[0.8em]
+
+    \textcolor{mygreen}{$\bullet$} Greedy Repair:\\
+    String 3 could not fit using\\
+    parent offsets (conflict).\\
+    $\rightarrow$ It is attached via a new\\
+    \textit{greedy edge} to ensure completeness.
+};
+
+\end{tikzpicture}
+\caption{Visualizing the Tree Crossover with Greedy Completion. The operator preserves local structures (subtrees) where possible (blue edges), but invokes a greedy repair mechanism (dashed green edge) when structural incompatibility arises.}
+\label{fig:ga_crossover_clean}
+\end{figure}
+
 Theorem~\ref{thm:tree-optimal} establishes that placement trees provide a complete encoding of connected placements, but the theorem's value extends beyond mere equivalence. The tree structure has three properties that make it particularly suitable for metaheuristic optimization:
 
 \begin{enumerate}
@@ -1063,9 +1329,9 @@ Having established the structural foundation linking placements and trees, we no
 
 \begin{itemize}
     \item An \emph{exact ILP formulation} (Section~\ref{sec:ilp-baseline}) that enumerates all candidate placements on a discrete grid and optimizes over them using mixed-integer linear programming. This approach guarantees optimal solutions but is limited to small instances.
-    
+
     \item A \emph{greedy construction heuristic} (Section~\ref{sec:greedy-impl}) that builds placements incrementally by always choosing the locally best extension. This approach is extremely fast but may produce suboptimal solutions.
-    
+
     \item A \emph{tree-based genetic algorithm} (Section~\ref{subsec:ga}) that represents individuals as placement trees and uses crossover operators that recombine subtrees. This approach aims to combine the quality of exact methods with the scalability of heuristics.
 \end{itemize}
 
@@ -1075,6 +1341,98 @@ The genetic algorithm uses placement trees rather than the more obvious coordina
 
 \subsection{Exact Verification via ILP}
 \label{sec:ilp-baseline}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.75,
+    every node/.style={font=\small},
+    brace/.style={decorate, decoration={brace, amplitude=4pt}, thick, gray},
+    label_text/.style={midway, fill=white, inner sep=2pt, font=\scriptsize}
+]
+
+% PARAMETERS
+\def\Wg{8}
+\def\Hg{6}
+\def\w{3}
+\def\h{2}
+
+% GLOBAL GRID
+
+
+\draw[step=1cm, gray!15, very thin] (0,0) grid (\Wg,\Hg);
+\draw[thick] (0,0) rectangle (\Wg,\Hg);
+\node[anchor=south, font=\small] at ($(\Wg/2,\Hg) + (0,1)$) {Global Grid Constraints $(W_g \times H_g)$};
+
+% VALID ORIGIN SPACE
+
+\fill[mygreen!15] (0,0) rectangle (\Wg-\w,\Hg-\h);
+\draw[mygreen, thick, dashed, rounded corners=2pt] (0,0) rectangle (\Wg-\w,\Hg-\h);
+
+% EXCLUDED MARGINS (PRUNING)
+
+\draw[brace] (\Wg,\Hg) -- (\Wg,\Hg-\h)
+    node[midway, right=5pt, font=\scriptsize] {Excluded margin $= h_i$};
+
+\draw[brace] (\Wg-\w,\Hg) -- (\Wg,\Hg)
+    node[midway, above=5pt, font=\scriptsize] {Excluded margin $= w_i$};
+
+% VALID PLACEMENT
+
+\def\xok{1}
+\def\yok{1}
+
+\fill[myblue!30] (\xok,\yok) rectangle (\xok+\w,\yok+\h);
+\draw[myblue, thick, rounded corners=2pt] (\xok,\yok) rectangle (\xok+\w,\yok+\h);
+\node[text=black] at (\xok+\w/2,\yok+\h/2) {$T_i$};
+
+\fill ( \xok,\yok ) circle (2pt);
+\node[anchor=north, font=\scriptsize] at (\xok,\yok) {$o_{\text{ok}}$};
+
+
+% INVALID PLACEMENT
+
+\def\xbad{5.5}
+\def\ybad{3.5}
+
+\fill[myred!20] (\xbad,\ybad-2) rectangle (\xbad+\w,\ybad+\h-2);
+\draw[myred, thick, rounded corners=2pt] (\xbad,\ybad-2) rectangle (\xbad+\w,\ybad+\h-2);
+
+\fill[myred] (\xbad,\ybad-2) circle (2pt);
+\node[anchor=north west, font=\scriptsize, text=black] at (\xbad,\ybad-2) {$o_{\text{bad}}$};
+\node[text=black] at (\xbad+\w/2,\ybad-2+\h/2) {$T_j$};
+
+% AXIS LABELS
+
+\draw[<->] (0,-0.5) -- (\Wg-\w,-0.5)
+    node[midway, below] {Valid origins $x$};
+
+\draw[<->] (-0.5,0) -- (-0.5,\Hg-\h)
+    node[midway, rotate=90, above] {Valid origins $y$};
+
+% LEGEND
+
+\node[
+    anchor=west,
+    align=left,
+    draw=gray!40,
+    rounded corners,
+    fill=white,
+    inner sep=5pt,
+    font=\scriptsize
+] at ($(\Wg+1,3) + (1,-1)$)
+ {
+    Search Space\\[0.3em]
+    \textcolor{mygreen}{\rule{8pt}{8pt}} Origin space $\mathcal{O}_i$\\
+    \textcolor{white!70!gray}{\rule{8pt}{8pt}} Forbidden region\\
+    \textcolor{myblue}{\rule{8pt}{8pt}} Valid placement $T_i$\\
+    \textcolor{myred}{\rule{8pt}{8pt}} Invalid placement $T_j$
+};
+
+\end{tikzpicture}
+\caption{Visualization of search space pruning. The green region represents the set of valid origins $\mathcal{O}_i$. Any origin outside this region forces the placement to exceed the global bounds $(W_g \times H_g)$, allowing the corresponding binary variables to be removed from the ILP.}
+\label{fig:ilp_origins_improved}
+\end{figure}
 
 To validate the solution quality of our heuristic approaches, we formulate a direct grid-based mixed-integer linear program~\citep{wolsey1999integer}. We emphasize that this formulation is \emph{not} intended as a scalable solver for general instances, but strictly as a \emph{ground-truth oracle} for small-scale verification ($N \le 10$). This allows us to measure exactly how close our genetic algorithm comes to the global optimum.
 
@@ -1325,6 +1683,63 @@ either \eqref{eq:ilp-square-L} or
 
 \subsection{Greedy Heuristics}
 \label{sec:greedy-impl}
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    scale=0.8,
+    every node/.style={font=\small},
+    string/.style={draw=#1, fill=#1!30, line width=1pt, rounded corners=2pt},
+    ghost/.style={draw=gray, dashed, line width=0.8pt, fill=gray!10},
+    dim_arrow/.style={<->, >=stealth, line width=0.8pt},
+    label_text/.style={font=\scriptsize\bfseries}
+]
+
+% --- Current State ---
+\begin{scope}[shift={(0,0)}]
+    \node[anchor=south] at (1.5, 4.5) {Current Canvas};
+
+    % Current strings placed
+    \draw[string=myblue] (0,0) rectangle (3,2);
+    \node at (1.5,1) {$T_{placed}$};
+
+    % Current Bounding Box
+    \draw[dim_arrow] (0, -0.6) -- (3, -0.6) node[midway, fill=white] {$W_{curr}$};
+    \draw[dim_arrow] (-0.8, 0) -- (-0.8, 2) node[midway, fill=white] {$H_{curr}$};
+\end{scope}
+
+% Arrow
+\draw[->, >=latex, line width=1.5pt, gray] (3.5, 1) -- (4.5, 1);
+
+% --- Candidate Evaluation ---
+\begin{scope}[shift={(8,0)}]
+    \node[anchor=south] at (2, 4.5) {Evaluate Candidates for $T_{new}$};
+
+    % Existing
+    \draw[string=myblue, fill opacity=0.3] (0,0) rectangle (3,2);
+
+    % Candidate A (Increases Width)
+    \draw[ghost, draw=myred] (2.5, 0.5) rectangle (4.5, 2.5);
+    \node[text=myred, font=\scriptsize] at (3.5, 1.5) {Cand A};
+    \node[text=myred, font=\tiny, align=center] at (5.2, 1.5) {Cost $\uparrow$\\ (Bad)};
+
+    % Candidate B (Fits inside / Small expansion)
+    \draw[ghost, draw=mygreen] (0.5, 1.5) rectangle (2.5, 3.5);
+    \node[text=mygreen, font=\scriptsize] at (1.5, 2.5) {Cand B};
+     \node[text=mygreen, font=\tiny, align=center] at (1.5, 4) {Min Cost $\Delta$\\ (Best)};
+
+    % Candidate C (Symbol Conflict - hypothetical)
+    \draw[ghost, draw=gray] (-1, 0.5) rectangle (1, 2.5);
+    \node[text=gray, font=\scriptsize] at (0, 1.5) {Cand C};
+    \node[text=gray, font=\tiny, align=center] at (-1.9, 1.5) {Conflict\\ (Invalid)};
+
+    % Bounding Box Extension visualization
+    \draw[dashed, mygreen] (0,0) rectangle (3, 3.5);
+\end{scope}
+
+\end{tikzpicture}
+\caption{Visualizing the Greedy Heuristic.}
+\end{figure}
 
 We also use greedy construction heuristics that build a placement incrementally
 on a global \emph{canvas}. Strings are placed one by one, always maintaining symbol-consistency and trying to keep the current bounding-box cost (either side length $\max\{\text{width},\text{height}\}$ for the square objective or area $\text{width}\times\text{height}$ for the area objective)

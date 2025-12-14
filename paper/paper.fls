@@ -286,6 +286,10 @@ INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\tex\generic\pgf\fro
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\tex\generic\pgf\libraries\pgflibraryfadings.code.tex
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\tex\generic\pgf\libraries\pgflibraryfadings.code.tex
 OUTPUT paper.pdf
+INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\tex\generic\pgf\frontendlayer\tikz\libraries\tikzlibrarypatterns.code.tex
+INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\tex\generic\pgf\frontendlayer\tikz\libraries\tikzlibrarypatterns.code.tex
+INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\tex\generic\pgf\libraries\pgflibrarypatterns.code.tex
+INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\tex\generic\pgf\libraries\pgflibrarypatterns.code.tex
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\tex\latex\amscls\amsthm.sty
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\tex\latex\amscls\amsthm.sty
 INPUT .\paper.aux
@@ -365,8 +369,10 @@ INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\am
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbx10.tfm
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmmib10.tfm
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmbsy10.tfm
+INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmti10.tfm
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmss12.tfm
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmssbx10.tfm
+INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmti8.tfm
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmcsc10.tfm
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmss8.tfm
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmss8.tfm
@@ -388,6 +394,8 @@ INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmbx10.pfb
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmbx12.pfb
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmbx12.pfb
+INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmbx8.pfb
+INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmbx8.pfb
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmcsc10.pfb
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmcsc10.pfb
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmex10.pfb
@@ -434,6 +442,8 @@ INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti12.pfb
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti7.pfb
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti7.pfb
+INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti8.pfb
+INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmti8.pfb
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmtt10.pfb
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmtt10.pfb
 INPUT C:\Users\LAPTOP Thai Hoa\AppData\Local\Programs\MiKTeX\fonts\type1\public\amsfonts\cm\cmtt12.pfb

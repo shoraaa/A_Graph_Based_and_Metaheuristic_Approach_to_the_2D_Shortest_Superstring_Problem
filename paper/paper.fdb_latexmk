@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex paper"] 1765657084.73379 "paper.aux" "paper.bbl" "paper" 1765657131.8589 0
+["bibtex paper"] 1765701910.84363 "paper.aux" "paper.bbl" "paper" 1765701975.08402 0
   "./references.bib" 1765521839 4174 a20c8d9915c7bd7b06f27cea12bcb17c ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/bibtex/bst/elsarticle/elsarticle-harv.bst" 1737286288 30002 e0380d61aa45e0af6c9b40308561c934 ""
-  "paper.aux" 1765657130 14388 2ab427d64322d145add6b875bea5c95e "pdflatex"
+  "paper.aux" 1765701973 15262 ab1706fc1b0f54be4ac74eb98bb9f1f6 "pdflatex"
   (generated)
   "paper.bbl"
   "paper.blg"
   (rewritten before read)
-["pdflatex"] 1765657126.14629 "c:/Coding/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/paper/paper.tex" "paper.pdf" "paper" 1765657131.86073 0
+["pdflatex"] 1765701968.4452 "c:/Coding/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/paper/paper.tex" "paper.pdf" "paper" 1765701975.08542 0
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1765630911 91620 7a57a1f8766c3b0e3fb60c506b76c594 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/tcrm1200.pk" 1765522837 14064 7a9ead8732ed99116070cebab07a6810 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/MiKTeX/miktex/data/le/pdftex/pdflatex.fmt" 1765519234 13338388 dd7f11c6608b24485b432d3880ffcb41 ""
@@ -56,10 +56,12 @@
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmti10.tfm" 1136765053 1480 aa8e34af0eb6a2941b776984cf1dfdc4 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmti12.tfm" 1136765053 1484 ed72f8f5cf654cda15ecc8e32bfcbee5 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmti7.tfm" 1136765053 1492 86331993fe614793f5e7e755835c31c5 ""
+  "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmti8.tfm" 1136765053 1504 1747189e0441d1c18f3ea56fafc1c480 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmtt10.tfm" 1136765053 768 1321e9409b4137d6fb428ac9dc956269 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/tfm/public/cm/cmtt12.tfm" 1136765053 772 9a936b7f5e2ff0557fce0f62822f0bbf ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx10.pfb" 1247596666 34811 78b52f49e893bcba91bd7581cdc144c0 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb" 1247596666 32080 340ef9bf63678554ee606688e7b5339d ""
+  "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx8.pfb" 1247596666 32166 b0c356b15f19587482a9217ce1d8fa67 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmcsc10.pfb" 1247596667 32001 6aeea3afe875097b1eb0da29acd61e28 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb" 1247596667 30251 6afa5cb1d0204815a708a080681d4674 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb" 1247596667 36299 5f9df58c2139e7edcf37c8fca4bd384d ""
@@ -83,6 +85,7 @@
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti10.pfb" 1247596667 37944 359e864bd06cde3b1cf57bb20757fb06 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti12.pfb" 1247596667 36118 fad905eba93cff5bce1e185fe980a177 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti7.pfb" 1247596667 36607 d654cb3f2bc54f57509240071db3bffa ""
+  "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmti8.pfb" 1247596666 35660 fb24af7afbadb71801619f1415838111 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt10.pfb" 1247596667 31099 342ef5a582aacbd3346f3cf4579679fa ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/cm/cmtt12.pfb" 1247596666 24252 1e4e051947e12dfb50fee0b7f4e26e3a ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msam10.pfb" 1247596673 31764 459c573c03a4949a528c2cc7f557e217 ""
@@ -114,6 +117,7 @@
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibraryfadings.code.tex" 1756451144 1179 5483d86c1582c569e665c74efab6281f ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibraryfit.code.tex" 1756451144 3626 2d87dc681257fa32d07a8b3934b10f88 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarymatrix.code.tex" 1756451144 4228 c39d423dc1a80da31c8c67bf1067f384 ""
+  "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarypatterns.code.tex" 1756451144 770 82e332cc9cc48e06b8070d74393a185a ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibraryplotmarks.code.tex" 1756451144 325 36322b0789619b270aec5993d5a9ed08 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarypositioning.code.tex" 1756451144 3937 3f208572dd82c71103831da976d74f1a ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibraryshadows.code.tex" 1756451144 2889 d698e3a959304efa342d47e3bb86da5b ""
@@ -131,6 +135,7 @@
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/libraries/pgflibraryarrows.meta.code.tex" 1756451144 58801 1e750fb0692eb99aaac45698bbec96b1 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/libraries/pgflibraryfadings.code.tex" 1756451144 2563 d5b174eb7709fd6bdcc2f70953dbdf8e ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/libraries/pgflibraryfpu.code.tex" 1756451144 85937 c349c2b4a923dd367213cf12546baa15 ""
+  "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/libraries/pgflibrarypatterns.code.tex" 1756451144 7936 49e55444d57eb69a380c6baa35094828 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/libraries/pgflibraryplothandlers.code.tex" 1756451144 32995 ac577023e12c0e4bd8aa420b2e852d1a ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/libraries/pgflibraryplotmarks.code.tex" 1756451144 14526 4bc184b12436aa7f6490b2d2036870ef ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/generic/pgf/libraries/shapes/pgflibraryshapes.arrows.code.tex" 1756451144 91587 d9b31a3e308b08833e4528a7b4484b4a ""
@@ -254,13 +259,13 @@
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/latex/tools/bm.sty" 1761901070 13389 9f718787b5d641dbc0271856c125f004 ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/latex/tools/tabularx.sty" 1761901070 7243 a2c17f18e2c9b702b84fad03d5f9c78b ""
   "C:/Users/LAPTOP Thai Hoa/AppData/Local/Programs/MiKTeX/tex/latex/xcolor/xcolor.sty" 1729265222 55384 b454dec21c2d9f45ec0b793f0995b992 ""
-  "c:/Coding/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/paper/paper.tex" 1765657124 111093 278bb6f0cae1866a5ea61fa7db8f2a81 ""
+  "c:/Coding/A_Graph_Based_and_Metaheuristic_Approach_to_the_2D_Shortest_Superstring_Problem/paper/paper.tex" 1765701967 125572 60ebdc71e96bb4c99e2a2966e02f0f45 ""
   "elsarticle.cls" 1765520222 45918 257d1f3ede7f2824bb4c5357de4b0c22 ""
   "figure/compare.png" 1765380396 123857 3323e15bb9987c03e7496f3793ab4d5b ""
-  "paper.aux" 1765657130 14388 2ab427d64322d145add6b875bea5c95e "pdflatex"
-  "paper.bbl" 1765657085 6858 2eb3425819b59e8dd505794f3fc8876e "bibtex paper"
-  "paper.spl" 1765657130 55 b387a28bbae2cca4af9396e80792aff8 "pdflatex"
-  "paper.tex" 1765657124 111093 278bb6f0cae1866a5ea61fa7db8f2a81 ""
+  "paper.aux" 1765701973 15262 ab1706fc1b0f54be4ac74eb98bb9f1f6 "pdflatex"
+  "paper.bbl" 1765701911 6858 2eb3425819b59e8dd505794f3fc8876e "bibtex paper"
+  "paper.spl" 1765701973 55 b387a28bbae2cca4af9396e80792aff8 "pdflatex"
+  "paper.tex" 1765701967 125572 60ebdc71e96bb4c99e2a2966e02f0f45 ""
   (generated)
   "paper.aux"
   "paper.log"
