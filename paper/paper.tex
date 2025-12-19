@@ -1,46 +1,24 @@
 %% Elsevier elsarticle template for Computers & Operations Research
 
-\documentclass[preprint,12pt,authoryear,a4paper,fleqn]{elsarticle}
+\documentclass[a4paper,fleqn]{cas-sc}
 
 % Bibliography options - Harvard style for CAOR
 % \biboptions{authoryear,longnamesfirst}
-\biboptions{authoryear,longnamesfirst}
+\usepackage[authoryear,longnamesfirst]{natbib}
+
 % Your packages
 \usepackage{amsmath,amssymb}
 \usepackage{bm}
 \usepackage{algorithm}    % defines the algorithm float
+\usepackage{tabularx}
 \usepackage{algpseudocode}  % defines \begin{algorithmic}, \State, ...
 \usepackage{float}        % (optional) for [!t] placement specifier
 \usepackage{booktabs}
-\usepackage{tabularx}
-
-% --- GRAPHICS & VISUALIZATION PREAMBLE ---
-\usepackage{tikz}
 \usepackage{pgfplots}
+\usepackage{tabularx}
+\usepackage{tikz}
+\usetikzlibrary{matrix,calc}
 \pgfplotsset{compat=1.18}
-
-% MERGED LIBRARIES: Includes your original 'matrix,calc' and the new ones
-\usetikzlibrary{
-    matrix, calc,           % For matrix layouts and calculations
-    positioning,            % For relative placement
-    arrows.meta,            % For modern arrowheads
-    shapes,                 % For node shapes
-    backgrounds,            % For background layers
-    fit,                    % To draw boxes around groups
-    shadows.blur,            % For soft shadows (requires pgf-blur package)
-    patterns                % For filling shapes with patterns
-}
-
-% CUSTOM COLORS (High-Fashion Palette)
-% Use these instead of standard 'blue' or 'red' for a professional look
-\definecolor{myblue}{rgb}{0.20 0.45 0.75}
-\definecolor{myorange}{rgb}{0.90 0.55 0.20}
-\definecolor{mygreen}{RGB}{85, 168, 104}
-\definecolor{myred}{rgb}{0.75 0.15 0.15}
-\definecolor{mypurple}{RGB}{148, 103, 189}
-\definecolor{mycyan}{RGB}{23, 190, 207}
-\definecolor{mymagenta}{RGB}{227, 119, 194}
-\definecolor{mybrown}{RGB}{140, 86, 75}
 
 % ---------- Theorem-like environments ----------
 \usepackage{amsthm}
@@ -60,21 +38,19 @@
 \def\floatpagepagefraction{1}
 \def\textpagefraction{.001}
 
-\begin{frontmatter}
-
 % Main title
-\title{A Graph-Based and Metaheuristic Approach to the 2D Shortest Superstring Problem}
+\title [mode = title]{A Graph-Based and Metaheuristic Approach to the 2D Shortest Superstring Problem}
 
-\author[vinuni]{Dat Thanh Tran}
+\author[vinuni]{Dat Thanh Tran\corref{cor1}}
 \ead{dat.tt3@vinuni.edu.vn}
 \author[vinuni]{Khai Quang Tran}
-\ead{23khai.tq@vinuni.edu.vn}
-\author[vinuni]{Van Khu Vu \corref{cor1}}
+\ead{khai.tq@vinuni.edu.vn}
+\author[vinuni]{Van Khu Vu}
 \ead{khu.vv@vinuni.edu.vn}
 
 \cortext[cor1]{Corresponding author}
 
-\affiliation[vinuni]{organization={VinUniversity}, city={Hanoi}, country={Vietnam}}
+\address[vinuni]{VinUniversity, Hanoi, Vietnam}
 
 \begin{abstract}
 We investigate a two-dimensional generalization of the Shortest Superstring Problem (SSP): given a set of 2D strings (symbol arrays), place them on the integer grid with symbol-consistent overlaps to minimize a bounding-box cost. We study two cost variants: a \emph{square} objective minimizing $\max\{H,W\}$, and an \emph{area} objective minimizing $H \cdot W$.
@@ -84,11 +60,11 @@ Our key modelling insight is to represent solutions as trees of relative offsets
 Experiments show that the GA matches ILP-optimal solutions on small instances and outperforms greedy by 6--12\% on larger instances, while remaining orders of magnitude faster than ILP.
 \end{abstract}
 
-\begin{keyword}
+\begin{keywords}
 Shortest superstring problem \sep Two-dimensional strings \sep Genetic algorithm \sep Integer linear programming \sep Combinatorial optimization \sep Metaheuristics
-\end{keyword}
+\end{keywords}
 
-\end{frontmatter}
+\maketitle
 
 % ===================== MAIN TEXT =====================
 
@@ -143,105 +119,6 @@ NP-hard, and there is a substantial literature on constant-factor
 approximations (e.g., greedy maximum-overlap merging, cycle-cover-based
 algorithms) and heuristic implementations used in practice.
 
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-    scale=0.9,
-    every node/.style={font=\small},
-    1d_box/.style={draw=black, minimum height=0.6cm, minimum width=0.6cm, anchor=west},
-    2d_box/.style={draw=black, fill=myblue!20, minimum size=0.6cm},
-    label_style/.style={font=\bfseries\scriptsize, color=gray}
-]
-
-% --- 1D SSP ---
-\begin{scope}[shift={(0,3)}]
-    \node[anchor=west, text=black] at (-1, 1) {1D SSP};
-
-    % Input Strings
-    \node[1d_box, fill=myblue!20] (s1) at (0,0) {A};
-    \node[1d_box, fill=myblue!20] at (0.6,0) {B};
-    \node[1d_box, fill=myblue!20] at (1.2,0) {C};
-    \node[right, font=\scriptsize, color=myblue] at (1.8,0) {$s_1$};
-
-    \node[1d_box, fill=myorange!20] (s2) at (3,0) {B};
-    \node[1d_box, fill=myorange!20] at (3.6,0) {C};
-    \node[1d_box, fill=myorange!20] at (4.2,0) {D};
-     \node[right, font=\scriptsize, color=myorange] at (4.8,0) {$s_2$};
-
-    % Merged Result
-    \draw[->, thick, gray] (5.5,0) -- (6.5,0);
-
-    \node[1d_box, fill=myblue!20] at (7,0) {A};
-    \node[1d_box, top color=myblue!20, bottom color=myorange!20] at (7.6,0) {B};
-    \node[1d_box, top color=myblue!20, bottom color=myorange!20] at (8.2,0) {C};
-    \node[1d_box, fill=myorange!20] at (8.8,0) {D};
-
-    \draw[decorate, decoration={brace, amplitude=3pt}, thick, mygreen] (7,-0.4) -- (9.4,-0.4) node[midway, below=3pt, font=\scriptsize, color=mygreen] {Length minimized};
-\end{scope}
-
-% --- Separator ---
-\draw[dashed, gray!50] (-1, 1.8) -- (10, 1.8);
-
-% --- 2D SSP ---
-\begin{scope}[shift={(0,-0.5)}]
-    \node[anchor=west, text=black] at (-1, 1.7) {2D SSP};
-
-    % String T1
-    \begin{scope}[shift={(0,-0.5)}]
-        \fill[myblue!20] (0,0) rectangle (1.2, 1.2);
-        \draw[step=0.6, white] (0,0) grid (1.2, 1.2);
-        \node at (0.3, 0.9) {A}; \node at (0.9, 0.9) {B};
-        \node at (0.3, 0.3) {C}; \node at (0.9, 0.3) {D};
-        \node[above, font=\scriptsize, color=myblue] at (0.6, 1.2) {$T_1$};
-    \end{scope}
-
-    % String T2
-    \begin{scope}[shift={(2.5,-0.5)}]
-        \fill[myorange!20] (0,0) rectangle (1.2, 1.2);
-        \draw[step=0.6, white] (0,0) grid (1.2, 1.2);
-        \node at (0.3, 0.9) {B}; \node at (0.9, 0.9) {X};
-        \node at (0.3, 0.3) {D}; \node at (0.9, 0.3) {Y};
-        \node[above, font=\scriptsize, color=myorange] at (0.6, 1.2) {$T_2$};
-    \end{scope}
-
-    % Merged Result
-    \draw[->, thick, gray] (5.5,0.1) -- (6.5,0.1);
-
-    \begin{scope}[shift={(7,-0.5)}]
-        % Underlying grid
-        \fill[gray!10] (0,0) rectangle (1.8, 1.2);
-
-        % T1 part
-        \fill[myblue!20] (0,0) rectangle (1.2, 1.2);
-
-        % T2 part (offset)
-        \fill[myorange!20, opacity=0.7] (0.6,0) rectangle (1.8, 1.2);
-
-        % Grid lines
-        \draw[step=0.6, white, line width=1pt] (0,0) grid (1.8, 1.2);
-
-        % Symbols
-        \node at (0.3, 0.9) {A};
-        \node[top color=myblue!20, bottom color=myorange!20] at (0.9, 0.9) {B}; % Overlap
-        \node at (1.5, 0.9) {X};
-
-        \node at (0.3, 0.3) {C};
-        \node[top color=myblue!20, bottom color=myorange!20] at (0.9, 0.3) {D}; % Overlap
-        \node at (1.5, 0.3) {Y};
-
-        % Dimensions
-        \draw[<->, >=stealth, mygreen] (0, 1.4) -- (1.8, 1.4) node[midway, fill=white, font=\scriptsize] {$W$};
-        \draw[<->, >=stealth, mygreen] (2.0, 0) -- (2.0, 1.2) node[midway, fill=white, font=\scriptsize] {$H$};
-
-        \node[anchor=north, font=\scriptsize, color=mygreen] at (0.9, -0.1) {Area/Square minimized};
-    \end{scope}
-\end{scope}
-
-\end{tikzpicture}
-\caption{Conceptual comparison between 1D and 2D Superstring Problems.}
-\label{fig:1d_vs_2d}
-\end{figure}
-
 \subsection{2D Strings and Covering Structures}
 
 Two-dimensional generalizations of string concepts appear in several areas:
@@ -289,63 +166,6 @@ The constraints of 2D-SSP strongly resemble the algorithmic self-assembly of DNA
 \section{Problem Definition and Structural Properties}
 \label{sec:problem}
 
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-    every node/.style={font=\small},
-    cell/.style={draw=white, minimum size=0.8cm, text centered, font=\bfseries},
-    box/.style={draw=black!50, line width=1pt, rounded corners=2pt, drop shadow},
-    label/.style={text=gray}
-]
-
-% --- String 1 (Blue) ---
-\begin{scope}[shift={(0,0.8)}]
-    \fill[myblue!20] (0,0) rectangle (2.4, 1.6);
-    \draw[step=0.8cm, white, line width=1pt] (0,0) grid (2.4, 1.6);
-    \node[cell] at (0.4, 1.2) {A}; \node[cell] at (1.2, 1.2) {D}; \node[cell] at (2.0, 1.2) {B};
-    \node[cell] at (0.4, 0.4) {B}; \node[cell] at (1.2, 0.4) {A}; \node[cell] at (2.0, 0.4) {C};
-    \node[right, myblue] at (2.4, 1.3) {$T_1$};
-\end{scope}
-
-% --- String 2 (Orange) ---
-\begin{scope}[shift={(1.6,-0.8)}]
-    \fill[myorange!20] (0,0) rectangle (1.6, 2.4);
-    \draw[step=0.8cm, white, line width=1pt] (0,0) grid (1.6, 2.4);
-    \node[cell, text=myred, top color=myblue!20, bottom color=myorange!20] at (0.4, 2.0) {B}; \node[cell] at (1.2, 2.0) {E};
-    \node[cell] at (0.4, 1.2) {A}; \node[cell] at (1.2, 1.2) {C};
-    \node[cell] at (0.4, 0.4) {B}; \node[cell] at (1.2, 0.4) {B};
-    \node[right, myorange] at (1.6, 0.4) {$T_2$};
-\end{scope}
-
-% --- Overlap ---
-\draw[myred, line width=1.5pt] (1.6, 0.8) rectangle (2.4, 1.6);
-
-% Adjusted position: Moved text to x=5.0 to give breathing room
-\node[text=myred, align=left, anchor=west] at (4.2, 1.2) {Symbol-Consistent\\Overlap Region};
-\draw[->, >=stealth, myred] (4.1, 1.5) -- (2.4, 1.5);
-
-% --- Bounding Box ---
-\draw[black, dashed, line width=1pt] (0,-0.8) rectangle (3.2, 2.4);
-
-% --- Dimensions (Moved outward for better spacing) ---
-% Top Arrow (W)
-\draw[<->, >=stealth] (0, 2.8) -- (3.2, 2.8) node[midway, fill=white] {$W=4$};
-% Side Arrow (H)
-\draw[<->, >=stealth] (-0.8, -0.8) -- (-0.8, 2.4) node[midway, fill=white] {$H=4$};
-
-% --- Cost Functions (Moved right and cleaned up) ---
-% Moved from x=6 to x=6.8 to separate from the red label
-\node[align=left, anchor=west] at (7.2, 0) {
-    \textbf{Objective Costs:}\\[0.3em]
-    $Cost_{area} = W \times H = 16$\\[0.2em]
-    $Cost_{\Box} = \max(W, H) = 4$
-};
-
-\end{tikzpicture}
-\caption{Illustration of a Symbol-Consistent Placement.}
-\label{fig:problem_def}
-\end{figure}
-
 We now formalize the Two-Dimensional Shortest Superstring Problem (2D-SSP), introduce the two objective variants, and develop the structural results underlying our tree-based representation. 
 
 \subsection{Preliminaries and notation}
@@ -377,56 +197,6 @@ one that minimizes the area and one that minimizes the side length of the smalle
 
 \subsection{Formal problem definition}
 
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-    scale=0.7,
-    every node/.style={font=\small},
-    string/.style={fill=myblue!30, draw=white, line width=1pt},
-    dim_line/.style={<->, >=stealth, line width=1pt},
-    dashed_box/.style={dashed, thick, color=myred}
-]
-
-% Define the mixed color explicitly to avoid parsing issues inside the pattern key
-\colorlet{myfillred}{myred!30}
-
-% --- The Placement Strings ---
-\draw[string] (0,0) rectangle (3,2); \node at (1.5,1) {$T_1$};
-\draw[string] (2,1) rectangle (5,3); \node at (3.5,2) {$T_2$};
-\draw[string] (4,0) rectangle (7,2); \node at (5.5,1) {$T_3$};
-
-% --- Bounding Box (Area) ---
-\draw[thick, myblue, rounded corners=2pt] (0,0) rectangle (7,3);
-\node[text=myblue, anchor=south west] at (0,3) {Area Bounding Box ($7 \times 3$)};
-
-% --- Square Box ---
-\draw[dashed_box, rounded corners=2pt] (0,-2) rectangle (7,5);
-\node[text=myred, anchor=south east] at (7,-2) {Square Cost Box ($7 \times 7$)};
-
-% --- Dimensions ---
-\draw[dim_line] (0, 5.5) -- (7, 5.5) node[midway, fill=white] {$W=7$};
-\draw[dim_line] (-1.2, 0) -- (-1.2, 3) node[midway, fill=white] {$H=3$};
-
-% --- The Penalty Region ---
-% Use the pre-defined color variable
-\fill[pattern=north east lines, pattern color=myfillred] (0,3) rectangle (7,5);
-\fill[pattern=north east lines, pattern color=myfillred] (0,-2) rectangle (7,0);
-
-\node[align=center, font=\small] at (11, 1.5) {
-    $W=7, H=3$\\[0.5em]
-    \textcolor{myblue}{Area Cost} $= 21$\\
-    \textcolor{myred}{Square Cost} $= 49$\\
-    ($\max(7,3)^2$)\\[1em]
-    \textit{Hatched region shows}\\
-    \textit{extra penalty under}\\
-    \textit{Square objective.}
-};
-
-\end{tikzpicture}
-\caption{Comparison of Objective Functions.}
-\label{fig:obj_comparison}
-\end{figure}
-
 \begin{definition}\label{def:2d-superstring}
 Let $\mathcal{T} = \{T_1,\dots,T_n\}$ be a finite multiset of 2D strings over
 $\Sigma$, which we call \emph{2D strings}. An $m \times n$ 2D-string $S$ is a
@@ -451,96 +221,55 @@ Thus $|S|_{\mathrm{area}}$ is the natural 2D analogue of superstring length
 (area of the bounding box), while $|S|_{\square}$ focuses on the longest side
 of the enclosing square.
 
-\begin{figure}[htbp]
+\begin{figure}
 \centering
 \begin{tikzpicture}[
-    % GLOBAL SETTINGS
-    scale=0.9,
-    transform shape,
-    font=\small,
-    % Styles
-    gridline/.style={gray!30, thin},
-    % Balanced opacity (0.55) so overlaps are visible but distinct strings stand out
-    tile/.style={fill=#1!30, draw=#1, thick, fill opacity=0.55, rounded corners=2pt},
-    label_text/.style={text=#1, font=\bfseries\scriptsize, anchor=south west},
-    letter/.style={font=\sffamily\bfseries, text=black!85}
+  letter/.style={font=\small, inner sep=1pt},
+  tile/.style={draw,thick},
 ]
 
-% --- 2D Strings ---
+%--- grid of letters ----------------------------------------------------
+\matrix (m) [matrix of nodes,
+  nodes in empty cells,
+  nodes={letter,minimum width=0.5em,minimum height=0.8em,anchor=center},
+  column sep=0.4em,row sep=0.25em
+]{
+  a & a & b & a & a & b & a & a & a & a \\
+  b & b & b & a & a & a & b & a & b & a \\
+  a & a & b & a & a & b & a & a & b & a \\
+  a & a & a & b & a & a & b & a & a & a \\
+  a & b & a & a & b & a & a & b & a & a \\
+};
 
-% T1 (Blue)
-\draw[tile=myblue] (0, 5) rectangle (3, 8);
-\node[label_text=myblue] at (3, 7.5) {$T_1$};
+%--- outer bounding box -------------------------------------------------
+\draw[very thick,rounded corners=6pt,red!70!black]
+  ($(m.north west)+(-0.4,0.3)$) rectangle
+  ($(m.south east)+(0.4,-0.3)$);
 
-% T2 (Orange)
-\draw[tile=myorange] (2, 4) rectangle (5, 7);
-\node[label_text=myorange] at (3.5, 7) {$T_2$};
+%--- some example tiles (rectangles over the grid) ----------------------
+% long horizontal
+\draw[tile] (m-1-1.north west) rectangle (m-1-10.south east);
+\draw[tile] (m-5-1.north west) rectangle (m-5-8.south east);
 
-% T3 (Green)
-\draw[tile=mygreen] (0, 2) rectangle (2, 5);
-\node[label_text=mygreen] at (2, 3.2) {$T_3$};
+% long vertical
+\draw[tile] (m-1-1.north west) rectangle (m-4-1.south east);
+\draw[tile] (m-1-10.north west) rectangle (m-5-10.south east);
 
-% T4 (Red)
-\draw[tile=myred] (4, 3) rectangle (7, 6);
-\node[label_text=myred] at (5.2, 6) {$T_4$};
+% medium / short tiles
+\draw[tile] (m-2-2.north west) rectangle (m-4-2.south east);
+\draw[tile] (m-2-4.north west) rectangle (m-3-6.south east);
+\draw[tile] (m-3-4.north west) rectangle (m-3-7.south east);
+\draw[tile] (m-4-4.north west) rectangle (m-4-7.south east);
+\draw[tile] (m-3-6.north west) rectangle (m-4-6.south east);
 
-% T5 (Purple)
-\draw[tile=mypurple] (6, 0) rectangle (9, 3);
-\node[label_text=mypurple] at (8, 3) {$T_5$};
-
-% T6 (Cyan)
-\draw[tile=mycyan] (0, 0) rectangle (5, 2);
-\node[label_text=mycyan] at (2.2, 2) {$T_6$};
-5
-% T7 (Magenta)
-\draw[tile=mymagenta] (6, 5) rectangle (9, 8);
-\node[label_text=mymagenta] at (8, 4.5) {$T_7$};
-
-% T8 (Brown)
-\draw[tile=mybrown] (3, 1) rectangle (6, 4);
-\node[label_text=mybrown] at (5.2, 0.5) {$T_8$};
-
-
-% --- GRID CONTENT (9x8 Matrix) ---
-
-% Row 7 (Top)
-\foreach \x/\l in {0/a, 1/b, 2/c, 6/m, 7/n, 8/o} { \node[letter] at (\x.5, 7.5) {\l}; }
-
-% Row 6
-\foreach \x/\l in {0/d, 1/e, 2/f, 3/k, 4/l, 6/o, 7/p, 8/q} { \node[letter] at (\x.5, 6.5) {\l}; }
-
-% Row 5
-\foreach \x/\l in {0/g, 1/h, 2/i, 3/q, 4/w, 5/r, 6/s, 7/t, 8/u} { \node[letter] at (\x.5, 5.5) {\l}; }
-
-% Row 4
-\foreach \x/\l in {0/j, 1/k, 2/m, 3/e, 4/r, 5/t, 6/y} { \node[letter] at (\x.5, 4.5) {\l}; }
-
-% Row 3
-\foreach \x/\l in {0/n, 1/o, 3/a, 4/s, 5/d, 6/f} { \node[letter] at (\x.5, 3.5) {\l}; }
-
-% Row 2
-\foreach \x/\l in {0/q, 1/r, 3/z, 4/x, 5/c, 6/v, 7/b, 8/n} { \node[letter] at (\x.5, 2.5) {\l}; }
-
-% Row 1
-\foreach \x/\l in {0/t, 1/u, 2/v, 3/b, 4/n, 5/m, 6/q, 7/w, 8/e} { \node[letter] at (\x.5, 1.5) {\l}; }
-
-% Row 0 (Bottom)
-\foreach \x/\l in {0/w, 1/x, 2/y, 3/u, 4/i, 6/o, 7/p, 8/a} { \node[letter] at (\x.5, 0.5) {\l}; }
-
-% Explicit Grid Lines
-\draw[gridline] (0,0) grid (9,8);
-
-% --- BOUNDING BOX & DIMENSIONS ---
-\draw[dashed, very thick, black!70] (-0.2, -0.2) rectangle (9.2, 8.2);
-
-% Width Arrow
-\draw[<->, >=stealth, thick] (0, 8.4) -- (9, 8.4) node[midway, fill=white] {$W$};
-% Height Arrow
-\draw[<->, >=stealth, thick] (-0.4, 0) -- (-0.4, 8) node[midway, fill=white] {$H$};
+% some 1x1 tiles
+\foreach \r/\c in {1/4,2/3,2/5,3/2,3/7,4/9}{
+  \draw[tile] (m-\r-\c.north west) rectangle (m-\r-\c.south east);
+}
 
 \end{tikzpicture}
-\caption{This represents a typical optimal solution where strings cluster to share symbols but extend outwards to fit unique content.}
-\label{fig:2d-superstring-balanced}
+\caption{Example of a 2D-superstring with multiple 2D strings placed on a grid. Each rectangle indicates a 2D string; overlapping regions share identical symbols.}
+\label{fig:2d-superstring-example}
 \end{figure}
 
 \begin{definition}
@@ -616,83 +345,6 @@ A subset $R \subseteq \mathbb{Z}^2$ is \emph{4-connected} if its adjacency graph
 under the 4-neighbourhood ($\|x-y\|_1 = 1$) is connected. Two cells
 $x,y\in\mathbb{Z}^2$ overlap if $x=y$.
 
-\begin{figure}[htbp]
-\centering
-\makebox[\textwidth][c]{%
-\begin{tikzpicture}[
-    scale=1.2,
-    every node/.style={font=\small},
-    % Graph styles
-    graphdot/.style={circle, fill=black, inner sep=0pt, minimum size=3pt},
-    overlapedge/.style={-, line width=1pt, color=myred},
-    graphedge/.style={-, line width=1pt, color=mygreen},
-    disconnectedge/.style={-, line width=1pt, color=gray}
-]
-
-% LEFT: Geometric Placement
-\begin{scope}
-    % T1
-    \fill[myblue!30] (0,1.2) rectangle (1.8,2.4);
-    \draw[myblue, thick, rounded corners=2pt] (0,1.2) rectangle (1.8,2.4);
-    \node[black, font=\bfseries] at ($(0,1.2)!0.5!(1.5,2.4)$) {$T_1$};
-
-    % T2
-    \fill[myorange!30] (1.2,1.2) rectangle (3.0,2.4);
-    \draw[myorange, thick, rounded corners=2pt] (1.2,1.2) rectangle (3.0,2.4);
-    \node[black, font=\bfseries] at ($(1.2,1.2)!0.5!(3.0,2.4)$) {$T_2$};
-
-    % Overlap region
-    \fill[left color=myblue!30, right color=myorange!30, rounded corners=2pt, thick] (1.2,1.2) rectangle (1.8,2.4);
-
-    % T3
-    \fill[mygreen!30] (1.2,0) rectangle (3.0,1.2);
-    \draw[mygreen, thick, rounded corners=2pt] (1.2,0) rectangle (3.0,1.2);
-    \node[black, font=\bfseries] at ($(1.2,0)!0.5!(3.0,1.2)$) {$T_3$};
-
-    % T4
-    \fill[gray!30] (0,-1.6) rectangle (1.4,-0.6);
-    \draw[gray, thick, rounded corners=2pt] (0,-1.6) rectangle (1.4,-0.6);
-    \node[black, font=\bfseries] at ($(0,-1.6)!0.5!(1.4,-0.6)$) {$T_4$};
-\end{scope}
-
-% RIGHT: Contact Graph (dots + thin edges)
-\begin{scope}[shift={(6,0)}]
-
-    % Graph nodes (dots)
-    \node[graphdot] (N1) at (0,2) {};
-    \node[graphdot] (N2) at (1.8,2) {};
-    \node[graphdot] (N3) at (1.8,0.6) {};
-    \node[graphdot] (N4) at (0,-0.8) {};
-
-    % Node labels
-    \node[anchor=south] at (N1) {$T_1$};
-    \node[anchor=south] at (N2) {$T_2$};
-    \node[anchor=west]  at (N3) {$T_3$};
-    \node[anchor=east] at (N4) {$T_4$};
-
-    % Edges (inside figure)
-    \draw[overlapedge] (N1) -- (N2);
-    \draw[graphedge]  (N2) -- (N3);
-    \draw[disconnectedge]  (N3) -- (N4);
-
-\end{scope}
-
-
-% External legend (outside edges)
-
-\node[anchor=west, font=\scriptsize] at (0,-2.3) {
-    \textcolor{myred}{\rule{8pt}{1.2pt}} Symbol-consistent overlap \quad
-    \textcolor{mygreen}{\rule{8pt}{1.2pt}} Geometric adjacency \quad \textcolor{gray}{\rule{8pt}{1.2pt}}
-    Disconnected
-};
-
-\end{tikzpicture}
-}
-\caption{Left: geometric placement. Right: abstract contact graph $G^{ct}(p)$.}
-\label{fig:contact_graph}
-\end{figure}
-
-
 \begin{definition}
 Let $p$ be a symbol-consistent placement of $\mathcal{T}$. The
 \emph{contact graph} $G^{\mathrm{ct}}(p)$ is the graph with vertex set
@@ -713,7 +365,7 @@ side.
 Our cost functionals depend only on the bounding rectangle $B(p)$, not directly on the cardinality of $R(p)$. In particular, two placements with the same bounding box have the same cost for both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\square}$. This choice mirrors the 1D shortest superstring objective (string length) in the area-based case and a natural ``square'' version in the other case, and differs from geometric covering formulations that minimize the area of the union $R(p)$.
 \end{remark}
 
-\begin{assumption}[Connectivity of optimal unions]
+\begin{assumption}
 \label{ass:connected-union}
 In the structural discussion below we restrict attention to instances
 for which there exists an optimal symbol-consistent placement $p^\ast$
@@ -742,92 +394,32 @@ We choose the translation vector $\tau = (x_1^{\max} - x_2^{\min} + 1, \delta_y)
     \item The horizontal component $x_1^{\max} - x_2^{\min} + 1$ is the unique value that places the leftmost column of the translated $B_2$ immediately to the right of the rightmost column of $B_1$, ensuring the two bounding boxes are horizontally adjacent but do not overlap.
     \item The vertical component $\delta_y$ is chosen to ensure vertical overlap: if the $y$-projections of $B_1$ and $B_2$ already intersect, we set $\delta_y = 0$; otherwise, we set $\delta_y$ to the minimum shift needed to make them share at least one row.
 \end{itemize}
-This construction guarantees that the translated $B_2$ and $B_1$ share a common edge (or at least a corner), making the combined region 4-connected.
+This construction guarantees that the translated $B_2$ and $B_1$ share a common edge, making the combined region 4-connected.
 
 We now verify that:
 \begin{enumerate}
     \item \emph{Symbol-consistency is preserved.} Before translation, strings in $\mathcal{T}_1$ and $\mathcal{T}_2$ had no overlapping cells (since $R_1$ and $R_2$ were disjoint). After translation, the bounding boxes $B_1$ and the translated $B_2$ are adjacent but non-overlapping by construction of $\tau$. Therefore, no cell can be occupied by both a string from $\mathcal{T}_1$ and a string from $\mathcal{T}_2$, and no symbol conflict arises. Symbol-consistency within each $\mathcal{T}_\ell$ is trivially preserved since internal offsets are unchanged.
-
+    
     \item \emph{The bounding box dimensions do not increase (for either cost variant).} Let $B(p) = [x_{\min}, x_{\max}] \times [y_{\min}, y_{\max}]$ with width $W = x_{\max} - x_{\min} + 1$ and height $H = y_{\max} - y_{\min} + 1$. 
-
+    
     \emph{Key observation:} Both cost functions $\mathrm{cost}_{\mathrm{area}}(p) = W \cdot H$ and $\mathrm{cost}_{\square}(p) = \max(W, H)$ are \emph{monotonically increasing} in each dimension. Equivalently, they are monotonically decreasing with respect to the removal of empty space from the bounding box. Since the components $R_1, \ldots, R_k$ are pairwise disjoint and all fit within $B(p)$, there must exist gaps (empty columns or rows) separating them within $B(p)$---otherwise they would not be disconnected. Our translation removes these gaps.
-
+    
     After merging $R_1$ and $R_2$ horizontally, denote the new bounding box dimensions by $W'$ and $H'$. We have:
     \begin{itemize}
         \item $W' = W_1 + W_2 \le W - 1 < W$: the strict inequality holds because $B_1$ and $B_2$ originally fit within $[x_{\min}, x_{\max}]$ with at least one empty column between them (the gap that separated the disconnected components).
         \item $H' = \max(H_1, H_2) \le H$: the height of the merged region is the maximum of the two component heights, which cannot exceed the original height. If a vertical shift $\delta_y \neq 0$ was applied, it can only decrease $H'$ further (by aligning the components vertically).
     \end{itemize}
-
+    
     Since $W' < W$ and $H' \le H$, we have coordinate-wise strict improvement in at least one dimension:
-    \begin{align*}
+    \begin{align}
         \mathrm{cost}_{\mathrm{area}}(p') &= W' \cdot H' < W \cdot H = \mathrm{cost}_{\mathrm{area}}(p), \\
         \mathrm{cost}_{\square}(p') &= \max(W', H') \le \max(W, H) = \mathrm{cost}_{\square}(p).
-    \end{align*}
+    \end{align}
     The area inequality is strict; the square inequality may be an equality (if the original $\max$ was determined by $H$ and $H' = H$), but in no case does the cost increase.
 \end{enumerate}
 
 Repeating this process for all remaining components yields a placement $p'$ with $R(p')$ 4-connected and $\mathrm{cost}(p') \le \mathrm{cost}(p)$. Since $p$ was optimal, we have $\mathrm{cost}(p') = \mathrm{cost}(p)$, so $p'$ is also optimal.
 \end{pf}
-
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-    scale=0.85,
-    every node/.style={font=\small},
-    component/.style={rounded corners, fill opacity=0.3, text opacity=1},
-    bbox/.style={dashed, thick, color=black!70}
-]
-
-% --- BEFORE STATE ---
-\begin{scope}[shift={(0,0)}]
-    % Component R1
-    \draw[fill=myblue!30, draw=myblue, rounded corners=2pt] (0,0) rectangle (2,3);
-    \node[black, font=\bfseries] at (1, 1.5) {$R_1$};
-
-    % Component R2 (Disconnected)
-    \draw[fill=myred!30, draw=myred, rounded corners=2pt] (3.5, 0.5) rectangle (5, 2.5);
-    \node[black, font=\bfseries] at (4.25, 1.5) {$R_2$};
-
-    % Gap
-    \draw[<->, >=stealth, gray] (2.1, 1.5) -- (3.4, 1.5) node[midway, above, font=\scriptsize] {Gap};
-
-    % Bounding Box Before
-    \draw[bbox] (-0.2, -0.2) rectangle (5.2, 3.2);
-    \node[anchor=south west] at (-0.2, 3.2) {\textbf{Before:} Cost $W \times H$};
-
-    % Action Arrow
-    \draw[->, >=latex, line width=2pt, mygreen] (3.5, -0.5) -- (2.0, -0.5) node[midway, font=\scriptsize, below] {Shift};
-\end{scope}
-
-% --- ARROW SEPARATOR ---
-\draw[->, line width=1pt, gray] (6, 1.5) -- (7, 1.5);
-
-% --- AFTER STATE ---
-\begin{scope}[shift={(8,0)}]
-    % Component R1 (Stationary)
-    \draw[fill=myblue!30, draw=myblue, rounded corners=2pt] (0,0) rectangle (2,3);
-    \node[black, font=\bfseries] at (1, 1.5) {$R_1$};
-
-    % Component R2 (Shifted)
-    % Shifted to touch R1
-    \draw[fill=myred!30, draw=myred, rounded corners=2pt] (2, 0.5) rectangle (3.5, 2.5);
-    \node[black, font=\bfseries] at (2.75, 1.5) {$R_2$};
-
-    % New Bounding Box
-    \draw[bbox, color=mygreen] (-0.2, -0.2) rectangle (3.7, 3.2);
-    \node[anchor=south west, color=mygreen] at (-0.2, 3.2) {\textbf{After:} Cost $W' \times H$};
-
-    % Logic
-    \node[align=center, font=\scriptsize, text width=3cm] at (1.75, -1.2) {
-        $W' < W$ (Area reduced)\\
-        Connectivity Restored
-    };
-\end{scope}
-
-\end{tikzpicture}
-\caption{Merging Logic}
-\label{fig:merging_logic}
-\end{figure}
 
 \begin{corollary}
 For any instance of 2D-SSP, there exists an optimal placement whose occupied region is 4-connected. Consequently, Assumption~\ref{ass:connected-union} holds for all instances.
@@ -837,7 +429,6 @@ This structural result justifies our focus on connected placements: rather than 
 focus and enables the tree-based structural perspective developed in this section. It is not required for the correctness of the algorithms in
 Section~\ref{sec:algorithms}, which operate on arbitrary
 symbol-consistent placements.
-
 
 \begin{lemma}
 \label{lem:contact-connected}
@@ -864,8 +455,7 @@ we obtain the following.
 
 \begin{theorem}
 \label{thm:growing-optimal}
-Let $\mathcal{T}$ be an instance of 2D-SSP (either 2D-SSP$_{\mathrm{area}}$ or 2D-SSP$_{\square}$) that satisfies
-Assumption~\ref{ass:connected-union}, and let $p^*$ be an optimal
+Let $\mathcal{T}$ be an instance of 2D-SSP (either 2D-SSP$_{\mathrm{area}}$ or 2D-SSP$_{\square}$), and let $p^*$ be an optimal
 symbol-consistent placement (with respect to the chosen cost) whose occupied region $R(p^*)$ is 4-connected.
 Then the contact graph $G^{\mathrm{ct}}(p^*)$ is connected and hence admits a
 spanning tree. Equivalently, there is an ordering of the strings
@@ -897,74 +487,6 @@ Intuitively, each edge $(i,j,\delta)$ in $G^{\mathrm{pl}}$ specifies a way of
 gluing $T_j$ next to $T_i$. We represent global placements as trees of such
 relative offsets.
 
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-    scale=1.0,
-    every node/.style={font=\small},
-    % Styles
-    ref/.style={draw=myblue, fill=myblue!30, line width=1.2pt, rounded corners=2pt},
-    ghost/.style={draw=myred!60, fill=myred!10, dashed, line width=0.8pt, rounded corners=2pt},
-    solid/.style={draw=myred, fill=myred!30, line width=1.2pt, rounded corners=2pt},
-    arrow_opt/.style={->, >=stealth, dashed, color=myorange!80, line width=0.8pt},
-    arrow_sel/.style={->, >=stealth, color=mygreen, line width=1.2pt}
-]
-
-% PANEL A: THE PLACEMENT GRAPH (Options)
-
-\begin{scope}[shift={(0,0)}]
-    \node[anchor=south] at (1.5, 2.8) {a) Placement Graph $G^{pl}$};
-    \node[anchor=south, font=\scriptsize, text=gray] at (1.5, 2.5) {(Multiple valid edges exist)};
-
-    % Reference String T1
-    \draw[ref] (0,0) rectangle (2,1.5);
-    \node[black, font=\bfseries] at (1, 0.75) {$T_1$};
-
-    % Option 1: Overlap Top-Right
-    \draw[ghost] (1.5, 1.0) rectangle (3.5, 2.0);
-    \node[black, font=\scriptsize] at (2.5, 1.5) {Option 1};
-
-    % Option 2: Overlap Right
-    \draw[ghost] (1.8, -0.5) rectangle (3.8, 0.5);
-    \node[black, font=\scriptsize] at (2.8, 0) {Option 2};
-
-    % Option 3: Adjacency Bottom
-    \draw[ghost] (0.5, -1.2) rectangle (2.5, -0.2);
-    \node[black, font=\scriptsize] at (1.5, -0.7) {Option 3};
-\end{scope}
-
-% SEPARATOR ARROW
-\draw[->, >=latex, line width=2pt, mygreen] (4.2, 0.75) -- (5.2, 0.75) 
-    node[midway, above, font=\scriptsize, text=black] {Solver}
-    node[midway, below, font=\scriptsize, text=black] {Selects One};
-
-% PANEL B: THE PLACEMENT TREE (Selection)
-
-\begin{scope}[shift={(6,0)}]
-    \node[anchor=south] at (1.5, 2.8) {b) Placement Tree $F$};
-    \node[anchor=south, font=\scriptsize, text=gray] at (1.5, 2.5) {(Exactly one edge chosen)};
-
-    % Reference String T1
-    \draw[ref] (0,0) rectangle (2,1.5);
-    \node[black, font=\bfseries] at (1, 0.75) {$T_1$};
-
-    % The Chosen One (Option 1)
-    \draw[solid] (1.5, 1.0) rectangle (3.5, 2.0);
-    \node[black, font=\bfseries] at (2.5, 1.5) {$T_2$};
-
-    % The Tree Edge
-    \draw[arrow_sel] (1, 1.1) -- (1.5, 1.1) node[midway, above, font=\tiny, text=black] {$\delta_{12}$};
-
-    % Ghost outlines of rejected options (very faint)
-    \draw[gray, dashed, rounded corners=2pt] (1.8, -0.5) rectangle (3.8, 0.5);
-    \draw[gray, dashed, rounded corners=2pt] (0.5, -1.2) rectangle (2.5, -0.2);
-\end{scope}
-
-\end{tikzpicture}
-\caption{(a) The Placement Graph $G^{pl}$ contains \textit{all} possible valid relative positions (offsets) for $T_2$ relative to $T_1$. (b) The Placement Tree $F$ selects exactly \textit{one} of these edges to fix the final physical position.}
-\label{fig:placement_graph_explained}
-\end{figure}
-
 \begin{definition}\label{def:placement-tree}
 A \emph{placement tree} for $\mathcal{T}$ is a rooted tree
 $F = (V,E)$ with vertex set $V = \{1,\dots,n\}$ together with, for each
@@ -980,69 +502,6 @@ For a vertex $i\in V$, let
   r = v_0, v_1,\dots,v_\ell = i
 \]
 be the unique simple path from $r$ to $i$ in $F$.
-
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-    % Global font setting
-    every node/.style={font=\small},
-    node distance=2cm,
-    stringnode/.style={circle, draw=black!60, fill=white, line width=1pt, minimum size=1cm, drop shadow},
-    edge/.style={->, >=latex, line width=1.2pt, color=black!70},
-    % Offset labels: cleaner look, slightly smaller text
-    offsetlabel/.style={midway, fill=white, font=\footnotesize, text=myblue, inner sep=2pt, draw=myblue!30, rounded corners}
-]
-
-% --- 1. The Placement Tree (Left) ---
-\node[stringnode, fill=myblue!50] (T1) {$T_1$};
-\node[stringnode, fill=myred!50, right=3.0cm of T1] (T2) {$T_2$};
-% Adjusted T3 position slightly for visual balance
-\node[stringnode, fill=mygreen!50, below right=1cm and 1cm of T1] (T3) {$T_3$};
-
-% Edges with Corrected Offsets
-% Note: These now match the physical coordinates in the Grid Realization below
-\draw[edge] (T1) -- (T2) node[offsetlabel, yshift=0pt] {$\delta_{12}=(6,0)$};
-\draw[edge] (T1) -- (T3) node[offsetlabel, left=2pt] {$\delta_{13}=(4,2)$};
-
-\node[align=center, font=\small] at (2, 1.8) {a) Placement Tree $F$};
-
-% --- Separator ---
-\draw[gray!30, line width=2pt, dashed] (5.5, 2) -- (5.5, -3);
-
-% --- 2. The Physical Placement (Right) ---
-\begin{scope}[shift={(6.5,0)}] % Shifted slightly right for better spacing
-    % Grid
-    \draw[step=0.5, gray!10, thin] (-0.5,-2.5) grid (4.5, 1.5);
-
-    % T1 Placement (Root at 0,0)
-    \fill[myblue!30, opacity=0.8] (0,0) rectangle (2,1);
-    \draw[myblue, thick, rounded corners=2pt] (0,0) rectangle (2,1);
-    \node at ($(0,0)!0.5!(2,1)$) {$T_1$};
-    \fill[black] (0,1) circle (1.5pt) node[above left, scale=0.7] {$(0,0)$};
-
-    % T2 Placement (Offset 3,0)
-    \fill[myred!30, opacity=0.8] (3,0) rectangle (4.5,1);
-    \draw[myred, thick, rounded corners=2pt] (3,0) rectangle (4.5,1);
-    \node at ($(3,0)!0.5!(4.5,1)$) {$T_2$};
-    \draw[->, myblue, dashed, thick] (0,1) -- (3,1);
-
-    % T3 Placement (Offset 1,-2)
-    \fill[mygreen!30, opacity=0.8] (1,-2) rectangle (3,-1);
-    \draw[mygreen, thick, rounded corners=2pt] (1,-2) rectangle (3,-1);
-    \node at ($(1,-2)!0.5!(3,-1)$) {$T_3$};
-    \draw[->, myblue, dashed, thick] (0,1) -- (1,-1);
-
-    % Visual Vector for T3
-    \draw[->, myblue, dashed, thick] (0,1) -- (1,-1);
-
-    \node[align=center, font=\small] at (2, 1.8) {b) Grid Realization $p_F$};
-    \node[text width=4.5cm, align=center, font=\scriptsize, gray] at (2, -3) {*Edges in the tree encode relative offsets, preserving local structure.};
-\end{scope}
-
-\end{tikzpicture}
-\caption{The Bijection between Trees and Placements.}
-\label{fig:tree_rep}
-\end{figure}
 
 \begin{definition}\label{def:realization}
 The \emph{realization} of a placement tree $F$ with root position
@@ -1158,124 +617,6 @@ derived from the bounding box $B(p)$. Consequently, the structural statements
 apply verbatim to both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\square}$.
 \end{remark}
 
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-    scale=0.9,
-    every node/.style={font=\small},
-    % --- STYLES ---
-    stringnode/.style={circle, draw=black, fill=white, line width=1pt, minimum size=1cm, drop shadow},
-    rootnode/.style={stringnode, fill=myblue!30},
-    % Edge Styles
-    edge_p1/.style={->, >=stealth, line width=1.5pt, color=black},
-    edge_p2/.style={->, >=stealth, line width=1.5pt, color=black},
-    edge_repair/.style={->, >=stealth, line width=2pt, color=mygreen, dashed},
-    % Box Styles
-    highlight_box/.style={draw=myblue!30, fill=myblue!10, dashed, rounded corners, inner sep=8pt},
-    logic_box/.style={rectangle, draw=gray!30, fill=white, rounded corners, align=left, font=\scriptsize, inner sep=8pt}
-]
-
-% ROW 1: PARENTS
-
-% --- PARENT 1 (Left) ---
-\begin{scope}[shift={(0,0)}]
-    \node[anchor=south] at (2, 2) {Parent 1 (Structure A)};
-
-    % Nodes
-    \node[stringnode, fill=myblue!50] (P1_1) at (0,0) {$T_1$};
-    \node[stringnode, fill=myred!50] (P1_2) at (2,0.8) {$T_2$};
-    \node[stringnode, fill=mygreen!50] (P1_3) at (2,-0.8) {$T_3$};
-    \node[stringnode, fill=myorange!50] (P1_4) at (4,0.8) {$T_4$};
-
-    % Edges
-    \draw[edge_p1] (P1_1) -- (P1_2);
-    \draw[edge_p1] (P1_1) -- (P1_3);
-    \draw[edge_p1] (P1_2) -- (P1_4);
-
-    % Highlight Subtree (Background layer)
-    \begin{scope}[on background layer]
-        \node[highlight_box, fit=(P1_2)(P1_4)] (HL) {};
-        \node[text=myblue, font=\scriptsize, anchor=south east] at (HL.north east) {Subtree A};
-    \end{scope}
-\end{scope}
-
-% --- PARENT 2 (Right) ---
-\begin{scope}[shift={(7,0)}]
-    \node[anchor=south] at (2, 2) {Parent 2 (Structure B)};
-
-    % Nodes
-    \node[stringnode, fill=myblue!50] (P2_1) at (0,0) {$T_1$};
-    \node[stringnode, fill=mygreen!50] (P2_3) at (2,0) {$T_3$};
-    \node[stringnode, fill=myorange!50] (P2_4) at (4,0.8) {$T_4$};
-    \node[stringnode, fill=myred!50] (P2_2) at (4,-0.8) {$T_2$};
-
-    % Edges (Red)
-    \draw[edge_p2] (P2_1) -- (P2_3);
-    \draw[edge_p2] (P2_3) -- (P2_4);
-    \draw[edge_p2] (P2_3) -- (P2_2);
-\end{scope}
-
-% TRANSITION: CROSSOVER ARROW
-
-\draw[
-    ->,
-    line width=1.2pt,
-    gray!70
-] (5.6,-1) -- (5.6,-2.6)
-node[
-    midway,
-    fill=white,
-    text=black,
-    rounded corners=3pt,
-    font=\scriptsize\bfseries,
-    inner sep=4pt
-] {Crossover Operator};
-
-% ROW 2: OFFSPRING & LOGIC
-
-
-% --- OFFSPRING (Centered below) ---
-\begin{scope}[shift={(2.5, -5)}]
-    \node[anchor=south] at (2, 1.2) {Offspring Result};
-
-    % Nodes
-    \node[rootnode, fill=myblue!50] (C_1) at (0,0) {$T_1$};
-
-    % Inherited Branch (From P1)
-    \node[stringnode, fill=myred!50] (C_2) at (2,0) {$T_2$};
-    \node[stringnode, fill=myorange!50] (C_4) at (4,0) {$T_4$};
-
-    % Repaired Node (Greedy)
-    \node[stringnode, fill=mygreen!50, line width=1.5pt, text=black] (C_3) at (1,-1.8) {$T_3$};
-
-    % Edges
-    \draw[edge_p1] (C_1) -- (C_2) node[midway, above, yshift=6pt, font=\tiny, text=black] {Inherited};
-    \draw[edge_p1] (C_2) -- (C_4);
-
-    % Repair Edge
-    \draw[edge_repair] (C_1) -- (C_3) node[midway, right, font=\tiny, text=black, align=left, xshift=2pt] {Greedy\\Repair};
-\end{scope}
-
-% --- LOGIC EXPLANATION BOX (Right side) ---
-\node[logic_box, anchor=north west] at (8, -2.5) {
-    Operation Logic:\\[0.5em]
-    \textcolor{myblue}{$\bullet$} Inheritance:\\
-    Subtree $1 \to 2 \to 4$ is copied\\
-    directly from Parent 1 to\\
-    preserve local structure.\\[0.8em]
-
-    \textcolor{mygreen}{$\bullet$} Greedy Repair:\\
-    String 3 could not fit using\\
-    parent offsets (conflict).\\
-    $\rightarrow$ It is attached via a new\\
-    \textit{greedy edge} to ensure completeness.
-};
-
-\end{tikzpicture}
-\caption{Visualizing the Tree Crossover with Greedy Completion. The operator preserves local structures (subtrees) where possible (blue edges), but invokes a greedy repair mechanism (dashed green edge) when structural incompatibility arises.}
-\label{fig:ga_crossover_clean}
-\end{figure}
-
 Theorem~\ref{thm:tree-optimal} establishes that placement trees provide a complete encoding of connected placements, but the theorem's value extends beyond mere equivalence. The tree structure has three properties that make it particularly suitable for metaheuristic optimization:
 
 \begin{enumerate}
@@ -1288,7 +629,7 @@ Theorem~\ref{thm:tree-optimal} establishes that placement trees provide a comple
 
 These properties motivate our choice to design a genetic algorithm whose individuals are placement trees and whose crossover operates on subtrees, rather than using a more conventional coordinate-based representation.
 
-\begin{table}[h]
+\begin{table}
   \centering
   \small
   \caption{Summary of main notation.}
@@ -1329,9 +670,9 @@ Having established the structural foundation linking placements and trees, we no
 
 \begin{itemize}
     \item An \emph{exact ILP formulation} (Section~\ref{sec:ilp-baseline}) that enumerates all candidate placements on a discrete grid and optimizes over them using mixed-integer linear programming. This approach guarantees optimal solutions but is limited to small instances.
-
+    
     \item A \emph{greedy construction heuristic} (Section~\ref{sec:greedy-impl}) that builds placements incrementally by always choosing the locally best extension. This approach is extremely fast but may produce suboptimal solutions.
-
+    
     \item A \emph{tree-based genetic algorithm} (Section~\ref{subsec:ga}) that represents individuals as placement trees and uses crossover operators that recombine subtrees. This approach aims to combine the quality of exact methods with the scalability of heuristics.
 \end{itemize}
 
@@ -1341,98 +682,6 @@ The genetic algorithm uses placement trees rather than the more obvious coordina
 
 \subsection{Exact Verification via ILP}
 \label{sec:ilp-baseline}
-
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-    scale=0.75,
-    every node/.style={font=\small},
-    brace/.style={decorate, decoration={brace, amplitude=4pt}, thick, gray},
-    label_text/.style={midway, fill=white, inner sep=2pt, font=\scriptsize}
-]
-
-% PARAMETERS
-\def\Wg{8}
-\def\Hg{6}
-\def\w{3}
-\def\h{2}
-
-% GLOBAL GRID
-
-
-\draw[step=1cm, gray!15, very thin] (0,0) grid (\Wg,\Hg);
-\draw[thick] (0,0) rectangle (\Wg,\Hg);
-\node[anchor=south, font=\small] at ($(\Wg/2,\Hg) + (0,1)$) {Global Grid Constraints $(W_g \times H_g)$};
-
-% VALID ORIGIN SPACE
-
-\fill[mygreen!15] (0,0) rectangle (\Wg-\w,\Hg-\h);
-\draw[mygreen, thick, dashed, rounded corners=2pt] (0,0) rectangle (\Wg-\w,\Hg-\h);
-
-% EXCLUDED MARGINS (PRUNING)
-
-\draw[brace] (\Wg,\Hg) -- (\Wg,\Hg-\h)
-    node[midway, right=5pt, font=\scriptsize] {Excluded margin $= h_i$};
-
-\draw[brace] (\Wg-\w,\Hg) -- (\Wg,\Hg)
-    node[midway, above=5pt, font=\scriptsize] {Excluded margin $= w_i$};
-
-% VALID PLACEMENT
-
-\def\xok{1}
-\def\yok{1}
-
-\fill[myblue!30] (\xok,\yok) rectangle (\xok+\w,\yok+\h);
-\draw[myblue, thick, rounded corners=2pt] (\xok,\yok) rectangle (\xok+\w,\yok+\h);
-\node[text=black] at (\xok+\w/2,\yok+\h/2) {$T_i$};
-
-\fill ( \xok,\yok ) circle (2pt);
-\node[anchor=north, font=\scriptsize] at (\xok,\yok) {$o_{\text{ok}}$};
-
-
-% INVALID PLACEMENT
-
-\def\xbad{5.5}
-\def\ybad{3.5}
-
-\fill[myred!20] (\xbad,\ybad-2) rectangle (\xbad+\w,\ybad+\h-2);
-\draw[myred, thick, rounded corners=2pt] (\xbad,\ybad-2) rectangle (\xbad+\w,\ybad+\h-2);
-
-\fill[myred] (\xbad,\ybad-2) circle (2pt);
-\node[anchor=north west, font=\scriptsize, text=black] at (\xbad,\ybad-2) {$o_{\text{bad}}$};
-\node[text=black] at (\xbad+\w/2,\ybad-2+\h/2) {$T_j$};
-
-% AXIS LABELS
-
-\draw[<->] (0,-0.5) -- (\Wg-\w,-0.5)
-    node[midway, below] {Valid origins $x$};
-
-\draw[<->] (-0.5,0) -- (-0.5,\Hg-\h)
-    node[midway, rotate=90, above] {Valid origins $y$};
-
-% LEGEND
-
-\node[
-    anchor=west,
-    align=left,
-    draw=gray!40,
-    rounded corners,
-    fill=white,
-    inner sep=5pt,
-    font=\scriptsize
-] at ($(\Wg+1,3) + (1,-1)$)
- {
-    Search Space\\[0.3em]
-    \textcolor{mygreen}{\rule{8pt}{8pt}} Origin space $\mathcal{O}_i$\\
-    \textcolor{white!70!gray}{\rule{8pt}{8pt}} Forbidden region\\
-    \textcolor{myblue}{\rule{8pt}{8pt}} Valid placement $T_i$\\
-    \textcolor{myred}{\rule{8pt}{8pt}} Invalid placement $T_j$
-};
-
-\end{tikzpicture}
-\caption{Visualization of search space pruning. The green region represents the set of valid origins $\mathcal{O}_i$. Any origin outside this region forces the placement to exceed the global bounds $(W_g \times H_g)$, allowing the corresponding binary variables to be removed from the ILP.}
-\label{fig:ilp_origins_improved}
-\end{figure}
 
 To validate the solution quality of our heuristic approaches, we formulate a direct grid-based mixed-integer linear program~\citep{wolsey1999integer}. We emphasize that this formulation is \emph{not} intended as a scalable solver for general instances, but strictly as a \emph{ground-truth oracle} for small-scale verification ($N \le 10$). This allows us to measure exactly how close our genetic algorithm comes to the global optimum.
 
@@ -1472,7 +721,8 @@ all its local cells inside the global grid:
 \begin{equation}
   \begin{split}
     \mathcal{O}_i \;:=\; \Bigl\{\, o = (x,y) \in \mathbb{Z}^2 \,\Big|\,
-    & (x+u, y+v) \in [0,W_g]\times[0,H_g] \text{ for all } (u,v)\in C_i \Bigr\}
+    & (x+u, y+v) \in [0,W_g]\times[0,H_g] \\
+    & \text{for all } (u,v)\in C_i \Bigr\}.
   \end{split}
   \label{eq:ilp-origins}
 \end{equation}
@@ -1487,9 +737,10 @@ Boolean conflict indicator
   \kappa_{ijoo'} =
   \begin{cases}
     1, & \begin{aligned}[t]
-           &\text{if there exist } (u,v)\in C_i,\, (u',v')\in C_j \text{ with } \\
-           & (x+u,y+v) =(x'+u',y'+v') \text{ and } T_i(u,v)\neq T_j(u',v') \\
-           & \text{for } o=(x,y),\,o'=(x',y'),
+           &\text{if there exist } (u,v)\in C_i,\, (u',v')\in C_j \\
+           &\text{with } (x+u,y+v)=(x'+u',y'+v') \\
+           &\text{and } T_i(u,v)\neq T_j(u',v'), \\
+           &\text{for } o=(x,y),\,o'=(x',y'),
          \end{aligned} \\
     0, & \text{otherwise},
   \end{cases}
@@ -1683,63 +934,6 @@ either \eqref{eq:ilp-square-L} or
 
 \subsection{Greedy Heuristics}
 \label{sec:greedy-impl}
-
-\begin{figure}[htbp]
-\centering
-\begin{tikzpicture}[
-    scale=0.8,
-    every node/.style={font=\small},
-    string/.style={draw=#1, fill=#1!30, line width=1pt, rounded corners=2pt},
-    ghost/.style={draw=gray, dashed, line width=0.8pt, fill=gray!10},
-    dim_arrow/.style={<->, >=stealth, line width=0.8pt},
-    label_text/.style={font=\scriptsize\bfseries}
-]
-
-% --- Current State ---
-\begin{scope}[shift={(0,0)}]
-    \node[anchor=south] at (1.5, 4.5) {Current Canvas};
-
-    % Current strings placed
-    \draw[string=myblue] (0,0) rectangle (3,2);
-    \node at (1.5,1) {$T_{placed}$};
-
-    % Current Bounding Box
-    \draw[dim_arrow] (0, -0.6) -- (3, -0.6) node[midway, fill=white] {$W_{curr}$};
-    \draw[dim_arrow] (-0.8, 0) -- (-0.8, 2) node[midway, fill=white] {$H_{curr}$};
-\end{scope}
-
-% Arrow
-\draw[->, >=latex, line width=1.5pt, gray] (3.5, 1) -- (4.5, 1);
-
-% --- Candidate Evaluation ---
-\begin{scope}[shift={(8,0)}]
-    \node[anchor=south] at (2, 4.5) {Evaluate Candidates for $T_{new}$};
-
-    % Existing
-    \draw[string=myblue, fill opacity=0.3] (0,0) rectangle (3,2);
-
-    % Candidate A (Increases Width)
-    \draw[ghost, draw=myred] (2.5, 0.5) rectangle (4.5, 2.5);
-    \node[text=myred, font=\scriptsize] at (3.5, 1.5) {Cand A};
-    \node[text=myred, font=\tiny, align=center] at (5.2, 1.5) {Cost $\uparrow$\\ (Bad)};
-
-    % Candidate B (Fits inside / Small expansion)
-    \draw[ghost, draw=mygreen] (0.5, 1.5) rectangle (2.5, 3.5);
-    \node[text=mygreen, font=\scriptsize] at (1.5, 2.5) {Cand B};
-     \node[text=mygreen, font=\tiny, align=center] at (1.5, 4) {Min Cost $\Delta$\\ (Best)};
-
-    % Candidate C (Symbol Conflict - hypothetical)
-    \draw[ghost, draw=gray] (-1, 0.5) rectangle (1, 2.5);
-    \node[text=gray, font=\scriptsize] at (0, 1.5) {Cand C};
-    \node[text=gray, font=\tiny, align=center] at (-1.9, 1.5) {Conflict\\ (Invalid)};
-
-    % Bounding Box Extension visualization
-    \draw[dashed, mygreen] (0,0) rectangle (3, 3.5);
-\end{scope}
-
-\end{tikzpicture}
-\caption{Visualizing the Greedy Heuristic.}
-\end{figure}
 
 We also use greedy construction heuristics that build a placement incrementally
 on a global \emph{canvas}. Strings are placed one by one, always maintaining symbol-consistency and trying to keep the current bounding-box cost (either side length $\max\{\text{width},\text{height}\}$ for the square objective or area $\text{width}\times\text{height}$ for the area objective)
@@ -1954,11 +1148,10 @@ square cost $f_{\square}(p)$ and runtime for each algorithm, aggregated
 over the small, medium, and large regimes respectively (within each regime
 we average over all tile counts belonging to that regime).
 
-\begin{table}[h]
+\begin{table}
 \centering
 \small
-\resizebox{0.65\columnwidth}{!}{%
-\begin{tabular}{lrr}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
 \toprule
 Algorithm & Mean max side & Mean time [s] \\
 \midrule
@@ -1968,8 +1161,7 @@ GA     & 7.64 &   0.24 \\
 greedy              & 8.18 &   $8.7\times 10^{-4}$ \\
 Greedy (Stochastic)  & 8.33 &   $8.2\times 10^{-4}$ \\
 \bottomrule
-\end{tabular}
-}
+\end{tabular*}
 \caption{Square objective, small instances ($N \in \{6,8,10\}$ strings). The ILP provides optimal solutions for verification; its runtime is omitted as it is used only for offline ground-truth generation.}
 \label{tab:square-small}
 \end{table}
@@ -1979,11 +1171,10 @@ provides optimal solutions with mean max side $7.32$, serving as the ground-trut
 this optimum (within about $1\%$--$4\%$). The greedy baselines are essentially instantaneous but incur about
 $7$--$13\%$ higher cost on average.
 
-\begin{table}[t]
+\begin{table}
 \centering
 \small
-\resizebox{0.65\columnwidth}{!}{%
-\begin{tabular}{lrr}
+ \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
 \toprule
 Algorithm & Mean max side & Mean time [s] \\
 \midrule
@@ -1993,18 +1184,16 @@ greedy              & 13.03 &   $3.3\times 10^{-3}$ \\
 Greedy (Stochastic)  & 13.75 &   $4.2\times 10^{-3}$ \\
 \bottomrule
 \end{tabular}
-}
 \caption{Square objective, medium instances ($N \in \{20,30,50\}$ strings). Mean over all sizes and seeds. ILP verification is not available at this scale.}
 \label{tab:square-medium}
 \end{table}
 
 On \emph{medium} instances (Table~\ref{tab:square-medium}), the ILP is no longer tractable for verification. Both genetic variants achieve mean max side around $12.1$, outperforming the greedy heuristics by roughly $7$--$13\%$. The GA runtimes (5--9\,s) remain practical for these instance sizes.
 
-\begin{table}[t]
+\begin{table}
 \centering
 \small
-\resizebox{0.65\columnwidth}{!}{%
-\begin{tabular}{lrr}
+ \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
 \toprule
 Algorithm & Mean max side & Mean time [s] \\
 \midrule
@@ -2014,7 +1203,6 @@ greedy              & 17.20 &    $2.2\times 10^{-2}$ \\
 Greedy (Stochastic)  & 17.97 &    $2.8\times 10^{-2}$ \\
 \bottomrule
 \end{tabular}
-}
 \caption{Square objective, large instances ($N \in \{60,80,100\}$ strings). Mean over all sizes and seeds.}
 \label{tab:square-large}
 \end{table}
@@ -2025,199 +1213,112 @@ improving on deterministic greedy by about $6\%$ on average. The GA runtimes
 (tens of seconds) are substantially higher than greedy (tens of milliseconds)
 but remain practical for offline optimization.
 
-Figure~\ref{fig:square-cost-vs-strings} plots the mean square cost as a function
-of the number of strings, while Figure~\ref{fig:square-time-vs-strings} shows the
+Figure~\ref{fig:square-cost-vs-tiles} plots the mean square cost as a function
+of the number of strings, while Figure~\ref{fig:square-time-vs-tiles} shows the
 corresponding runtimes on a logarithmic scale.
 
-
-\begin{figure}[htbp]
+\begin{figure}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.9\textwidth,
-    height=0.6\textwidth,
-    xlabel={Number of Strings ($N$)},
-    ylabel={Mean Max Side ($L$)},
-    xmin=0, xmax=105,
-    ymin=6, ymax=21,
-    xtick={10,20,30,40,50,60,70,80,90,100},
-    grid=major,
-    grid style={dashed, gray!30},
-    legend style={
-        at={(0.65,0.45)},
-        anchor=north west,
-        draw=none,
-        fill=white,
-        fill opacity=0.8,
-        text opacity=1,
-        font=\sffamily\scriptsize
-    },
-    thick,
-    tick label style={font=\sffamily},
+    width=0.8\linewidth,
+    height=0.45\linewidth,
+    xlabel={Number of strings $N$},
+    ylabel={Mean max side},
+    xmin=4, xmax=102,
+    ymin=6, ymax=40,
+    xtick={6,8,10,20,30,50,60,80,100},
+    ymajorgrids=true,
+    xmajorgrids=true,
+    legend style={at={(0.5,-0.25)},anchor=north,legend columns=3},
 ]
+\addplot+[mark=o] coordinates {
+  (6,7.3333) (8,8.2333) (10,8.9667)
+  (20,11.35) (30,12.8) (50,14.95)
+  (60,15.9) (80,17.4) (100,18.3)
+};
+\addlegendentry{greedy}
 
-% GA — red square
-\addplot[
-    color=myred,
-    mark=square*,
-    mark options={fill=myred, scale=0.8},
-    line width=1.5pt
-] coordinates {
-    (6,7.0) (8,7.7667) (10,8.1667)
-    (20,10.2) (30,11.95) (50,14.15)
-    (60,15.0) (80,16.1) (100,17.5)
+\addplot+[mark=diamond*] coordinates {
+  (6,7.4667) (8,8.4) (10,9.1333)
+  (20,11.75) (30,13.65) (50,15.85)
+  (60,16.6) (80,18.1) (100,19.2)
+};
+\addlegendentry{Greedy (Stochastic)}
+
+\addplot+[mark=square*] coordinates {
+  (6,7.0) (8,7.7667) (10,8.1667)
+  (20,10.2) (30,11.95) (50,14.15)
+  (60,15.0) (80,16.1) (100,17.5)
 };
 \addlegendentry{GA}
 
-
-% GA (Stochastic) — orange diamond
-\addplot[
-    color=myorange,
-    mark=diamond*,
-    mark options={fill=myorange, scale=1.0},
-    line width=1.0pt
-] coordinates {
-    (6,6.7667) (8,7.3667) (10,8.0333)
-    (20,10.15) (30,11.9) (50,14.15)
-    (60,14.9) (80,16.5) (100,17.8)
+\addplot+[mark=triangle*] coordinates {
+  (6,6.7667) (8,7.3667) (10,8.0333)
+  (20,10.15) (30,11.9) (50,14.15)
+  (60,14.9) (80,16.5) (100,17.8)
 };
-\addlegendentry{GA (Stoch.)}
+\addlegendentry{GA (Stochastic)}
 
-% Greedy — blue triangle
-\addplot[
-    color=myblue,
-    mark=triangle*,
-    mark options={fill=white, scale=1.0},
-    line width=1.0pt
-] coordinates {
-    (6,7.3333) (8,8.2333) (10,8.9667)
-    (20,11.35) (30,12.8) (50,14.95)
-    (60,15.9) (80,17.4) (100,18.3)
+\addplot+[mark=*] coordinates {
+  (6,6.7333) (8,7.2333) (10,8.0)
 };
-\addlegendentry{Greedy}
-
-% Greedy (Stochastic) — green dotted circle
-\addplot[
-    color=mygreen,
-    mark=o,
-    mark options={solid, scale=1.0},
-    line width=0.8pt,
-    dotted
-] coordinates {
-    (6,7.4667) (8,8.4) (10,9.1333)
-    (20,11.75) (30,13.65) (50,15.85)
-    (60,16.6) (80,18.1) (100,19.2)
-};
-\addlegendentry{Greedy (Stoch.)}
-
-% ILP (Optimal) — black dashed with filled circles
-\addplot[
-    color=black,
-    mark=*,
-    mark options={fill=black, scale=0.8},
-    dashed
-] coordinates {
-    (6,6.7333) (8,7.2333) (10,8.0)
-};
-\addlegendentry{ILP (Optimal)}
-
-% --- Zone markings ---
-\draw[fill=gray, opacity=0.08, draw=none] (axis cs:0,0) rectangle (axis cs:12, 22);
-\node[rotate=90, font=\sffamily\tiny, gray] at (axis cs: 14, 15) {Verification Zone ($N \le 10$)};
+\addlegendentry{ILP (optimal)}
 
 \end{axis}
 \end{tikzpicture}
-\caption{Square Objective: Mean Max Side vs.\ Number of Strings.
-The ILP provides optimal ground truth for $N \le 10$.}
-\label{fig:square-cost-vs-strings}
+\caption{Square objective: mean max side vs.\ number of strings. The ILP provides optimal ground truth for $N \le 10$.}
+\label{fig:square-cost-vs-tiles}
 \end{figure}
 
-
-\begin{figure}[htbp]
+\begin{figure}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.9\textwidth,
-    height=0.6\textwidth,
-    xlabel={Number of Strings ($N$)},
-    ylabel={Mean Runtime [s] (log scale)},
-    xmin=0, xmax=105,
+    width=0.8\linewidth,
+    height=0.45\linewidth,
+    xlabel={Number of strings $N$},
+    ylabel={Mean runtime [s] (log scale)},
+    xmin=4, xmax=102,
     ymode=log,
-    xtick={10,20,30,40,50,60,70,80,90,100},
-    grid=major,
-    grid style={dashed, gray!30},
-    legend style={
-        at={(0.65,0.75)},
-        anchor=north west,
-        draw=none,
-        fill=white,
-        fill opacity=0.8,
-        text opacity=1,
-        font=\sffamily\scriptsize
-    },
-    thick,
-    tick label style={font=\sffamily},
+    xtick={6,8,10,20,30,50,60,80,100},
+    ymajorgrids=true,
+    xmajorgrids=true,
+    legend style={at={(0.5,-0.25)},anchor=north,legend columns=3},
 ]
+\addplot+[mark=o] coordinates {
+  (6,0.0006645) (8,0.0008485) (10,0.0011074)
+  (20,0.0016184) (30,0.0028920) (50,0.0055241)
+  (60,0.0123243) (80,0.0222861) (100,0.0300579)
+};
+\addlegendentry{greedy}
 
-% GA — red square
-\addplot[
-    color=myred,
-    mark=square*,
-    mark options={fill=myred, scale=0.8},
-    line width=1.5pt
-] coordinates {
+\addplot+[mark=diamond*] coordinates {
+  (6,0.0006966) (8,0.0008737) (10,0.0008938)
+  (20,0.0015631) (30,0.0036246) (50,0.0074041)
+  (60,0.0168720) (80,0.0336874) (100,0.0321508)
+};
+\addlegendentry{Greedy (Stochastic)}
+
+\addplot+[mark=square*] coordinates {
   (6,0.1645) (8,0.3043) (10,0.2369)
   (20,1.0927) (30,3.1055) (50,11.0334)
   (60,43.4149) (80,49.0693) (100,94.6147)
 };
 \addlegendentry{GA}
 
-% GA (Stochastic) — orange diamond
-\addplot[
-    color=myorange,
-    mark=diamond*,
-    mark options={fill=myorange, scale=1.0},
-    line width=1.0pt
-] coordinates {
+\addplot+[mark=triangle*] coordinates {
   (6,0.2254) (8,0.2851) (10,0.3796)
   (20,2.5201) (30,5.9062) (50,17.7508)
   (60,28.1970) (80,89.3945) (100,124.2279)
 };
-\addlegendentry{GA (Stoch.)}
-
-% Greedy — blue triangle
-\addplot[
-    color=myblue,
-    mark=triangle*,
-    mark options={fill=white, scale=1.0},
-    line width=1.0pt
-] coordinates {
-  (6,0.0006645) (8,0.0008485) (10,0.0011074)
-  (20,0.0016184) (30,0.0028920) (50,0.0055241)
-  (60,0.0123243) (80,0.0222861) (100,0.0300579)
-};
-\addlegendentry{Greedy}
-
-% Greedy (Stochastic) — green dotted circle
-\addplot[
-    color=mygreen,
-    mark=o,
-    mark options={solid, scale=1.0},
-    line width=0.8pt,
-    dotted
-] coordinates {
-  (6,0.0006966) (8,0.0008737) (10,0.0008938)
-  (20,0.0015631) (30,0.0036246) (50,0.0074041)
-  (60,0.0168720) (80,0.0336874) (100,0.0321508)
-};
-\addlegendentry{Greedy (Stoch.)}
+\addlegendentry{GA (Stochastic)}
 
 \end{axis}
 \end{tikzpicture}
 \caption{Square objective: mean runtime vs.\ number of strings (logarithmic scale) for the heuristic methods.}
-\label{fig:square-time-vs-strings}
+\label{fig:square-time-vs-tiles}
 \end{figure}
-
 
 These plots highlight a clear Pareto frontier:
 \begin{itemize}
@@ -2238,11 +1339,10 @@ We now turn to the area-based objective $f_{\mathrm{area}}(p) = W(p) \cdot H(p)$
 
 On small instances (6--10 strings, Table~\ref{tab:small-results}), the ILP provides optimal solutions with mean cost $7.32$, serving as ground truth. The genetic variants are very close to optimal: \textsc{GA (Stochastic)} and \textsc{GA} are only about $2.3\%$ and $4.2\%$ worse than the optimum, respectively. The purely greedy heuristics sacrifice about $12$--$14\%$ in solution quality compared to optimal.
 
-\begin{table}[t]
+\begin{table}
 \centering
 \small
-\resizebox{0.65\columnwidth}{!}{%
-\begin{tabular}{lrrr}
+ \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
 \toprule
 Algorithm & Mean cost & Std. dev. \\
 \midrule
@@ -2252,19 +1352,17 @@ GA (Stochastic) & 7.49 & 0.67 \\
 greedy              & 8.24 & 0.85 \\
 Greedy (Stochastic)  & 8.32 & 0.91 \\
 \bottomrule
-\end{tabular}
-}
+\end{tabular*}
 \caption{Average placement cost on small string sets (6--10 strings), area-based objective. The ILP provides optimal solutions for verification; runtime is omitted as it is used only for offline ground-truth generation.}
 \label{tab:small-results}
 \end{table}
 
 On medium instances (20--50 strings, Table~\ref{tab:medium-results}), \textsc{GA (Stochastic)} attains the lowest average cost, with \textsc{GA} being essentially indistinguishable (within $0.1\%$). The greedy baselines are roughly $8\%$ (\textsc{greedy}) and $11.5\%$ (\textsc{Greedy (Stochastic)}) worse in cost.
 
-\begin{table}[t]
+\begin{table}
 \centering
 \small
-\resizebox{0.65\columnwidth}{!}{%
-\begin{tabular}{lrr}
+ \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
 \toprule
 Algorithm & Mean cost & Std. dev. \\
 \midrule
@@ -2273,19 +1371,17 @@ GA (Stochastic) & 12.16 & 1.73 \\
 greedy              & 13.17 & 1.76 \\
 Greedy (Stochastic)  & 13.56 & 1.77 \\
 \bottomrule
-\end{tabular}
-}
+\end{tabular*}
 \caption{Average placement cost on medium string sets (20--50 strings), area-based objective.}
 \label{tab:medium-results}
 \end{table}
 
 On large instances (60--100 strings, Table~\ref{tab:large-results}), \textsc{GA} consistently achieves the best average cost. The cost gap between the GA and the deterministic greedy baseline is around $6$--$7\%$ on average, and around $11\%$ for \textsc{Greedy (Stochastic)}.
 
-\begin{table}[t]
+\begin{table}
 \centering
 \small
-\resizebox{0.6\columnwidth}{!}{%
-\begin{tabular}{lrr}
+ \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
 \toprule
 Algorithm & Mean cost & Std. dev. \\
 \midrule
@@ -2294,108 +1390,56 @@ GA (Stochastic) & 16.54 & 1.21 \\
 greedy              & 17.28 & 1.25 \\
 Greedy (Stochastic)  & 18.12 & 1.34 \\
 \bottomrule
-\end{tabular}
-}
+\end{tabular*}
 \caption{Average placement cost on large string sets (60--100 strings), area-based objective.}
 \label{tab:large-results}
 \end{table}
 
-\begin{figure}[htbp]
+\begin{figure}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.9\textwidth,
-    height=0.6\textwidth,
-    xlabel={Number of Strings ($N$)},
-    ylabel={Mean Placement Cost (Area-Based)},
+    width=0.8\linewidth,
+    height=0.45\linewidth,
+    xlabel={Number of strings},
+    ylabel={Mean placement cost (area-based)},
     xmin=0, xmax=105,
     ymin=6, ymax=20,
-    xtick={10,20,30,40,50,60,70,80,90,100},
-    grid=major,
-    grid style={dashed, gray!30},
-    legend style={
-        at={(0.65,0.45)},
-        anchor=north west,
-        draw=none,
-        fill=white,
-        fill opacity=0.8,
-        text opacity=1,
-        font=\sffamily\scriptsize
-    },
-    thick,
-    tick label style={font=\sffamily},
+    xtick={10,20,30,50,60,80,100},
+    ymajorgrids=true,
+    xmajorgrids=true,
+    legend style={at={(0.5,-0.25)},anchor=north,legend columns=3},
 ]
+\addplot+[mark=*] coordinates {
+  (6,6.73) (8,7.23) (10,8.00)
+};
+\addlegendentry{ILP (optimal)}
 
-% GA — red square
-\addplot[
-    color=myred,
-    mark=square*,
-    mark options={fill=myred, scale=0.8},
-    line width=1.5pt
-] coordinates {
-  (6,6.97) (8,7.77) (10,8.17) (20,10.37) (30,11.93)
-  (50,14.20) (60,15.00) (80,16.20) (100,17.50)
+\addplot+[mark=square*] coordinates {
+  (6,6.97) (8,7.77) (10,8.17) (20,10.37) (30,11.93) (50,14.20) (60,15.00) (80,16.20) (100,17.50)
 };
 \addlegendentry{GA}
 
-% GA (Stochastic) — orange diamond
-\addplot[
-    color=myorange,
-    mark=diamond*,
-    mark options={fill=myorange, scale=1.0},
-    line width=1.0pt
-] coordinates {
-  (6,6.83) (8,7.50) (10,8.13) (20,10.20) (30,11.97)
-  (50,14.30) (60,15.10) (80,16.80) (100,17.94)
+\addplot+[mark=triangle*] coordinates {
+  (6,6.83) (8,7.50) (10,8.13) (20,10.20) (30,11.97) (50,14.30) (60,15.10) (80,16.80) (100,17.94)
 };
-\addlegendentry{GA (Stoch.)}
+\addlegendentry{GA (Stochastic)}
 
-% Greedy — blue triangle
-\addplot[
-    color=myblue,
-    mark=triangle*,
-    mark options={fill=white, scale=1.0},
-    line width=1.0pt
-] coordinates {
-  (6,7.47) (8,8.27) (10,9.00) (20,11.33) (30,12.80)
-  (50,15.37) (60,15.95) (80,17.30) (100,18.60)
+\addplot+[mark=o] coordinates {
+  (6,7.47) (8,8.27) (10,9.00) (20,11.33) (30,12.80) (50,15.37) (60,15.95) (80,17.30) (100,18.60)
 };
-\addlegendentry{Greedy}
+\addlegendentry{greedy}
 
-% Greedy (Stochastic) — green dotted circle
-\addplot[
-    color=mygreen,
-    mark=o,
-    mark options={solid, scale=1.0},
-    line width=0.8pt,
-    dotted
-] coordinates {
-  (6,7.40) (8,8.47) (10,9.10) (20,11.57) (30,13.43)
-  (50,15.67) (60,16.60) (80,18.20) (100,19.55)
+\addplot+[mark=diamond*] coordinates {
+  (6,7.40) (8,8.47) (10,9.10) (20,11.57) (30,13.43) (50,15.67) (60,16.60) (80,18.20) (100,19.55)
 };
-\addlegendentry{Greedy (Stoch.)}
-
-% ILP (Optimal) — black dashed with filled circles
-\addplot[
-    color=black,
-    mark=*,
-    mark options={fill=black, scale=0.8},
-    dashed
-] coordinates {
-  (6,6.73) (8,7.23) (10,8.00)
-};
-\addlegendentry{ILP (Optimal)}
-
-% --- Zone markings ---
-\draw[fill=gray, opacity=0.08, draw=none] (axis cs:0,0) rectangle (axis cs:12, 22);
-\node[rotate=90, font=\sffamily\tiny, gray] at (axis cs: 14, 15) {Verification Zone ($N \le 10$)};
+\addlegendentry{Greedy (Stochastic)}
 
 \end{axis}
 \end{tikzpicture}
 \caption{Mean placement cost (area-based objective) as a function of the number of strings. Each point averages over all random instances for the corresponding size.}
 \label{fig:cost-vs-2Dstrings}
 \end{figure}
-
 
 \subsection{Scaling with the number of strings}
 
@@ -2407,100 +1451,55 @@ Figure~\ref{fig:time-vs-2Dstrings} (note the logarithmic y-axis) highlights the 
 
 Overall, the experiments suggest a clear Pareto frontier: greedy heuristics provide very fast but moderately suboptimal solutions, while the tree-based genetic algorithms consistently improve the placement cost by roughly $6$--$12\%$ at the expense of significantly higher runtime. Crucially, when verified against optimal ILP solutions on small instances, the GA achieves near-optimal quality, validating its effectiveness on larger instances where ground truth is unavailable.
 
-\begin{figure}[htbp]
+\begin{figure}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.9\textwidth,
-    height=0.6\textwidth,
-    xlabel={Number of Strings ($N$)},
-    ylabel={Mean Runtime [s]},
+    width=0.8\linewidth,
+    height=0.45\linewidth,
+    xlabel={Number of strings},
+    ylabel={Mean runtime (s)},
     xmin=0, xmax=105,
     ymode=log,
-    xtick={10,20,30,40,50,60,70,80,90,100},
-    grid=major,
-    grid style={dashed, gray!30},
-    legend style={
-        at={(0.65,0.7)},
-        anchor=north west,
-        draw=none,
-        fill=white,
-        fill opacity=0.8,
-        text opacity=1,
-        font=\sffamily\scriptsize
-    },
-    thick,
-    tick label style={font=\sffamily},
+    xtick={10,20,30,50,60,80,100},
+    ymajorgrids=true,
+    xmajorgrids=true,
+    legend style={at={(0.5,-0.25)},anchor=north,legend columns=2},
 ]
 
-% GA — red square
-\addplot[
-    color=myred,
-    mark=square*,
-    mark options={fill=myred, scale=0.8},
-    line width=1.5pt
-] coordinates {
-  (6,3.92) (8,4.01) (10,3.80)
-  (20,10.24) (30,12.40) (50,35.66)
-  (60,69.54) (80,163.00) (100,276.00)
+\addplot+[mark=square*] coordinates {
+  (6,3.92) (8,4.01) (10,3.80) (20,10.24) (30,12.40) (50,35.66) (60,69.54) (80,163.00) (100,276.00)
 };
 \addlegendentry{GA}
 
-% GA (Stochastic) — orange diamond
-\addplot[
-    color=myorange,
-    mark=diamond*,
-    mark options={fill=myorange, scale=1.0},
-    line width=1.0pt
-] coordinates {
-  (6,3.86) (8,4.00) (10,3.89)
-  (20,10.49) (30,15.68) (50,58.26)
-  (60,92.34) (80,253.13) (100,351.74)
+\addplot+[mark=triangle*] coordinates {
+  (6,3.86) (8,4.00) (10,3.89) (20,10.49) (30,15.68) (50,58.26) (60,92.34) (80,253.13) (100,351.74)
 };
-\addlegendentry{GA (Stoch.)}
+\addlegendentry{GA (Stochastic)}
 
-% Greedy — blue triangle
-\addplot[
-    color=myblue,
-    mark=triangle*,
-    mark options={fill=white, scale=1.0},
-    line width=1.0pt
-] coordinates {
-  (6,0.28) (8,0.35) (10,0.44)
-  (20,0.77) (30,0.98) (50,1.34)
-  (60,1.54) (80,2.38) (100,3.38)
+\addplot+[mark=o] coordinates {
+  (6,0.28) (8,0.35) (10,0.44) (20,0.77) (30,0.98) (50,1.34) (60,1.54) (80,2.38) (100,3.38)
 };
-\addlegendentry{Greedy}
+\addlegendentry{greedy}
 
-% Greedy (Stochastic) — green dotted circle
-\addplot[
-    color=mygreen,
-    mark=o,
-    mark options={solid, scale=1.0},
-    line width=0.8pt,
-    dotted
-] coordinates {
-  (6,0.29) (8,0.38) (10,0.44)
-  (20,0.78) (30,0.99) (50,1.62)
-  (60,1.63) (80,2.42) (100,3.40)
+\addplot+[mark=diamond*] coordinates {
+  (6,0.29) (8,0.38) (10,0.44) (20,0.78) (30,0.99) (50,1.62) (60,1.63) (80,2.42) (100,3.40)
 };
-\addlegendentry{Greedy (Stoch.)}
+\addlegendentry{Greedy (Stochastic)}
 
 \end{axis}
 \end{tikzpicture}
-\caption{Mean runtime as a function of the number of strings (logarithmic scale) for the heuristic methods.
-Greedy heuristics are one to two orders of magnitude faster than the genetic algorithms.}
+\caption{Mean runtime as a function of the number of strings (logarithmic scale) for the heuristic methods. Greedy heuristics are one to two orders of magnitude faster than the genetic algorithms.}
 \label{fig:time-vs-2Dstrings}
 \end{figure}
-
 
 \subsection{Genetic algorithm dynamics and crossover statistics}
 
 To better understand how the genetic algorithms construct their solutions, we instrument \textsc{GA} and \textsc{GA (Stochastic)} with additional counters. For each run we record:
 \begin{itemize}
   \item the total number of crossover operations, $C$ (\texttt{total\_crossovers});
-  \item the number of crossovers that produce an incomplete placement and therefore require greedy completion, $C_{\text{repair}}$ (\texttt{crossovers\_needing\_comp \\ -letion});
-  \item the total number of strings that are finally placed by the greedy completion step across all incomplete offspring, $T_{\text{fix}}$ (\texttt{total\_strings\_complete \\ -d}).
+  \item the number of crossovers that produce an incomplete placement and therefore require greedy completion, $C_{\text{repair}}$ (\texttt{crossovers\_needing\_completion});
+  \item the total number of strings that are finally placed by the greedy completion step across all incomplete offspring, $T_{\text{fix}}$ (\texttt{total\_strings\_completed}).
 \end{itemize}
 
 From these quantities we derive:
@@ -2523,7 +1522,7 @@ From these quantities we derive:
         average \#missing strings per repaired offspring}.
 \end{align*}
 
-\begin{table*}[!t]
+\begin{table*}
 \centering
 \small
 \resizebox{\linewidth}{!}{%
@@ -2553,58 +1552,32 @@ Several trends are apparent:
 \end{itemize}
 
 Figure~\ref{fig:crossovers-vs-2Dstrings} plots the average number of crossovers per run as a function of the number of strings. As expected from the fixed population size and generation budget in our implementation, the curves are piecewise constant: roughly $3{,}150$ crossovers for 6--10 strings, $12{,}600$ for 20--50 strings, and $28{,}350$ for 60--100 strings. The two GA variants behave almost identically in this respect.
-\begin{figure}[htbp]
+
+\begin{figure}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.9\textwidth,
-    height=0.6\textwidth,
-    xlabel={Number of Strings ($N$)},
-    ylabel={Mean \#Crossovers per Run},
+    width=0.8\linewidth,
+    height=0.45\linewidth,
+    xlabel={Number of strings},
+    ylabel={\shortstack{Mean \#crossovers\\per run}},
     xmin=0, xmax=105,
     ymin=0, ymax=32000,
-    xtick={10,20,30,40,50,60,70,80,90,100},
+    xtick={10,20,30,50,60,80,100},
     ytick={0,10000,20000,30000},
-    grid=major,
-    grid style={dashed, gray!30},
-    legend style={
-        at={(0.65,0.45)},
-        anchor=north west,
-        draw=none,
-        fill=white,
-        fill opacity=0.8,
-        text opacity=1,
-        font=\sffamily\scriptsize
-    },
-    thick,
-    tick label style={font=\sffamily},
+    ymajorgrids=true,
+    xmajorgrids=true,
+    legend style={at={(0.5,-0.25)},anchor=north,legend columns=2},
 ]
-
-% GA — red square
-\addplot[
-    color=myred,
-    mark=square*,
-    mark options={fill=myred, scale=0.8},
-    line width=1.5pt
-] coordinates {
-  (6,3152.1) (8,3147.1) (10,3157.5)
-  (20,12591.9) (30,12584.2) (50,12606.7)
-  (60,28351.2) (80,28352.5) (100,28367.7)
+\addplot+[mark=square*] coordinates {
+  (6,3152.1) (8,3147.1) (10,3157.5) (20,12591.9) (30,12584.2) (50,12606.7) (60,28351.2) (80,28352.5) (100,28367.7)
 };
 \addlegendentry{GA}
 
-% GA (Stochastic) — orange diamond
-\addplot[
-    color=myorange,
-    mark=triangle*,
-    mark options={fill=myorange, scale=1.0},
-    line width=1.0pt
-] coordinates {
-  (6,3151.7) (8,3152.4) (10,3148.0)
-  (20,12606.3) (30,12598.7) (50,12601.0)
-  (60,28355.4) (80,28337.5) (100,28370.4)
+\addplot+[mark=triangle*] coordinates {
+  (6,3151.7) (8,3152.4) (10,3148.0) (20,12606.3) (30,12598.7) (50,12601.0) (60,28355.4) (80,28337.5) (100,28370.4)
 };
-\addlegendentry{GA (Stoch.)}
+\addlegendentry{GA (Stochastic)}
 
 \end{axis}
 \end{tikzpicture}
@@ -2614,66 +1587,37 @@ Figure~\ref{fig:crossovers-vs-2Dstrings} plots the average number of crossovers 
 
 Figure~\ref{fig:greedy-share-vs-2Dstrings} focuses on the string-level interaction between crossover and greedy repair by plotting $\rho_{\text{greedy}}$ (the fraction of strings placed by the greedy completion step) as a function of the number of strings. For both GA variants this fraction remains between roughly $2\%$ and $7\%$ across all sizes, confirming that the vast majority of strings in the final placements are produced by crossover rather than by the repair heuristic.
 
-\begin{figure}[htbp]
+\begin{figure}
 \centering
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.9\textwidth,
-    height=0.6\textwidth,
-    xlabel={Number of Strings ($N$)},
-    ylabel={Strings from Greedy Completion (\%)},
+    width=0.8\linewidth,
+    height=0.45\linewidth,
+    xlabel={Number of strings},
+    ylabel={\shortstack{Strings from greedy\\completion (\%)}},
     xmin=0, xmax=105,
     ymin=0, ymax=8,
-    xtick={10,20,30,40,50,60,70,80,90,100},
+    xtick={10,20,30,50,60,80,100},
     ytick={0,2,4,6,8},
-    grid=major,
-    grid style={dashed, gray!30},
-    legend style={
-        at={(0.7,0.25)},
-        anchor=north west,
-        draw=none,
-        fill=white,
-        fill opacity=0.8,
-        text opacity=1,
-        font=\sffamily\scriptsize
-    },
-    thick,
-    tick label style={font=\sffamily},
+    ymajorgrids=true,
+    xmajorgrids=true,
+    legend style={at={(0.5,-0.25)},anchor=north,legend columns=2},
 ]
-
-% GA — red square
-\addplot[
-    color=myred,
-    mark=square*,
-    mark options={fill=myred, scale=0.8},
-    line width=1.5pt
-] coordinates {
-  (6,2.39) (8,4.20) (10,2.51)
-  (20,3.09) (30,2.34) (50,3.67)
-  (60,2.01) (80,2.74) (100,2.82)
+\addplot+[mark=square*] coordinates {
+  (6,2.39) (8,4.20) (10,2.51) (20,3.09) (30,2.34) (50,3.67) (60,2.01) (80,2.74) (100,2.82)
 };
 \addlegendentry{GA}
 
-% GA (Stochastic) — orange diamond
-\addplot[
-    color=myorange,
-    mark=triangle*,
-    mark options={fill=myorange, scale=1.0},
-    line width=1.0pt
-] coordinates {
-  (6,3.63) (8,4.17) (10,4.66)
-  (20,3.77) (30,4.08) (50,6.65)
-  (60,3.31) (80,4.68) (100,3.80)
+\addplot+[mark=triangle*] coordinates {
+  (6,3.63) (8,4.17) (10,4.66) (20,3.77) (30,4.08) (50,6.65) (60,3.31) (80,4.68) (100,3.80)
 };
-\addlegendentry{GA (Stoch.)}
+\addlegendentry{GA (Stochastic)}
 
 \end{axis}
 \end{tikzpicture}
-\caption{Share of string placements produced by the greedy completion step as a function of the number of strings.
-The complement to $100\%$ can be interpreted as the completion rate of the crossover operators.}
+\caption{Share of string placements produced by the greedy completion step as a function of the number of strings. The complement to $100\%$ can be interpreted as the ``completion rate'' of the crossover operators.}
 \label{fig:greedy-share-vs-2Dstrings}
 \end{figure}
-
 
 Taken together, these diagnostics indicate that the GA operates in a regime where (i) crossover is the dominant constructive mechanism, responsible for more than $95\%$ of string placements, and (ii) greedy completion acts as a lightweight but essential repair operator that corrects the relatively small fraction of offspring that violate feasibility, especially on large instances where missing strings can be numerous.
 
@@ -2714,39 +1658,13 @@ Several directions for future research emerge from this work:
 
 More broadly, the placement-tree representation and tree-based GA operators developed here may serve as a template for other two-dimensional placement and tiling problems where local overlap structure plays a central role.
 
-
-\begin{figure*}[!htb]
-  \centering
-  \resizebox{\textwidth}{!}{%
-    \begin{tabular}{l cc cc cc cc cc }
-    \toprule[1pt]
-    & \multicolumn{2}{c}{CPLEX} & \multicolumn{2}{c}{Greedy} & \multicolumn{2}{c}{Stoch. Greedy} & \multicolumn{2}{c}{Genetic Greedy} & \multicolumn{2}{c}{Genetic Stoch.} \\
-    \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}
-    Tiles & Obj & Time & Obj & Time & Obj & Time & Obj & Time & Obj & Time \\
-    \midrule[1pt]
-    6   & \textbf{6.73} & 2.32   & 7.47 & \textbf{0.28} & 7.40 & 0.29 & 6.97 & 3.92 & 6.83 & 3.86 \\
-    8   & \textbf{7.23} & 12.13  & 8.27 & \textbf{0.35} & 8.47 & 0.38 & 7.77 & 4.01 & 7.50 & 4.00 \\
-    10  & \textbf{8.00} & 43.88  & 9.00 & \textbf{0.44} & 9.10 & 0.44 & 8.17 & 3.80 & 8.13 & 3.89 \\
-    20  & - & - & 11.33 & \textbf{0.77} & 11.57 & 0.78 & 10.37 & 10.24 & \textbf{10.20} & 10.49 \\
-    30  & - & - & 12.80 & \textbf{0.98} & 13.43 & 0.99 & \textbf{11.93} & 12.40 & 11.97 & 15.68 \\
-    50  & - & - & 15.37 & \textbf{1.34} & 15.67 & 1.62 & \textbf{14.20} & 35.66 & 14.30 & 58.26 \\
-    60  & - & - & 15.95 & \textbf{1.54} & 16.60 & 1.63 & \textbf{15.00} & 69.54 & 15.10 & 92.34 \\
-    80  & - & - & 17.30 & \textbf{2.38} & 18.20 & 2.42 & \textbf{16.20} & 163.00 & 16.80 & 253.13 \\
-    100 & - & - & 18.60 & \textbf{3.38} & 19.55 & 3.40 & \textbf{17.50} & 276.00 & 17.94 & 351.74 \\
-    \bottomrule[1pt]
-    \end{tabular}
-  }
-  \caption{Performance comparison across varying number of tiles. CPLEX provides optimal baselines for small scales (Tiles $\le$ 10), while other methods scale to larger instances.}
-  \label{fig:tiles_comparison}
-\end{figure*}
-
-
-\begin{figure}[H] 
-    \centering
-    \includegraphics[width=1.0\linewidth]{figure/compare.png}
-    \caption{Comparison of objective values across Small, Medium, and Large scales. The blue bars highlight the best-performing algorithm in each category.}
-    \label{fig:objective_comparison}
-\end{figure}
+% Figure commented out - image file not found
+% \begin{figure}[H] 
+%     \centering
+%     \includegraphics[width=1.0\linewidth]{figs/Comparee.png}
+%     \caption{Comparison of objective values across Small, Medium, and Large scales. The blue bars highlight the best-performing algorithm in each category.}
+%     \label{fig:objective_comparison}
+% \end{figure}
 
 
 % ===================== BACK MATTER =====================

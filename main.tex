@@ -1074,424 +1074,71 @@ results for both objective variants.
 \section{Experimental Evaluation}
 \label{sec:experiments}
 
-Having presented three algorithmic approaches with different design philosophies, we now empirically evaluate their performance on synthetic instances of 2D-SSP. Our experiments address the following questions:
-\begin{enumerate}
-    \item How close do the heuristic methods come to optimal solutions on instances where the ILP can be solved?
-    \item How do the methods scale as instance size increases beyond the ILP's practical limit?
-    \item What is the trade-off between solution quality and runtime across different methods?
-\end{enumerate}
-
-We evaluate under both cost variants introduced in Section~\ref{sec:problem}:
-\begin{itemize}
-  \item the \emph{square} objective
-  \(
-    f_{\square}(p) := \max\{W(p),H(p)\},
-  \)
-  i.e., the side length of the minimal bounding box, and
-  \item the \emph{area} objective
-  \(
-    f_{\mathrm{area}}(p) := W(p)\cdot H(p).
-  \)
-\end{itemize}
-Here $W(p)$ and $H(p)$ denote the width and height of the bounding box $B(p)$
-induced by placement~$p$.
-
-We compare five algorithms:
-(i) deterministic greedy (\textsc{greedy}),
-(ii) stochastic greedy (\textsc{Greedy (Stochastic)}),
-(iii) the tree-based genetic algorithm initialized from deterministic greedy
-(\textsc{GA}),
-(iv) the same GA initialized from stochastic greedy
-(\textsc{GA (Stochastic)}), and
-(v) the grid-based ILP solved by CPLEX (\textsc{cplex}).
-
-Our primary performance measure is the cost $f(p)$ of the final placement $p$
-under the chosen objective (lower is better). We also report the wall-clock
-runtime in seconds.
-
-\subsection{Benchmark instances and protocol}
-
-All experiments use $3\times 3$ strings over a fixed finite
-alphabet. Instance difficulty is controlled by the number of strings $N$ in the input set:
-\[
-  N \in \{6, 8, 10, 20, 30, 50, 60, 80, 100\}.
-\]
-For each $N$ we generate multiple random instances and run all algorithms on
-the same pool of instances.
-
-For the \emph{square objective} we evaluate:
-\begin{itemize}
-  \item \emph{small} sets: $N \in \{6,8,10\}$, $30$ instances per size;
-  \item \emph{medium} sets: $N \in \{20,30,50\}$, $20$ instances per size;
-  \item \emph{large} sets: $N \in \{60,80,100\}$, $10$ instances per size.
-\end{itemize}
-For the \emph{area objective} we currently report results on
-\emph{small} sets ($N \in \{6,8,10\}$, $10$ instances per size);
-medium and large area-based experiments are left for future work.
-
-For the genetic algorithms we keep the same population size and generation
-budget across all instance sizes; these settings are chosen such that the GA
-has time to meaningfully exploit crossover while still remaining far below the
-CPLEX wall-clock limit (2\,000\,s in our experiments).  
-For \textsc{cplex} we use default parameters with a time limit of
-2\,000\,s per instance; many medium and large instances hit this limit and
-terminate with a suboptimal incumbent.
-
-All statistics below are averages over successful runs.  For each configuration
-we report the mean and standard deviation of the objective value and runtime.
-
-\subsection{Results for the square objective}
-\label{subsec:square-results}
-
-Tables~\ref{tab:square-small}--\ref{tab:square-large} summarize the mean
-square cost $f_{\square}(p)$ and runtime for each algorithm, aggregated
-over the small, medium, and large regimes respectively (within each regime
-we average over all tile counts belonging to that regime).
-
 \begin{table}
 \centering
 \small
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
+% \setlength{\tabcolsep}{2pt}
+% \renewcommand{\arraystretch}{1.15}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}ccccc}
 \toprule
-Algorithm & Mean max side & Mean time [s] \\
+\textbf{Config} & \texttt{greedy} & \texttt{stochastic\_greedy} & \texttt{genetic\_greedy} & \texttt{genetic\_stochastic} \\
 \midrule
-cplex (optimal)     & 7.32 & --- \\
-GA (Stochastic) & 7.39 &   0.30 \\
-GA     & 7.64 &   0.24 \\
-greedy              & 8.18 &   $8.7\times 10^{-4}$ \\
-Greedy (Stochastic)  & 8.33 &   $8.2\times 10^{-4}$ \\
+T6\_n3\_m3 & \shortstack{$43.80$\\$\left(0.002\mathrm{s}\right)$} & \shortstack{$43.80$\\$\left(\mathbf{0.002}\mathrm{s}\right)$} & \shortstack{$41.50$\\$\left(0.111\mathrm{s}\right)$} & \shortstack{$\mathbf{40.60}$\\$\left(0.154\mathrm{s}\right)$} \\
+T6\_n5\_m5 & \shortstack{$144.00$\\$\left(\mathbf{0.025}\mathrm{s}\right)$} & \shortstack{$143.00$\\$\left(0.027\mathrm{s}\right)$} & \shortstack{$143.00$\\$\left(0.491\mathrm{s}\right)$} & \shortstack{$\mathbf{142.50}$\\$\left(1.066\mathrm{s}\right)$} \\
+T6\_n10\_m10 & \shortstack{$599.00$\\$\left(2.722\mathrm{s}\right)$} & \shortstack{$599.00$\\$\left(\mathbf{2.697}\mathrm{s}\right)$} & \shortstack{$\mathbf{598.00}$\\$\left(25.851\mathrm{s}\right)$} & \shortstack{$\mathbf{598.00}$\\$\left(44.959\mathrm{s}\right)$} \\
+T8\_n3\_m3 & \shortstack{$57.10$\\$\left(\mathbf{0.003}\mathrm{s}\right)$} & \shortstack{$58.10$\\$\left(0.004\mathrm{s}\right)$} & \shortstack{$53.90$\\$\left(0.149\mathrm{s}\right)$} & \shortstack{$\mathbf{51.80}$\\$\left(0.162\mathrm{s}\right)$} \\
+T8\_n5\_m5 & \shortstack{$195.20$\\$\left(0.053\mathrm{s}\right)$} & \shortstack{$196.20$\\$\left(\mathbf{0.053}\mathrm{s}\right)$} & \shortstack{$190.50$\\$\left(0.847\mathrm{s}\right)$} & \shortstack{$\mathbf{190.00}$\\$\left(2.472\mathrm{s}\right)$} \\
+T8\_n10\_m10 & \shortstack{$799.00$\\$\left(5.962\mathrm{s}\right)$} & \shortstack{$799.00$\\$\left(\mathbf{5.953}\mathrm{s}\right)$} & \shortstack{$\mathbf{798.00}$\\$\left(64.985\mathrm{s}\right)$} & \shortstack{$\mathbf{798.00}$\\$\left(103.970\mathrm{s}\right)$} \\
+T10\_n3\_m3 & \shortstack{$69.20$\\$\left(0.005\mathrm{s}\right)$} & \shortstack{$69.10$\\$\left(\mathbf{0.005}\mathrm{s}\right)$} & \shortstack{$62.30$\\$\left(0.195\mathrm{s}\right)$} & \shortstack{$\mathbf{59.00}$\\$\left(0.266\mathrm{s}\right)$} \\
+T10\_n5\_m5 & \shortstack{$240.00$\\$\left(\mathbf{0.089}\mathrm{s}\right)$} & \shortstack{$241.00$\\$\left(0.089\mathrm{s}\right)$} & \shortstack{$237.00$\\$\left(1.530\mathrm{s}\right)$} & \shortstack{$\mathbf{236.00}$\\$\left(4.976\mathrm{s}\right)$} \\
+T10\_n10\_m10 & \shortstack{$999.00$\\$\left(11.122\mathrm{s}\right)$} & \shortstack{$999.00$\\$\left(\mathbf{11.091}\mathrm{s}\right)$} & \shortstack{$\mathbf{998.00}$\\$\left(114.693\mathrm{s}\right)$} & \shortstack{$\mathbf{998.00}$\\$\left(184.834\mathrm{s}\right)$} \\
+T50\_n3\_m3 & \shortstack{$227.30$\\$\left(\mathbf{0.086}\mathrm{s}\right)$} & \shortstack{$236.60$\\$\left(0.097\mathrm{s}\right)$} & \shortstack{$197.90$\\$\left(13.097\mathrm{s}\right)$} & \shortstack{$\mathbf{191.33}$\\$\left(18.018\mathrm{s}\right)$} \\
+T60\_n3\_m3 & \shortstack{$278.70$\\$\left(\mathbf{0.152}\mathrm{s}\right)$} & \shortstack{$283.60$\\$\left(0.164\mathrm{s}\right)$} & \shortstack{$223.30$\\$\left(28.947\mathrm{s}\right)$} & \shortstack{$\mathbf{220.20}$\\$\left(35.860\mathrm{s}\right)$} \\
+T80\_n3\_m3 & \shortstack{$349.40$\\$\left(\mathbf{0.196}\mathrm{s}\right)$} & \shortstack{$347.90$\\$\left(0.196\mathrm{s}\right)$} & \shortstack{$\mathbf{268.20}$\\$\left(54.356\mathrm{s}\right)$} & \shortstack{$270.40$\\$\left(57.364\mathrm{s}\right)$} \\
+T100\_n3\_m3 & \shortstack{$414.30$\\$\left(\mathbf{0.337}\mathrm{s}\right)$} & \shortstack{$421.70$\\$\left(0.358\mathrm{s}\right)$} & \shortstack{$\mathbf{306.20}$\\$\left(122.176\mathrm{s}\right)$} & \shortstack{$311.30$\\$\left(114.786\mathrm{s}\right)$} \\
 \bottomrule
 \end{tabular*}
-\caption{Square objective, small instances ($N \in \{6,8,10\}$ strings). The ILP provides optimal solutions for verification; its runtime is omitted as it is used only for offline ground-truth generation.}
-\label{tab:square-small}
+\caption{Objective type: \texttt{area}. Each cell shows objective (top) as mean $\pm$ std and runtime is mean only (bottom).}
+\label{tab:results-summary}
 \end{table}
-
-On \emph{small} instances (Table~\ref{tab:square-small}), the ILP
-provides optimal solutions with mean max side $7.32$, serving as the ground-truth benchmark. Both genetic algorithms closely approach
-this optimum (within about $1\%$--$4\%$). The greedy baselines are essentially instantaneous but incur about
-$7$--$13\%$ higher cost on average.
 
 \begin{table}
 \centering
 \small
- \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
+% \setlength{\tabcolsep}{2pt}
+% \renewcommand{\arraystretch}{1.15}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cccccc}
 \toprule
-Algorithm & Mean max side & Mean time [s] \\
+\textbf{Config} & \texttt{cplex} & \texttt{greedy} & \texttt{stochastic\_greedy} & \texttt{genetic\_greedy} & \texttt{genetic\_stochastic} \\
 \midrule
-GA     & 12.10 &   5.08 \\
-GA (Stochastic) & 12.07 &   8.73 \\
-greedy              & 13.03 &   $3.3\times 10^{-3}$ \\
-Greedy (Stochastic)  & 13.75 &   $4.2\times 10^{-3}$ \\
-\bottomrule
-\end{tabular}
-\caption{Square objective, medium instances ($N \in \{20,30,50\}$ strings). Mean over all sizes and seeds. ILP verification is not available at this scale.}
-\label{tab:square-medium}
-\end{table}
-
-On \emph{medium} instances (Table~\ref{tab:square-medium}), the ILP is no longer tractable for verification. Both genetic variants achieve mean max side around $12.1$, outperforming the greedy heuristics by roughly $7$--$13\%$. The GA runtimes (5--9\,s) remain practical for these instance sizes.
-
-\begin{table}
-\centering
-\small
- \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
-\toprule
-Algorithm & Mean max side & Mean time [s] \\
-\midrule
-GA     & 16.20 &   62.37 \\
-GA (Stochastic) & 16.40 &   80.61 \\
-greedy              & 17.20 &    $2.2\times 10^{-2}$ \\
-Greedy (Stochastic)  & 17.97 &    $2.8\times 10^{-2}$ \\
-\bottomrule
-\end{tabular}
-\caption{Square objective, large instances ($N \in \{60,80,100\}$ strings). Mean over all sizes and seeds.}
-\label{tab:square-large}
-\end{table}
-
-On \emph{large} instances (Table~\ref{tab:square-large}), the
-tree-based GAs consistently achieve the best max side (around $16.2$--$16.4$),
-improving on deterministic greedy by about $6\%$ on average. The GA runtimes
-(tens of seconds) are substantially higher than greedy (tens of milliseconds)
-but remain practical for offline optimization.
-
-Figure~\ref{fig:square-cost-vs-tiles} plots the mean square cost as a function
-of the number of strings, while Figure~\ref{fig:square-time-vs-tiles} shows the
-corresponding runtimes on a logarithmic scale.
-
-\begin{figure}
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    width=0.8\linewidth,
-    height=0.45\linewidth,
-    xlabel={Number of strings $N$},
-    ylabel={Mean max side},
-    xmin=4, xmax=102,
-    ymin=6, ymax=40,
-    xtick={6,8,10,20,30,50,60,80,100},
-    ymajorgrids=true,
-    xmajorgrids=true,
-    legend style={at={(0.5,-0.25)},anchor=north,legend columns=3},
-]
-\addplot+[mark=o] coordinates {
-  (6,7.3333) (8,8.2333) (10,8.9667)
-  (20,11.35) (30,12.8) (50,14.95)
-  (60,15.9) (80,17.4) (100,18.3)
-};
-\addlegendentry{greedy}
-
-\addplot+[mark=diamond*] coordinates {
-  (6,7.4667) (8,8.4) (10,9.1333)
-  (20,11.75) (30,13.65) (50,15.85)
-  (60,16.6) (80,18.1) (100,19.2)
-};
-\addlegendentry{Greedy (Stochastic)}
-
-\addplot+[mark=square*] coordinates {
-  (6,7.0) (8,7.7667) (10,8.1667)
-  (20,10.2) (30,11.95) (50,14.15)
-  (60,15.0) (80,16.1) (100,17.5)
-};
-\addlegendentry{GA}
-
-\addplot+[mark=triangle*] coordinates {
-  (6,6.7667) (8,7.3667) (10,8.0333)
-  (20,10.15) (30,11.9) (50,14.15)
-  (60,14.9) (80,16.5) (100,17.8)
-};
-\addlegendentry{GA (Stochastic)}
-
-\addplot+[mark=*] coordinates {
-  (6,6.7333) (8,7.2333) (10,8.0)
-};
-\addlegendentry{ILP (optimal)}
-
-\end{axis}
-\end{tikzpicture}
-\caption{Square objective: mean max side vs.\ number of strings. The ILP provides optimal ground truth for $N \le 10$.}
-\label{fig:square-cost-vs-tiles}
-\end{figure}
-
-\begin{figure}
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    width=0.8\linewidth,
-    height=0.45\linewidth,
-    xlabel={Number of strings $N$},
-    ylabel={Mean runtime [s] (log scale)},
-    xmin=4, xmax=102,
-    ymode=log,
-    xtick={6,8,10,20,30,50,60,80,100},
-    ymajorgrids=true,
-    xmajorgrids=true,
-    legend style={at={(0.5,-0.25)},anchor=north,legend columns=3},
-]
-\addplot+[mark=o] coordinates {
-  (6,0.0006645) (8,0.0008485) (10,0.0011074)
-  (20,0.0016184) (30,0.0028920) (50,0.0055241)
-  (60,0.0123243) (80,0.0222861) (100,0.0300579)
-};
-\addlegendentry{greedy}
-
-\addplot+[mark=diamond*] coordinates {
-  (6,0.0006966) (8,0.0008737) (10,0.0008938)
-  (20,0.0015631) (30,0.0036246) (50,0.0074041)
-  (60,0.0168720) (80,0.0336874) (100,0.0321508)
-};
-\addlegendentry{Greedy (Stochastic)}
-
-\addplot+[mark=square*] coordinates {
-  (6,0.1645) (8,0.3043) (10,0.2369)
-  (20,1.0927) (30,3.1055) (50,11.0334)
-  (60,43.4149) (80,49.0693) (100,94.6147)
-};
-\addlegendentry{GA}
-
-\addplot+[mark=triangle*] coordinates {
-  (6,0.2254) (8,0.2851) (10,0.3796)
-  (20,2.5201) (30,5.9062) (50,17.7508)
-  (60,28.1970) (80,89.3945) (100,124.2279)
-};
-\addlegendentry{GA (Stochastic)}
-
-\end{axis}
-\end{tikzpicture}
-\caption{Square objective: mean runtime vs.\ number of strings (logarithmic scale) for the heuristic methods.}
-\label{fig:square-time-vs-tiles}
-\end{figure}
-
-These plots highlight a clear Pareto frontier:
-\begin{itemize}
-  \item \textsc{greedy} and \textsc{Greedy (Stochastic)} offer the best
-        speed--accuracy trade-off when tight time budgets are required.
-  \item \textsc{GA} and \textsc{GA (Stochastic)} consistently
-        improve the bounding-box side length by roughly $6$--$12\%$ over greedy
-        once $N \ge 20$, at the cost of two to three orders of magnitude more
-        runtime.
-  \item The ILP (\textsc{cplex}) provides verified optimal solutions on small instances ($N \le 10$)
-        but is computationally intractable beyond this regime.
-\end{itemize}
-
-\subsection{Results for the area objective}
-\label{subsec:area-results}
-
-We now turn to the area-based objective $f_{\mathrm{area}}(p) = W(p) \cdot H(p)$, which is the direct 2D analogue of classical superstring length. Tables~\ref{tab:small-results}--\ref{tab:large-results} summarize the average placement cost for each algorithm, grouped by instance scale. Figure~\ref{fig:cost-vs-2Dstrings} visualizes the scaling behavior across all instance sizes.
-
-On small instances (6--10 strings, Table~\ref{tab:small-results}), the ILP provides optimal solutions with mean cost $7.32$, serving as ground truth. The genetic variants are very close to optimal: \textsc{GA (Stochastic)} and \textsc{GA} are only about $2.3\%$ and $4.2\%$ worse than the optimum, respectively. The purely greedy heuristics sacrifice about $12$--$14\%$ in solution quality compared to optimal.
-
-\begin{table}
-\centering
-\small
- \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
-\toprule
-Algorithm & Mean cost & Std. dev. \\
-\midrule
-cplex (optimal)     & 7.32 & 0.63 \\
-GA     & 7.63 & 0.63 \\
-GA (Stochastic) & 7.49 & 0.67 \\
-greedy              & 8.24 & 0.85 \\
-Greedy (Stochastic)  & 8.32 & 0.91 \\
+T20\_n3\_m3 & \shortstack{$120.30$\\$\left(2005.749\mathrm{s}\right)$} & \shortstack{$120.30$\\$\left(\mathbf{0.010}\mathrm{s}\right)$} & \shortstack{$122.60$\\$\left(0.013\mathrm{s}\right)$} & \shortstack{$104.20$\\$\left(1.041\mathrm{s}\right)$} & \shortstack{$\mathbf{96.10}$\\$\left(1.628\mathrm{s}\right)$} \\
+T30\_n3\_m3 & \shortstack{$340.90$\\$\left(2021.541\mathrm{s}\right)$} & \shortstack{$154.70$\\$\left(\mathbf{0.021}\mathrm{s}\right)$} & \shortstack{$164.80$\\$\left(0.024\mathrm{s}\right)$} & \shortstack{$138.40$\\$\left(2.821\mathrm{s}\right)$} & \shortstack{$\mathbf{131.90}$\\$\left(3.518\mathrm{s}\right)$} \\
 \bottomrule
 \end{tabular*}
-\caption{Average placement cost on small string sets (6--10 strings), area-based objective. The ILP provides optimal solutions for verification; runtime is omitted as it is used only for offline ground-truth generation.}
-\label{tab:small-results}
+\caption{Objective type: \texttt{area}. Each cell shows objective (top) as mean $\pm$ std and runtime is mean only (bottom).}
+\label{tab:results-summary-cplex}
 \end{table}
-
-On medium instances (20--50 strings, Table~\ref{tab:medium-results}), \textsc{GA (Stochastic)} attains the lowest average cost, with \textsc{GA} being essentially indistinguishable (within $0.1\%$). The greedy baselines are roughly $8\%$ (\textsc{greedy}) and $11.5\%$ (\textsc{Greedy (Stochastic)}) worse in cost.
 
 \begin{table}
 \centering
 \small
- \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
+% \setlength{\tabcolsep}{2pt}
+% \renewcommand{\arraystretch}{1.15}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}cccccc}
 \toprule
-Algorithm & Mean cost & Std. dev. \\
+\textbf{Config} & \texttt{merge\_greedy\_py} & \texttt{greedy} & \texttt{stochastic\_greedy} & \texttt{genetic\_greedy} & \texttt{genetic\_stochastic} \\
 \midrule
-GA     & 12.17 & 1.63 \\
-GA (Stochastic) & 12.16 & 1.73 \\
-greedy              & 13.17 & 1.76 \\
-Greedy (Stochastic)  & 13.56 & 1.77 \\
+T10\_n1\_m8 & \shortstack{$46.10$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$49.50$\\$\left(0.007\mathrm{s}\right)$} & \shortstack{$48.20$\\$\left(0.007\mathrm{s}\right)$} & \shortstack{$45.30$\\$\left(0.288\mathrm{s}\right)$} & \shortstack{$\mathbf{44.80}$\\$\left(0.400\mathrm{s}\right)$} \\
+T20\_n1\_m8 & \shortstack{$73.80$\\$\left(\mathbf{0.004}\mathrm{s}\right)$} & \shortstack{$77.00$\\$\left(0.025\mathrm{s}\right)$} & \shortstack{$77.30$\\$\left(0.045\mathrm{s}\right)$} & \shortstack{$74.00$\\$\left(0.880\mathrm{s}\right)$} & \shortstack{$\mathbf{71.40}$\\$\left(1.416\mathrm{s}\right)$} \\
+T50\_n1\_m8 & \shortstack{$\mathbf{123.50}$\\$\left(\mathbf{0.048}\mathrm{s}\right)$} & \shortstack{$135.10$\\$\left(0.148\mathrm{s}\right)$} & \shortstack{$136.50$\\$\left(0.191\mathrm{s}\right)$} & \shortstack{$131.30$\\$\left(7.273\mathrm{s}\right)$} & \shortstack{$127.10$\\$\left(6.853\mathrm{s}\right)$} \\
+T100\_n1\_m8 & \shortstack{$\mathbf{176.50}$\\$\left(\mathbf{0.276}\mathrm{s}\right)$} & \shortstack{$198.50$\\$\left(0.399\mathrm{s}\right)$} & \shortstack{$196.10$\\$\left(0.380\mathrm{s}\right)$} & \shortstack{$185.10$\\$\left(25.846\mathrm{s}\right)$} & \shortstack{$183.40$\\$\left(25.341\mathrm{s}\right)$} \\
+T200\_n1\_m8 & \shortstack{$\mathbf{227.80}$\\$\left(1.201\mathrm{s}\right)$} & \shortstack{$258.10$\\$\left(0.956\mathrm{s}\right)$} & \shortstack{$252.90$\\$\left(\mathbf{0.880}\mathrm{s}\right)$} & \shortstack{$242.30$\\$\left(100.015\mathrm{s}\right)$} & \shortstack{$238.00$\\$\left(126.543\mathrm{s}\right)$} \\
+T300\_n1\_m8 & \shortstack{$\mathbf{251.70}$\\$\left(2.533\mathrm{s}\right)$} & \shortstack{$280.50$\\$\left(1.390\mathrm{s}\right)$} & \shortstack{$278.80$\\$\left(\mathbf{1.353}\mathrm{s}\right)$} & \shortstack{$262.80$\\$\left(279.432\mathrm{s}\right)$} & \shortstack{$258.30$\\$\left(332.637\mathrm{s}\right)$} \\
 \bottomrule
 \end{tabular*}
-\caption{Average placement cost on medium string sets (20--50 strings), area-based objective.}
-\label{tab:medium-results}
+\caption{Objective type: \texttt{area}. Each cell shows objective (top) as mean $\pm$ std and runtime is mean only (bottom).}
+\label{tab:results-summary-merge}
 \end{table}
-
-On large instances (60--100 strings, Table~\ref{tab:large-results}), \textsc{GA} consistently achieves the best average cost. The cost gap between the GA and the deterministic greedy baseline is around $6$--$7\%$ on average, and around $11\%$ for \textsc{Greedy (Stochastic)}.
-
-\begin{table}
-\centering
-\small
- \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcc}
-\toprule
-Algorithm & Mean cost & Std. dev. \\
-\midrule
-GA     & 16.23 & 1.09 \\
-GA (Stochastic) & 16.54 & 1.21 \\
-greedy              & 17.28 & 1.25 \\
-Greedy (Stochastic)  & 18.12 & 1.34 \\
-\bottomrule
-\end{tabular*}
-\caption{Average placement cost on large string sets (60--100 strings), area-based objective.}
-\label{tab:large-results}
-\end{table}
-
-\begin{figure}
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    width=0.8\linewidth,
-    height=0.45\linewidth,
-    xlabel={Number of strings},
-    ylabel={Mean placement cost (area-based)},
-    xmin=0, xmax=105,
-    ymin=6, ymax=20,
-    xtick={10,20,30,50,60,80,100},
-    ymajorgrids=true,
-    xmajorgrids=true,
-    legend style={at={(0.5,-0.25)},anchor=north,legend columns=3},
-]
-\addplot+[mark=*] coordinates {
-  (6,6.73) (8,7.23) (10,8.00)
-};
-\addlegendentry{ILP (optimal)}
-
-\addplot+[mark=square*] coordinates {
-  (6,6.97) (8,7.77) (10,8.17) (20,10.37) (30,11.93) (50,14.20) (60,15.00) (80,16.20) (100,17.50)
-};
-\addlegendentry{GA}
-
-\addplot+[mark=triangle*] coordinates {
-  (6,6.83) (8,7.50) (10,8.13) (20,10.20) (30,11.97) (50,14.30) (60,15.10) (80,16.80) (100,17.94)
-};
-\addlegendentry{GA (Stochastic)}
-
-\addplot+[mark=o] coordinates {
-  (6,7.47) (8,8.27) (10,9.00) (20,11.33) (30,12.80) (50,15.37) (60,15.95) (80,17.30) (100,18.60)
-};
-\addlegendentry{greedy}
-
-\addplot+[mark=diamond*] coordinates {
-  (6,7.40) (8,8.47) (10,9.10) (20,11.57) (30,13.43) (50,15.67) (60,16.60) (80,18.20) (100,19.55)
-};
-\addlegendentry{Greedy (Stochastic)}
-
-\end{axis}
-\end{tikzpicture}
-\caption{Mean placement cost (area-based objective) as a function of the number of strings. Each point averages over all random instances for the corresponding size.}
-\label{fig:cost-vs-2Dstrings}
-\end{figure}
-
-\subsection{Scaling with the number of strings}
-
-To better understand the scaling behaviour, Figures~\ref{fig:cost-vs-2Dstrings} and \ref{fig:time-vs-2Dstrings} plot the mean cost and mean runtime as a function of the number of strings, again using the area-based objective.
-
-Figure~\ref{fig:cost-vs-2Dstrings} shows that for all algorithms the placement cost grows roughly monotonically with the number of strings, as expected. At every size for which optimal solutions are available ($N \le 10$), the ILP provides the ground truth, and the GA variants remain within $2\%$ of the optimum. For larger instances where the ILP is intractable, the GA consistently achieves the best cost. Both greedy baselines trail the best method by between $6\%$ and $14\%$, with an average gap of approximately $7.7\%$ (\textsc{greedy}) and $11.8\%$ (\textsc{Greedy (Stochastic)}) for string sets of size $20$ and larger.
-
-Figure~\ref{fig:time-vs-2Dstrings} (note the logarithmic y-axis) highlights the trade-off between solution quality and runtime for the heuristic methods. The two greedy algorithms are extremely fast and scale almost linearly in the number of strings, remaining below $0.5$ seconds for up to 10 strings and below $3.5$ seconds even at 100 strings. The GA variants incur one to two orders of magnitude more CPU time, with runtime growing from roughly $4$ seconds on 6--10 strings to around $170$--$225$ seconds at 100 strings.
-
-Overall, the experiments suggest a clear Pareto frontier: greedy heuristics provide very fast but moderately suboptimal solutions, while the tree-based genetic algorithms consistently improve the placement cost by roughly $6$--$12\%$ at the expense of significantly higher runtime. Crucially, when verified against optimal ILP solutions on small instances, the GA achieves near-optimal quality, validating its effectiveness on larger instances where ground truth is unavailable.
-
-\begin{figure}
-\centering
-\begin{tikzpicture}
-\begin{axis}[
-    width=0.8\linewidth,
-    height=0.45\linewidth,
-    xlabel={Number of strings},
-    ylabel={Mean runtime (s)},
-    xmin=0, xmax=105,
-    ymode=log,
-    xtick={10,20,30,50,60,80,100},
-    ymajorgrids=true,
-    xmajorgrids=true,
-    legend style={at={(0.5,-0.25)},anchor=north,legend columns=2},
-]
-
-\addplot+[mark=square*] coordinates {
-  (6,3.92) (8,4.01) (10,3.80) (20,10.24) (30,12.40) (50,35.66) (60,69.54) (80,163.00) (100,276.00)
-};
-\addlegendentry{GA}
-
-\addplot+[mark=triangle*] coordinates {
-  (6,3.86) (8,4.00) (10,3.89) (20,10.49) (30,15.68) (50,58.26) (60,92.34) (80,253.13) (100,351.74)
-};
-\addlegendentry{GA (Stochastic)}
-
-\addplot+[mark=o] coordinates {
-  (6,0.28) (8,0.35) (10,0.44) (20,0.77) (30,0.98) (50,1.34) (60,1.54) (80,2.38) (100,3.38)
-};
-\addlegendentry{greedy}
-
-\addplot+[mark=diamond*] coordinates {
-  (6,0.29) (8,0.38) (10,0.44) (20,0.78) (30,0.99) (50,1.62) (60,1.63) (80,2.42) (100,3.40)
-};
-\addlegendentry{Greedy (Stochastic)}
-
-\end{axis}
-\end{tikzpicture}
-\caption{Mean runtime as a function of the number of strings (logarithmic scale) for the heuristic methods. Greedy heuristics are one to two orders of magnitude faster than the genetic algorithms.}
-\label{fig:time-vs-2Dstrings}
-\end{figure}
 
 \subsection{Genetic algorithm dynamics and crossover statistics}
 
