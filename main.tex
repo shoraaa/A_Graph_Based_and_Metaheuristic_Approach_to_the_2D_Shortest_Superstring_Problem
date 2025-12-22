@@ -55,11 +55,7 @@
 \address[vinuni]{VinUniversity, Hanoi, Vietnam}
 
 \begin{abstract}
-The Shortest Superstring Problem (SSP), finding the shortest string containing a given set of strings as substrings, is a classical NP-hard problem. We introduce its two-dimensional generalization (2D-SSP): given a collection of rectangular symbol arrays, arrange them on the integer lattice with symbol-consistent overlaps to minimize bounding-box area. While 1D-SSP is pure sequencing, 2D-SSP becomes a \emph{simultaneous sequencing-and-packing} problem.
-
-We prove NP-hardness for both the area and balanced-area objectives, and APX-hardness for the area objective via an L-reduction from 1D-SSP. We develop a \emph{Bounded-Offset Tree Representation} that transforms this geometric problem into a finite combinatorial problem over spanning trees. A connectivity lemma guarantees that optimal solutions can be made 4-connected without increasing cost, ensuring the tree space covers all optima.
-
-Exploiting this representation, we design a Tree-Based Genetic Algorithm (T-GA) with \emph{locality-preserving crossover} that recombines subtrees rather than coordinates, preserving functional clusters across generations. Experiments verify near-optimality against exact ILP solvers (gap $\le 2.6\%$) and show 6--12\% improvement over greedy baselines on larger instances. The framework extends naturally to $d$ dimensions.
+We introduce the Two-Dimensional Shortest Superstring Problem (2D-SSP): arrange rectangular symbol arrays on the integer lattice with symbol-consistent overlaps to minimize bounding-box area or square side length. We prove NP-hardness for both objectives and APX-hardness for area via L-reduction from 1D-SSP. A \emph{Bounded-Offset Tree Representation} reduces 2D-SSP to search over spanning trees, justified by a connectivity lemma ensuring optimal solutions can be made 4-connected. We design a Tree-Based Genetic Algorithm with locality-preserving crossover that recombines subtrees rather than coordinates. Experiments show near-optimality (gap $\le 2.6\%$) against exact solvers and 6--12\% improvement over greedy baselines. The theoretical framework extends to $d$ dimensions.
 \end{abstract}
 
 \begin{keywords}
@@ -73,31 +69,34 @@ Shortest superstring problem \sep Two-dimensional strings \sep Genetic algorithm
 \section{Introduction}
 \label{sec:intro}
 
-The Shortest Superstring Problem (SSP) is a classical NP-hard problem~\citep{gallant1980finding}:
-given a collection of strings, the goal is to construct the shortest string that
-contains each input string as a contiguous substring. SSP has been extensively
-studied, with known approximation algorithms~\citep{blum1994linear, mucha2013ssp} and rich connections to
-combinatorial optimization.
+The \emph{Two-Dimensional Shortest Superstring Problem} (2D-SSP) generalizes the classical Shortest Superstring Problem~\citep{gallant1980finding} from 1D strings to 2D arrays. Given rectangular 2D strings $T_1,\dots,T_n$ over a finite alphabet, the goal is to place them in the integer plane with \emph{symbol-consistent overlaps}, overlapping cells must contain identical symbols, while minimizing the bounding-box cost. We study two objectives: \emph{area} ($W \cdot H$) and \emph{balanced} ($\max\{W,H\}$). Figure~\ref{fig:cplex-seed342} illustrates a small optimal placement.
 
-This paper explores a largely uncharted territory at the intersection of two classical algorithmic domains: \emph{stringology} (the study of 1D sequencing problems like SSP, where overlap is the key operation) and \emph{bin packing} (the study of 2D geometric arrangement problems, where objects are placed without overlap). Standard packing algorithms fail when objects must overlap with symbol consistency; standard string algorithms fail when overlap can occur from four directions rather than two, and when a new object can fill an interior ``hole'' created by the arrangement of others. We introduce the \emph{Two-Dimensional Shortest Superstring Problem} (2D-SSP) as a principled bridge between these domains, providing both the theoretical foundations and algorithmic machinery to handle the unique challenges that arise when sequencing meets geometry.
+The transition from 1D to 2D introduces three qualitative changes:
+\begin{enumerate}
+    \item \emph{Multi-directional overlap.} In 1D-SSP, strings overlap from two directions (left/right). In 2D-SSP, overlap can occur from four directions, dramatically increasing the number of pairwise configurations.
+    \item \emph{Holes.} A 2D placement can have interior cells not covered by any string (see ``$*$'' in Figure~\ref{fig:cplex-seed342}). These ``holes'' inflate the bounding box and have no 1D analogue.
+    \item \emph{Sequencing meets packing.} Optimal placement depends on global geometric configuration, not just local overlaps. This creates a hybrid problem combining aspects of stringology (overlap exploitation) and bin packing (spatial arrangement).
+\end{enumerate}
 
-In 2D-SSP, the basic objects are rectangular 2D strings $T_1,\dots,T_n$ (finite 2D arrays over a finite alphabet), collected into a set $\mathcal{T}$. The goal is to place them
-in the plane with symbol-consistent overlaps so that all 2D strings are embedded while
-minimizing a bounding-box cost derived from the minimal axis-aligned bounding rectangle enclosing the occupied region. We consider two cost variants:
-\begin{itemize}
-    \item the \emph{area objective}, which minimizes the rectangle area $H \cdot W$, the natural 2D generalization of string length in the classical SSP;
-    \item a \emph{balanced-area objective}, which minimizes the side length $\max\{H,W\}$ of the smallest enclosing square, a secondary objective that penalizes extreme aspect ratios.
-\end{itemize}
+\paragraph{Contributions.}
+We make the following contributions:
+\begin{enumerate}
+    \item \textbf{Problem formalization} (Section~\ref{sec:problem}). We define 2D-SSP precisely, including placement feasibility, symbol consistency, and the two bounding-box objectives.
+    
+    \item \textbf{Complexity results} (Section~\ref{sec:complexity}). We prove NP-hardness for both objectives and APX-hardness for the area objective via L-reduction from 1D-SSP.
+    
+    \item \textbf{Compaction theorem} (Theorem~\ref{thm:compaction}). Every optimal placement can be transformed into a 4-connected placement without increasing cost. This is analogous to compaction in VLSI floorplanning but requires a new proof to handle symbol-consistency constraints.
+    
+    \item \textbf{Bounded-Offset Tree Representation} (Section~\ref{sec:trees}). We show that connected placements correspond to spanning trees with bounded edge labels (Lemma~\ref{lem:bounded-offsets}), and that at least one optimal placement admits such a representation (Corollary~\ref{cor:tree-optimal}). Combined with a global coordinate bound (Lemma~\ref{lem:global-bound}), this yields a finite (though exponential) combinatorial search space.
+    
+    \item \textbf{Tree-based Genetic Algorithm} (Section~\ref{subsec:ga}). We design a GA whose individuals are placement trees and whose crossover transplants subtrees, preserving spatially coherent clusters. On small instances ($n \le 10$), T-GA achieves optimality gaps $\le 2.6\%$ versus CPLEX; on larger instances, it outperforms greedy baselines by 6--12\%.
+\end{enumerate}
 
-The primary motivation for 2D-SSP is \emph{compression}: just as 1D-SSP asks how compactly a set of strings can be represented via a single superstring exploiting overlaps, 2D-SSP asks the same question for 2D patterns. This is the natural higher-dimensional generalization of a classical problem, and to our knowledge, the first systematic study of SSP beyond one dimension. The problem exhibits a rich combinatorial structure---sitting at the intersection of stringology and geometric packing---that is absent from either domain alone and warrants study in its own right. Potential applications (DNA tile assembly, texture synthesis, 2D barcode design) may emerge where symbol-consistent overlap is physically meaningful, but our focus here is on establishing the theoretical and algorithmic foundations.
+\paragraph{Scope and limitations.}
+The tree encoding yields a \emph{finite} search space in the sense that spanning-tree topologies and edge labels are bounded. However, this space remains \emph{exponential} in $n$; our exact MIP baseline does not scale beyond $n \approx 10$. The GA provides a practical heuristic but with no worst-case guarantees. Our experiments use binary alphabets; behavior on higher-entropy instances is unexplored.
 
-The transition from 1D to 2D introduces a fundamental \emph{complexity leap}. In 1D-SSP, strings can only overlap from two directions (left/right), making it a pure sequencing problem. In 2D-SSP, strings can overlap from four directions, and, crucially, a new string can fill a ``hole'' created by the arrangement of other strings. This transforms the problem into a \emph{simultaneous sequencing and packing} problem, where the optimal placement of one string depends not just on its neighbors but on the global geometric configuration. Our approach is the first to bridge these two domains by using a graph-based structure to handle the sequencing aspect and a grid-based canvas to handle the packing constraints.
-
-Our central modelling innovation is a \emph{relative-offset encoding} that shifts the search space from absolute Cartesian coordinates to placement trees. Rather than representing a solution as an explicit 2D array or a vector of $(x,y)$ coordinates, we encode it as a \emph{tree of relative offsets between 2D strings}. This representation achieves \emph{symmetry-breaking} by collapsing the infinitely many translationally equivalent coordinate vectors into a single canonical form, and enforces structural connectivity by construction. Unlike coordinate-based representations, which suffer from high redundancy due to translational invariance, a solution at $(0,0)$ is equivalent to one at $(1,1)$, $(1,2)$, etc., our tree-based encoding ensures that each individual represents a \emph{unique relative arrangement}, significantly increasing search efficiency by eliminating redundant exploration of the coordinate space.
-
-From a \emph{theoretical} perspective, we develop a \emph{Bounded-Offset Tree Representation} for 2D-SSP solutions. The key structural result (Theorem~\ref{thm:compaction}) shows that optimal placements can always be made 4-connected without increasing cost. This is intuitively similar to compaction arguments in VLSI floorplanning~\citep{murata1996vlsi}, but the proof is complicated by the \emph{symbol-consistency} constraint: we must verify that sliding disconnected components together does not introduce symbol conflicts, a concern absent in traditional floorplanning where components are non-overlapping rectangles. Building on this, we prove an \emph{Optimality-Preserving Equivalence} (Corollary~\ref{cor:tree-optimal}): every connected placement can be represented by a spanning tree of a naturally defined placement graph (though the correspondence is many-to-one: multiple trees may encode the same placement, and not every tree yields a feasible placement when decoded). Crucially, at least one optimal solution always admits such a tree representation, so the tree search space is \emph{complete} for optimization. Together, these results establish that \emph{the search space can be reduced from an infinite Cartesian plane to a finite discrete combinatorial space}, the space of spanning trees with bounded edge labels. While this space remains exponential in the worst case, it transforms a geometric optimization problem into a structured combinatorial one amenable to both exact methods and structure-aware search exploiting this bounded-offset encoding. Our theoretical framework (the connectivity/compaction theorem and tree representation) relies only on lattice adjacency and translation, making it directly applicable to $d$-dimensional generalizations for any $d \ge 2$.
-
-From an \emph{algorithmic} perspective, the tree-based encoding enables a \emph{locality-preserving crossover} operator that directly addresses the \emph{building block hypothesis}~\citep{goldberg1989genetic}: a subtree corresponds to a spatially coherent cluster, and crossover can transplant entire subtrees between parents, preserving beneficial local arrangements. Our Tree-Based GA (T-GA) consistently outperforms greedy baselines and matches ILP-optimal solutions on small instances while scaling to much larger problems.
+\paragraph{Paper organization.}
+Section~\ref{sec:background} reviews related work. Section~\ref{sec:problem} defines 2D-SSP. Section~\ref{sec:complexity} establishes complexity. Section~\ref{sec:structure} develops structural properties and the tree representation. Section~\ref{sec:algorithms} presents algorithms. Section~\ref{sec:experiments} reports experiments. Section~\ref{sec:conclusion} concludes.
 
 \section{Background and Related Work}
 \label{sec:background}
@@ -150,10 +149,10 @@ absent from standard 2D bin packing and cutting stock formulations. In the langu
 
 2D-SSP shares structural similarities with several problems in combinatorial optimization. In VLSI floorplanning, topological representations such as Sequence Pairs \citep{murata1995sequence} and B*-trees \citep{chang2000b} encode relative module positions; our placement trees adapt this approach to content-based adjacency. Patch-based texture synthesis \citep{efros2001image, kwatra2003graphcut} places patches to minimize visual error in overlaps; 2D-SSP is the discrete, lossless limit requiring exact symbol consistency. The Tile Assembly Model \citep{winfree1998algorithmic} studies self-assembly of Wang tiles with edge-matching constraints; 2D-SSP asks the inverse question of finding the most compact configuration containing a given set of patterned tiles. Unlike jigsaw puzzle assembly \citep{sholomon2013genetic} or polyomino packing \citep{golomb1994polyominoes}, 2D-SSP permits symbol-consistent overlaps that enable compression beyond pure geometric packing.
 
-\section{Preliminaries}
+\section{Problem Definition}
 \label{sec:problem}
 
-In this section, we formalize the Two-Dimensional Shortest Superstring Problem (2D-SSP), introduce the two objective variants, and develop a \emph{Bounded-Offset Tree Representation} that enables structured algorithmic treatment. The central contribution of this section is showing that the search space can be reduced from an infinite coordinate space to a finite (though exponential) space of spanning trees with bounded edge labels. 
+This section formalizes the Two-Dimensional Shortest Superstring Problem (2D-SSP) and introduces the two objective variants.
 
 Let $\Sigma$ be a finite alphabet over which the 2D strings are defined. A \emph{2D-string} over $\Sigma$ is a finite
 $m \times n$ array $T \in \Sigma^{m \times n}$, for some $m,n \in \mathbb{N}$.
@@ -178,7 +177,7 @@ $T$ by
 
 We will derive cost functions from the dimensions of the minimal axis-aligned
 bounding rectangle of a placement, and consider two variants:
-one that minimizes the area and one that minimizes the maximum side length (balanced-area objective).
+one that minimizes the area and one that minimizes the maximum side length (square objective).
 
 \begin{definition}\label{def:2d-superstring}
 Let $\mathcal{T} = \{T_1,\dots,T_n\}$ be a finite set of 2D strings over
@@ -189,20 +188,21 @@ $\Sigma$, which we call \emph{2D strings}. An $m \times n$ 2D-string $S$ is a
     \operatorname{Occ}(T_i, S) \neq \emptyset
     \quad \text{for all } i \in \{1,\dots,n\}.
 \]
+Note that, under our bounding-box objectives, an optimal arrangement may leave cells inside the bounding box that are not covered by any input string (``holes''). Formally this causes no mismatch with $S\in\Sigma^{m\times n}$: any such uncovered cell is \emph{unconstrained} by the feasibility conditions and may be assigned an arbitrary symbol from $\Sigma$ without affecting whether the $T_i$ occur as substrings.
 We denote by
 \[
     |S|_{\mathrm{area}} := m \cdot n
     \quad\text{and}\quad
-    |S|_{\mathrm{bal}} := \max\{m,n\}
+    |S|_{\mathrm{sq}} := \max\{m,n\}
 \]
-the \emph{area} and the \emph{balanced side length} of $S$, respectively.
-The area measure is the natural 2D analogue of string length in 1D-SSP, while the balanced measure constrains the aspect ratio.
+the \emph{area} and the \emph{square side length} of $S$, respectively.
+The area measure is the natural 2D analogue of string length in 1D-SSP, while the square measure seeks the smallest enclosing square.
 Both are derived from the minimal axis-aligned rectangle containing $S$ and
 penalize any empty cells inside that rectangle.
 \end{definition}
 
 Thus $|S|_{\mathrm{area}}$ is the primary objective, the natural 2D analogue of superstring length
-(total cells in the bounding box), while $|S|_{\mathrm{bal}}$ is a constrained variant that bounds the aspect ratio,
+(total cells in the bounding box), while $|S|_{\mathrm{sq}}$ is the side length of the smallest enclosing square,
 ensuring neither dimension dominates.
 
 
@@ -225,16 +225,16 @@ nodes={minimum width=5.2mm, minimum height=5.2mm,inner sep=0pt, outer sep=0pt,fo
 \draw[purple,thick,opacity=0.810] ([xshift=0.6pt,yshift=-0.6pt]m-2-3.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-5.south east);
 \draw[cyan!60!black,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-1-4.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-6.south east);
 \end{tikzpicture}
-\caption{A 2D-superstring $S$ (5 rows $\times$ 7 columns) containing six 2D strings $T_1,\dots,T_6$ as 2D-substrings (highlighted rectangles). The cells marked with ``$*$'' are \emph{wildcard} (or \emph{don't-care}) positions, cells within the bounding box that are not covered by any input string. The area is $|S|_{\mathrm{area}} = 35$, and the balanced side length is $|S|_{\mathrm{bal}} = 7$.
+\caption{A 2D-superstring $S$ (5 rows $\times$ 7 columns) containing six 2D strings $T_1,\dots,T_6$ as 2D-substrings (highlighted rectangles). The cells printed as ``$*$'' are \emph{uncovered} positions (holes) inside the bounding box that are not covered by any input string; ``$*$'' is a \emph{diagrammatic placeholder} (not an alphabet symbol). In any formal $S\in\Sigma^{m\times n}$ these cells can be filled arbitrarily with symbols from $\Sigma$. The area is $|S|_{\mathrm{area}} = 35$, and the square side length is $|S|_{\mathrm{sq}} = 7$.
 }
 \label{fig:cplex-seed342}
 \end{figure}
 
-\begin{remark}[Wildcard characters and 2D holes]
+\begin{remark}[Holes inside the bounding box]
 \label{rem:wildcard}
-The wildcard symbol ``$*$'' in Figure~\ref{fig:cplex-seed342} represents a fundamental distinction between 1D-SSP and 2D-SSP. In 1D-SSP, every optimal superstring is \emph{fully covered}: each position belongs to at least one input string. If any position were uncovered, we could delete that character to obtain a shorter superstring, contradicting optimality.
+The ``$*$'' marker in Figure~\ref{fig:cplex-seed342} highlights a fundamental distinction between 1D-SSP and 2D-SSP. In 1D-SSP, every position in an optimal superstring must be covered by some input string: if any position were uncovered, we could delete that character to obtain a shorter superstring, contradicting optimality.
 
-In 2D-SSP, this property fails. The two-dimensional geometry permits \emph{holes}: cells within the bounding box that no input string covers. These holes cannot simply be ``deleted'' as in 1D, because removing a row or column would disrupt the geometric arrangement of strings in other parts of the superstring. The wildcard cells contribute to the bounding-box cost but carry no information, they can be filled with any symbol (or left undefined) without affecting which strings are embedded.
+In 2D-SSP, this property fails. The two-dimensional geometry permits \emph{holes}: cells within the bounding box that no input string covers. These holes cannot simply be ``deleted'' as in 1D, because removing a row or column would disrupt the geometric arrangement of strings in other parts of the superstring. Hole cells contribute to the bounding-box cost but carry no information: they are unconstrained and can be filled arbitrarily with symbols from $\Sigma$ without affecting which strings are embedded.
 
 Formally, given a placement $p$, let $R(p) = \bigcup_{i=1}^n \mathrm{footprint}(T_i, p)$ denote the set of occupied cells, and let $B(p)$ denote the bounding box. The \emph{hole set} is $B(p) \setminus R(p)$, cells inside the bounding box but not covered by any string. In Figure~\ref{fig:cplex-seed342}, this set contains two cells (the ``$*$'' positions). These holes represent ``wasted'' area that inflates the objective value, and minimizing them is part of the optimization challenge unique to 2D-SSP.
 \end{remark}
@@ -244,12 +244,13 @@ Given a finite set $\mathcal{T}$ of 2D strings over $\Sigma$, we define two
 variants of the Two-Dimensional Shortest Superstring Problem:
 \begin{itemize}
     \item \emph{Area-based 2D-SSP} (2D-SSP$_{\mathrm{area}}$): find a 2D-superstring $S$ of $\mathcal{T}$ minimizing $|S|_{\mathrm{area}}$. This is the primary variant, directly generalizing the 1D-SSP objective.
-    \item \emph{Balanced-area 2D-SSP} (2D-SSP$_{\mathrm{bal}}$): find a 2D-superstring $S$ of $\mathcal{T}$ minimizing $|S|_{\mathrm{bal}}$. This variant constrains the aspect ratio and is useful in applications requiring near-square layouts.
+    \item \emph{Square 2D-SSP} (2D-SSP$_{\mathrm{sq}}$): find a 2D-superstring $S$ of $\mathcal{T}$ minimizing $|S|_{\mathrm{sq}} = \max\{m,n\}$, the side length of the smallest enclosing square.
 \end{itemize}
 Both objectives depend only on the minimal axis-aligned bounding rectangle of $S$ and penalize all empty cells inside it.
 \end{definition}
 
-\subsection{Computational complexity}
+\section{Computational Complexity}
+\label{sec:complexity}
 
 We establish that 2D-SSP is NP-hard. Both proofs are straightforward reductions; we state them for completeness.
 
@@ -262,9 +263,9 @@ We establish that 2D-SSP is NP-hard. Both proofs are straightforward reductions;
 Reduction from 1D-SSP (NP-hard for $|\Sigma| \ge 2$~\citep{gallant1980finding}). Given 1D strings $\mathcal{S} = \{s_1, \ldots, s_n\}$, create height-1 2D strings $T_i = 1 \times |s_i|$. Any 2D placement with $k$ rows and maximum row width $W$ has area $\ge k \cdot W$. Concatenating rows yields a 1D superstring of length $\le k \cdot W$. Conversely, the optimal 1D superstring gives a 1-row 2D placement. Thus $\mathrm{OPT}_{2\text{D}} = \mathrm{OPT}_{1\text{D}}$.
 \end{pf}
 
-\begin{theorem}[NP-hardness of 2D-SSP$_{\mathrm{bal}}$]
-\label{thm:np-hard-bal}
-2D-SSP$_{\mathrm{bal}}$ is NP-hard.
+\begin{theorem}[NP-hardness of 2D-SSP$_{\mathrm{sq}}$]
+\label{thm:np-hard-sq}
+2D-SSP$_{\mathrm{sq}}$ is NP-hard.
 \end{theorem}
 
 \begin{pf}
@@ -275,14 +276,14 @@ Reduction from minimum enclosing square packing (NP-hard~\citep{leung1990packing
 \label{rem:complexity-summary}
 \emph{Area objective:} NP-hard and APX-hard for any $|\Sigma| \ge 2$ (inherited from 1D-SSP via L-reduction with $\alpha = \beta = 1$; see Appendix~\ref{app:apx-hardness}).
 
-\emph{Balanced objective:} NP-hard, but Theorem~\ref{thm:np-hard-bal} requires a large alphabet ($|\Sigma| = n$). This places the proof in the \emph{packing regime} where no overlaps occur.
+\emph{Square objective:} NP-hard, but Theorem~\ref{thm:np-hard-sq} requires a large alphabet ($|\Sigma| = n$). This places the proof in the \emph{packing regime} where no overlaps occur.
 
-\textbf{Open problem:} \emph{The complexity of 2D-SSP$_{\mathrm{bal}}$ over a fixed constant-size alphabet (e.g., binary) remains open.} In the sequencing regime where overlaps are common, neither the 1D-SSP reduction nor the packing reduction applies directly.
+\textbf{Open problem:} \emph{The complexity of 2D-SSP$_{\mathrm{sq}}$ over a fixed constant-size alphabet (e.g., binary) remains open.} In the sequencing regime where overlaps are common, neither the 1D-SSP reduction nor the packing reduction applies directly.
 \end{remark}
 
 \subsubsection{Experimental scope}
 
-Our experiments focus on the \emph{sequencing regime}: binary alphabets ($|\Sigma| = 2$) where overlap opportunities are common enough to matter but rare enough to be computationally challenging. This is the regime where 2D-SSP is most distinct from pure packing and where our tree-based methods provide the most value. See Appendix~\ref{app:complexity-details} for extended discussion of the sequencing--packing spectrum and entropy effects.
+Our experiments focus on the \emph{sequencing regime}: binary alphabets ($|\Sigma| = 2$). Extended discussion of the sequencing--packing spectrum and entropy effects is deferred to Appendix~\ref{app:complexity-details}.
 
 \medskip
 Whenever the distinction between the two variants is not important, we simply refer to either as \emph{2D-SSP}. Hereafter, we use \emph{string} to mean \emph{2D string} unless otherwise specified.
@@ -302,7 +303,7 @@ coordinates $(u,v)$ (row and column indices) is mapped to global coordinates
 $(x_i + u,\, y_i + v) \in \mathbb{Z}^2$.
 \end{definition}
 
-A placement $p$ is symbol-consistent if for every global coordinate $(x,y) \in \mathbb{Z}^2$, all strings covering $(x,y)$ under $p$ write the same symbol. We denote by
+A placement $p$ is symbol-consistent if for every global coordinate $(x,y) \in \mathbb{Z}^2$, all strings covering $(x,y)$ under $p$ write the same symbol. Note that 4-adjacent contact imposes no symbol constraints; only overlapping cells must agree. We denote by
 \[
 \begin{aligned}
 R(p) := \{(x,y) \in \mathbb{Z}^2 :\;
@@ -315,17 +316,17 @@ axis-aligned rectangle containing $R(p)$. Let $W(p)$ and $H(p)$ be the width and
 \[
   \mathrm{cost}_{\mathrm{area}}(p) := W(p)\cdot H(p),
   \qquad
-  \mathrm{cost}_{\mathrm{bal}}(p) := \max\{W(p),H(p)\}.
+  \mathrm{cost}_{\mathrm{sq}}(p) := \max\{W(p),H(p)\}.
 \]
 Restricting the symbol map to $B(p)$ yields an $m \times n$ array $T_p$; by construction $T_p$ is a 2D-superstring of $\mathcal{T}$, and its area and balanced side satisfy
 \[
 |T_p|_{\mathrm{area}} = \mathrm{cost}_{\mathrm{area}}(p),
 \qquad
-|T_p|_{\mathrm{bal}} = \mathrm{cost}_{\mathrm{bal}}(p).
+|T_p|_{\mathrm{sq}} = \mathrm{cost}_{\mathrm{sq}}(p).
 \]
 
 In particular, empty cells of $B(p)$ that are not covered by any strings still contribute to both objectives.
-Thus every symbol-consistent placement defines a feasible solution to both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\mathrm{bal}}$, with cost equal to the chosen bounding-box functional.
+Thus every symbol-consistent placement defines a feasible solution to both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\mathrm{sq}}$, with cost equal to the chosen bounding-box functional.
 
 \begin{remark}
 \label{rem:bounding-box-justification}
@@ -435,22 +436,41 @@ Let $T_i$ and $T_j$ have bounding boxes of dimensions $w_i \times h_i$ and $w_j 
 For $T_i$ and $T_j$ to be in contact (overlap or 4-adjacent), their bounding boxes must intersect or share an edge. The $x$-projections $[0, w_i-1]$ and $[\Delta x, \Delta x + w_j - 1]$ intersect or are adjacent if $|\Delta x| \le w_i + w_j - 1$. The bound for $\Delta y$ follows symmetrically.
 \end{pf}
 
+\begin{lemma}[A polynomially describable global bound]
+\label{lem:global-bound}
+Let $w_i\times h_i$ be the dimensions of $T_i$ and define
+\[
+W_0 := \sum_{i=1}^n w_i,\qquad H_0 := \sum_{i=1}^n h_i.
+\]
+There exists a symbol-consistent placement $p_0$ such that, after translating its bounding box to the origin, $B(p_0)\subseteq[0,W_0-1]\times[0,H_0-1]$. In particular,
+\[
+\mathrm{OPT}_{\mathrm{area}} \le W_0\,H_0\quad\text{and}\quad \mathrm{OPT}_{\mathrm{sq}} \le \max\{W_0,H_0\}.
+\]
+Consequently, there exists an optimal placement $p^*$ whose bounding box (after translating to the origin) lies inside $[0,U-1]\times[0,U-1]$ for the polynomially describable bound
+\[
+U := \begin{cases}
+W_0H_0, & \text{for 2D-SSP}_{\mathrm{area}},\\
+\max\{W_0,H_0\}, & \text{for 2D-SSP}_{\mathrm{sq}}.
+\end{cases}
+\]
+\end{lemma}
+
+\begin{pf}
+Construct $p_0$ by placing the strings without overlap, e.g., set $p_0(i)=(\sum_{t<i} w_t,\; \sum_{t<i} h_t)$. Then the translated footprints are pairwise disjoint, so symbol-consistency holds vacuously. The union of footprints is contained in $[0,W_0-1]\times[0,H_0-1]$.
+Thus $\mathrm{cost}_{\mathrm{area}}(p_0)\le W_0H_0$ and $\mathrm{cost}_{\mathrm{sq}}(p_0)\le\max\{W_0,H_0\}$, implying the stated upper bounds on the optimum.
+Finally, for any objective, translating an optimal placement so that its bounding box has lower-left corner at the origin yields a congruent optimal placement; since its cost is at most the corresponding bound above, both width and height are at most $U$, hence the translated bounding box lies within $[0,U-1]\times[0,U-1]$.
+\end{pf}
+
 \begin{remark}[Graph size vs.\ tree space]
 \label{rem:polynomial-search}
 Lemma~\ref{lem:bounded-offsets} ensures that the \emph{placement graph} $G^{\mathrm{pl}}$ has polynomial size: for each pair $(T_i, T_j)$, there are $O((w_i + w_j)(h_i + h_j))$ candidate offsets to check. For uniform $w \times h$ strings, the placement graph has $O(n^2 wh)$ edges.
 
-However, the \emph{search space of spanning trees} remains exponential. By Cayley's formula, a complete graph on $n$ vertices has $n^{n-2}$ spanning trees; while our placement graph is typically sparser, the number of feasible placement trees can still grow exponentially with $n$. The significance of our reduction is not that it yields a polynomial search space, but that it transforms an \emph{infinite continuous space} (absolute coordinates on $\mathbb{Z}^2$) into a \emph{finite discrete combinatorial space} (spanning trees with bounded edge labels). This discretization enables exact enumeration for small instances and structured search exploiting the graph-based encoding for larger ones.
+However, the \emph{search space of spanning trees} remains exponential. By Cayley's formula, a complete graph on $n$ vertices has $n^{n-2}$ spanning trees; while our placement graph is typically sparser, the number of feasible placement trees can still grow exponentially with $n$.
+
+The main significance of the tree view is symmetry-breaking and structure: it represents solutions via \emph{relative offsets} along a connected backbone rather than absolute coordinates, and enables structure-aware search operators (Section~\ref{sec:algorithms}). Formally, one can also bound absolute coordinates a priori by a polynomially describable $U$ (Lemma~\ref{lem:global-bound}), so the set of placements up to translation is finite even in a coordinate encoding; the tree encoding remains valuable because it removes translational redundancy and exposes useful combinatorial structure.
 \end{remark}
 
-\begin{remark}[Edge density]
-\label{rem:edge-density}
-The bound $O(n^2 wh)$ on $|E(G^{\mathrm{pl}})|$ is a worst-case geometric bound. The actual edge count depends on string entropy: high-entropy strings yield sparse graphs (dominated by adjacency edges), while low-entropy strings yield dense graphs (many symbol-consistent overlaps). See Appendix~\ref{app:edge-density} for detailed analysis.
-\end{remark}
-
-\begin{remark}[Optimized offset enumeration]
-\label{rem:offset-enumeration}
-In the sequencing regime, practical performance improves by enumerating offsets in order of bounding-box increase, stopping at the first level with a symbol-consistent offset. See Appendix~\ref{app:offset-enumeration} for details.
-\end{remark}
+We defer two performance-oriented discussions to the appendix: how string entropy affects edge density in $G^{\mathrm{pl}}$ (Appendix~\ref{app:edge-density}) and how to enumerate offsets efficiently in practice (Appendix~\ref{app:offset-enumeration}).
 
 \begin{definition}
 \label{def:contact-graph}
@@ -463,7 +483,7 @@ Equivalently, strings $i$ and $j$ are adjacent in $G^{\mathrm{ct}}(p)$ if they a
 The contact graph $G^{\mathrm{ct}}(p)$ records which edges of the placement graph are ``realized'' by a given placement. Different placements of the same instance may realize different subsets of edges.
 
 \begin{remark}
-Our cost functionals depend only on the bounding rectangle $B(p)$, not directly on the cardinality of $R(p)$. In particular, two placements with the same bounding box have the same cost for both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\mathrm{bal}}$. The area-based objective directly generalizes the 1D shortest superstring objective (string length), while the balanced-area variant additionally constrains the aspect ratio. Both differ from geometric covering formulations that minimize the area of the union $R(p)$.
+Our cost functionals depend only on the bounding rectangle $B(p)$, not directly on the cardinality of $R(p)$. In particular, two placements with the same bounding box have the same cost for both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\mathrm{sq}}$. The area-based objective directly generalizes the 1D shortest superstring objective (string length), while the square objective seeks a compact, near-square layout. Both differ from geometric covering formulations that minimize the area of the union $R(p)$.
 \end{remark}
 
 \begin{assumption}
@@ -473,66 +493,60 @@ whose occupied region $R(p)$
 is 4-connected. The following theorem shows this is without loss of optimality.
 \end{assumption}
 
+\section{Structural Properties and Tree Representation}
+\label{sec:structure}
+
+This section develops the \emph{Bounded-Offset Tree Representation} that underlies our algorithms. We first prove a compaction theorem (Section~\ref{sec:compaction}) showing that optimal placements can be made 4-connected, then introduce the placement tree encoding (Section~\ref{sec:trees}) and summarize algorithmic implications (Section~\ref{sec:alg-implications}).
+
+\subsection{Compaction and Connectivity}
+\label{sec:compaction}
+
 The following theorem shows that optimal solutions can be restricted to connected placements, a result analogous to compaction in VLSI floorplanning~\citep{murata1996vlsi}.
 
 \begin{theorem}[Connectivity/compaction]
 \label{thm:compaction}
-Let $p$ be an optimal symbol-consistent placement for 2D-SSP (under either $\mathrm{cost}_{\mathrm{area}}$ or $\mathrm{cost}_{\mathrm{bal}}$). If $R(p)$ is not 4-connected, then there exists an optimal symbol-consistent placement $p'$ such that $R(p')$ is 4-connected and $\mathrm{cost}(p') \le \mathrm{cost}(p)$.
+Let $p$ be an optimal symbol-consistent placement for 2D-SSP under either objective. Then there exists an optimal symbol-consistent placement $p'$ with $\mathrm{cost}(p') \le \mathrm{cost}(p)$ such that $R(p')$ is 4-connected.
 \end{theorem}
 
+The proof relies on two lemmas. The key observation is that symbol-consistency constrains only \emph{overlapping} cells, not 4-adjacent ones. Thus we can slide disconnected components closer until they become 4-adjacent without creating overlaps, hence without risking symbol conflicts.
+
+\begin{lemma}[Unit shifts are safe]
+\label{lem:unit-shift}
+Let $p$ be a symbol-consistent placement with occupied region $R = R(p)$, and let $C$ be a maximal 4-connected component of $R$. If $\mathrm{dist}(C, R \setminus C) \ge 2$, then for any unit vector $e \in \{(\pm1,0), (0,\pm1)\}$, shifting all strings in $C$ by $e$ preserves symbol-consistency.
+\end{lemma}
+
 \begin{pf}
-We prove existence of an optimal 4-connected placement by an extremal argument.
-
-\medskip
-\noindent\textbf{Canonical normalization and tie-breaking.}
-Among all optimal symbol-consistent placements (for the chosen objective), pick one $q$ as follows.
-First translate $q$ so that the lower-left corner of its bounding box is at the origin, i.e., $B(q)=[0, W-1]\times[0, H-1]$ for some $W,H$.
-Among all such translated optimal placements, choose $q$ that minimizes the pair $(W,H)$ lexicographically, and subject to that minimizes
-\[
-  \Phi(q) := \sum_{(x,y)\in R(q)} x \; + \; \sum_{(x,y)\in R(q)} y.
-\]
-This tie-breaking is well-defined because, after anchoring $B(q)$ at the origin, the set $R(q)\subseteq [0,W-1]\times[0,H-1]$ is finite.
-
-\medskip
-\noindent\textbf{Claim: $R(q)$ is 4-connected.}
-Assume for contradiction that $R(q)$ has at least two maximal 4-connected components.
-Let these components be $C_1,\dots,C_k$ with $k\ge 2$.
-
-\smallskip
-\noindent\emph{(1) Components are separated by distance at least 2.}
-For distinct components $C_i\neq C_j$, we have $\mathrm{dist}(C_i,C_j)\ge 2$: if $\mathrm{dist}(C_i,C_j)=1$ then there exist 4-adjacent cells across them, contradicting maximality of 4-connected components.
-
-\smallskip
-\noindent\emph{(2) Any unit shift of a component cannot create overlap.}
-Fix a component $C$ and a unit vector $e\in\{(\pm1,0),(0,\pm1)\}$.
-If $(C+e)\cap (R(q)\setminus C)\neq\emptyset$, then there exist $c\in C$ and $d\in R(q)\setminus C$ with $c+e=d$, hence $\|c-d\|_1=1$ and thus $\mathrm{dist}(C, R(q)\setminus C)=1$, contradicting (1).
-Therefore shifting any component by a unit step preserves non-overlap with all other components.
-Since the shift is rigid, symbol-consistency is preserved as well.
-
-\smallskip
-\noindent\emph{(3) Each component touches every side of the bounding box.}
-Suppose some component $C$ does not touch the left side of $B(q)$, i.e., every cell $(x,y)\in C$ satisfies $x\ge 1$.
-Then $C+(-1,0)\subseteq B(q)$.
-By (2), translating $C$ by $(-1,0)$ yields a symbol-consistent placement $q'$ whose occupied set stays inside the same box $B(q)$, so $(W,H)$ does not increase.
-However, this translation strictly decreases $\Phi$ (every cell of $C$ decreases its $x$-coordinate by 1), contradicting the choice of $q$.
-Thus every component touches the left side.
-The same argument applied to $(1,0)$, $(0,-1)$, and $(0,1)$ shows that every component touches the right, bottom, and top sides of $B(q)$.
-
-\smallskip
-\noindent\emph{(4) Two disjoint components cannot both touch all four sides.}
-Fix two distinct components $A$ and $B$.
-Since $A$ is 4-connected and touches the left and right sides, it contains a 4-neighbour path in the grid from the left side of $B(q)$ to the right side.
-Similarly, since $B$ is 4-connected and touches the top and bottom sides, it contains a 4-neighbour path from the top side to the bottom side.
-By the standard planar separation (crossing) property of the rectangular grid (see Lemma~\ref{lem:grid-crossing} in Appendix~\ref{app:grid-crossing}), these two paths must share a grid cell.
-This contradicts that $A$ and $B$ are disjoint.
-
-Therefore $k=1$ and $R(q)$ is 4-connected.
-
-\medskip
-\noindent\textbf{Conclusion.}
-Let $p':=q$. Then $p'$ is optimal for the chosen objective and $R(p')$ is 4-connected.
-In particular, $\mathrm{cost}(p')=\mathrm{cost}(q)\le \mathrm{cost}(p)$.
+Suppose $(C + e) \cap (R \setminus C) \neq \emptyset$. Then there exist $c \in C$ and $d \in R \setminus C$ with $c + e = d$, so $\|c - d\|_1 = 1$, contradicting $\mathrm{dist}(C, R \setminus C) \ge 2$. Thus the shifted component does not overlap any other component, and since the shift is rigid, symbol-consistency within $C$ is preserved.
 \end{pf}
+
+\begin{lemma}[Merge move exists]
+\label{lem:merge-move}
+Let $p$ be a symbol-consistent placement whose occupied region $R(p)$ has $k \ge 2$ maximal 4-connected components. Then there exist two components $C_a, C_b$ and a unit vector $e$ such that:
+\begin{enumerate}
+    \item[(i)] shifting $C_b$ by $e$ keeps $C_b + e$ within the same bounding box $B(R(p))$, and
+    \item[(ii)] $\mathrm{dist}(C_a, C_b + e) = \mathrm{dist}(C_a, C_b) - 1$.
+\end{enumerate}
+\end{lemma}
+
+\begin{pf}
+Pick a closest pair $(C_a, C_b)$ minimizing $\mathrm{dist}(C_i, C_j)$ among all component pairs, with $d := \mathrm{dist}(C_a, C_b) \ge 2$. Choose $u \in C_a$ and $v \in C_b$ with $\|u - v\|_1 = d$. Let $e$ be a unit step from $v$ toward $u$ along a shortest Manhattan path, so $\|u - (v + e)\|_1 = d - 1$.
+
+We show $e$ can be chosen so that $C_b + e \subseteq B(R(p))$. Consider the case $e = (-1, 0)$ (left step). If $x_{\min}(C_b) > x_{\min}(B)$, then shifting $C_b$ left by one keeps it within $B$. If $x_{\min}(C_b) = x_{\min}(B)$, then $C_b$ is flush with the left boundary. But since $u \in C_a \subseteq B$ and $v \in C_b \subseteq B$, there exists at least one coordinate direction where $u$ differs from $v$ and the corresponding unit step from $v$ toward $u$ remains within $B$. The same reasoning applies symmetrically to other directions.
+
+Finally, Lemma~\ref{lem:unit-shift} ensures the move creates no overlaps (all components are at distance $\ge d \ge 2$ from $C_b$), so symbol-consistency is preserved.
+\end{pf}
+
+\begin{pf}[Proof of Theorem~\ref{thm:compaction}]
+Among all optimal placements, choose one $q$ that minimizes the number $k$ of 4-connected components of $R(q)$.
+
+Suppose $k \ge 2$. By Lemma~\ref{lem:merge-move}, there exist components $C_a, C_b$ and a unit shift $e$ that keeps $C_b + e$ within the same bounding box (so cost does not increase) and reduces the distance between $C_a$ and $C_b$ by one. Repeating this shift at most $\mathrm{dist}(C_a, C_b) - 1$ times makes $C_a$ and $C_b$ become 4-adjacent, at which point they merge into a single component.
+
+This yields an optimal placement with strictly fewer than $k$ components, contradicting minimality of $k$. Hence $k = 1$ and $R(q)$ is 4-connected. Set $p' := q$.
+\end{pf}
+
+\begin{remark}
+This proof does not rely on planar topology (crossing lemmas). The argument extends directly to $d$ dimensions: components separated by grid distance $\ge 2$ can be slid together one unit step at a time without creating overlaps, since $2d$-adjacency (contact) is distinct from overlap.
+\end{remark}
 
 \begin{corollary}
 For any instance of 2D-SSP, there exists an optimal placement whose occupied region is 4-connected. Consequently, Assumption~\ref{ass:connected-union} is justified for all instances.
@@ -566,7 +580,8 @@ which contradicts 4-connectivity of $R(p)$.
 By Theorem~\ref{thm:compaction} and Corollary~\ref{cor:contact-connected},
 every optimal connected placement has a connected contact graph that admits a spanning tree. We now formalize this tree representation.
 
-\subsection{Placement trees}
+\subsection{Placement Trees}
+\label{sec:trees}
 
 A placement tree encodes a solution as a spanning tree with labeled edges specifying relative offsets between strings. The key insight is that edge labels are drawn from a \emph{bounded} set determined by string dimensions, which, combined with the finite number of spanning tree topologies, yields a finite search space.
 
@@ -578,7 +593,7 @@ the relative offset from $i$ to $j$.
 For each oriented edge $(i,j)$ we store $\delta_{ij}$ and require
 $\delta_{ji} = -\delta_{ij}$.
 
-By Lemma~\ref{lem:bounded-offsets}, valid edge labels are bounded: if $T_i$ and $T_j$ have dimensions $w_i \times h_i$ and $w_j \times h_j$, then any symbol-consistent contact requires $|\Delta x| \le w_i + w_j - 1$ and $|\Delta y| \le h_i + h_j - 1$. This bounds the number of candidate labels per edge to $O((w_i + w_j)(h_i + h_j))$---for uniform $w \times h$ strings, $O(wh)$ per edge---ensuring the search space of placement trees is finite.
+By Lemma~\ref{lem:bounded-offsets}, valid edge labels are bounded: if $T_i$ and $T_j$ have dimensions $w_i \times h_i$ and $w_j \times h_j$, then any symbol-consistent contact requires $|\Delta x| \le w_i + w_j - 1$ and $|\Delta y| \le h_i + h_j - 1$. This bounds the number of candidate labels per edge to $O((w_i + w_j)(h_i + h_j))$, for uniform $w \times h$ strings, $O(wh)$ per edge, ensuring the search space of placement trees is finite.
 
 The \emph{realization} of $F$ with root $r$ and root position
 $p(r)\in\mathbb{Z}^2$ is the placement $p_F$ defined by
@@ -634,11 +649,11 @@ By feasibility, $p_F$ is symbol-consistent.
 Every string $T_i$ is placed exactly once, so $T_i$ occurs as a 2D-substring of the induced array $T_{p_F}$, making it a 2D-superstring of $\mathcal{T}$.
 \end{pf}
 
-The significance of this corollary is that \emph{no optimal solution is lost} by restricting to the Bounded-Offset Tree Representation. While not every placement corresponds to a tree, disconnected placements correspond to forests of multiple trees, Theorem~\ref{thm:compaction} ensures that at least one optimal solution has a connected contact graph, and hence corresponds to a single spanning tree. Combined with the bounded edge labels (Lemma~\ref{lem:bounded-offsets}), this establishes that the search space is both \emph{finite} (bounded labels, finite tree topologies) and \emph{complete} (contains at least one optimum). This justifies designing algorithms that search exclusively over placement trees.
+The significance of this corollary is that \emph{no optimal solution is lost} by restricting to the Bounded-Offset Tree Representation. While not every placement corresponds to a tree, disconnected placements correspond to forests of multiple trees, Theorem~\ref{thm:compaction} ensures that at least one optimal solution has a connected contact graph, and hence corresponds to a single spanning tree. Moreover, the bounded edge labels (Lemma~\ref{lem:bounded-offsets}) and finite tree topologies yield a finite set of candidate \emph{encodings}, and the objective implies an explicit global bound on the size of an optimal bounding box (Lemma~\ref{lem:global-bound}). This justifies designing algorithms that search exclusively over placement trees: the representation is \emph{complete} (contains at least one optimum), symmetry-reduced, and it exposes a useful combinatorial structure for search.
 
 \begin{remark}
 All results in this section concern only symbol-consistency,
-connectivity, and combinatorial structure. They apply verbatim to both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\mathrm{bal}}$.
+connectivity, and combinatorial structure. They apply verbatim to both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\mathrm{sq}}$.
 \end{remark}
 
 \begin{remark}[Extension to higher dimensions]
@@ -646,16 +661,13 @@ connectivity, and combinatorial structure. They apply verbatim to both 2D-SSP$_{
 The theoretical framework (connectivity lemma, bounded offsets, tree representation) extends directly to $d$-dimensional SSP for any $d \ge 1$, with $2d$-adjacency replacing $4$-adjacency. See Appendix~\ref{app:higher-dim} for details.
 \end{remark}
 
-\subsection{Algorithmic implications}
+\subsection{Algorithmic Implications}
+\label{sec:alg-implications}
 
-Corollary~\ref{cor:tree-optimal} has two key algorithmic consequences. First, it guarantees that \emph{optimal solutions are always reachable} via tree-based search: since at least one optimal placement corresponds to a feasible placement tree, any algorithm that exhaustively searches over placement trees is guaranteed to find an optimum. Second, combined with the bounded offset property (Lemma~\ref{lem:bounded-offsets}), it yields a \emph{finite discrete search space}: while the number of spanning trees can be exponential in $n$ (see Remark~\ref{rem:polynomial-search}), this is a dramatic improvement over the infinite space of absolute coordinate vectors. For small instances, this enables exact ILP enumeration; for larger instances, it provides a well-structured combinatorial space amenable to structure-aware search.
+Corollary~\ref{cor:tree-optimal} has two key algorithmic consequences. First, it guarantees that \emph{optimal solutions are always reachable} via tree-based search: since at least one optimal placement corresponds to a feasible placement tree, any algorithm that exhaustively searches over placement trees is guaranteed to find an optimum. Second, the bounded offset property (Lemma~\ref{lem:bounded-offsets}) together with the objective-implied global bound (Lemma~\ref{lem:global-bound}) justify focusing on a finite, discrete solution family: the tree encoding has finitely many topologies and finitely many admissible edge labels, and (up to translation) an optimal placement can be assumed to lie within a finite coordinate window. While the number of spanning trees can be exponential in $n$ (see Remark~\ref{rem:polynomial-search}), this replaces an unbounded coordinate description by a structured combinatorial one that is amenable to exact methods on small instances and structure-aware search on larger ones.
+Our GA searches only a restricted subspace of trees induced by greedy completion; the resulting existence-vs.-reachability gap is discussed in Appendix~\ref{app:greedy-gap}.
 
-\begin{remark}[Existence vs.\ search reachability]
-\label{rem:greedy-gap}
-Corollary~\ref{cor:tree-optimal} establishes \emph{existence} of an optimal placement tree, but our GA searches only ``greedily-completable'' trees. Empirically, the GA matches or closely approaches ILP solutions on small instances, suggesting that this subspace contains near-optimal solutions. The theoretical gap remains open; see Appendix~\ref{app:greedy-gap} for detailed analysis.
-\end{remark}
-
-The tree structure has three properties making it suitable for structure-aware search: (1) \emph{locality preservation}---subtrees correspond to spatially coherent clusters; (2) \emph{incremental realizability}---trees can be grown one string at a time; and (3) \emph{symmetry breaking}---relative offsets factor out global translation, yielding a non-redundant search space.
+The tree structure has three properties making it suitable for structure-aware search: (1) \emph{locality preservation}, subtrees correspond to spatially coherent clusters; (2) \emph{incremental realizability}, trees can be grown one string at a time; and (3) \emph{symmetry breaking}, relative offsets factor out global translation, yielding a non-redundant search space.
 
 These properties motivate our choice to design a genetic algorithm whose individuals are placement trees and whose crossover operates on subtrees, rather than using a more conventional coordinate-based representation.
 
@@ -676,13 +688,13 @@ These properties motivate our choice to design a genetic algorithm whose individ
     $\operatorname{Occ}(P,T)$ & Set of occurrences of $P$ in $T$ \\
     $S$ & 2D-superstring of $\mathcal{T}$ \\
     $|S|_{\mathrm{area}}$ & Area of minimal bounding box of $S$ \\
-    $|S|_{\mathrm{bal}}$ & Balanced side length $\max\{m,n\}$ of $S$ \\
+    $|S|_{\mathrm{sq}}$ & Square side length $\max\{m,n\}$ of $S$ \\
     $p(i) = (x_i,y_i)$ & Placement (offset) of string $T_i$ \\
     $R(p) \subset \mathbb{Z}^2$ & Union of occupied cells under placement $p$ \\
     $B(p)$ & Minimal axis-aligned bounding box of $R(p)$ \\
     $W(p),H(p)$ & Width and height of $B(p)$ \\
     $\mathrm{cost}_{\mathrm{area}}(p)$ & Area-based cost $W(p)H(p)$ \\
-    $\mathrm{cost}_{\mathrm{bal}}(p)$ & Balanced-area cost $\max\{W(p),H(p)\}$ \\
+    $\mathrm{cost}_{\mathrm{sq}}(p)$ & Square cost $\max\{W(p),H(p)\}$ \\
     $G^{\mathrm{ct}}(p)$ & Contact graph induced by placement $p$ \\
     $G^{\mathrm{pl}}$ & Placement graph of symbol-consistent offsets \\
     $F = (V,E)$ & Placement tree on $\{1,\dots,n\}$ \\
@@ -699,7 +711,7 @@ These properties motivate our choice to design a genetic algorithm whose individ
 Having established the structural foundation linking placements and trees, we present three algorithmic approaches for solving 2D-SSP. These methods span the spectrum from exact to structure-aware, offering different trade-offs between solution quality and computational cost:
 
 \begin{itemize}
-    \item An \emph{exact ILP formulation} (Section~\ref{sec:ilp-baseline}) that enumerates all candidate placements on a discrete grid and optimizes over them using mixed-integer linear programming. This approach guarantees optimal solutions but is limited to small instances.
+  \item An \emph{exact CPLEX MIP formulation} (Section~\ref{sec:ilp-baseline}) that enumerates all candidate placements on a discrete grid and optimizes over them using mixed-integer programming (MILP for the balanced objective and MIQP for the area objective). This approach guarantees optimal solutions but is limited to small instances.
     
     \item A \emph{merge-based greedy heuristic} (Section~\ref{sec:merge-greedy}) adapted from the classical 1D Shortest Superstring algorithm. This baseline repeatedly merges pairs of partial superstrings with maximum overlap.
     
@@ -708,20 +720,20 @@ Having established the structural foundation linking placements and trees, we pr
     \item A \emph{tree-based genetic algorithm} (Section~\ref{subsec:ga}) that represents individuals as placement trees and uses crossover operators that recombine subtrees. By exploiting the relative-offset encoding, this approach aims to combine the quality of exact methods with the scalability of structure-aware search.
 \end{itemize}
 
-All three methods can be instantiated with either of the two bounding-box cost variants, 2D-SSP$_{\mathrm{area}}$ or 2D-SSP$_{\mathrm{bal}}$.
+All three methods can be instantiated with either of the two bounding-box cost variants, 2D-SSP$_{\mathrm{area}}$ or 2D-SSP$_{\mathrm{sq}}$.
 
 The genetic algorithm uses placement trees rather than the more obvious coordinate-based representation (where each individual is a vector of $(x,y)$ coordinates for each string). This choice is motivated by several considerations. First, in the coordinate representation, an offspring produced by crossover rarely inherits good local structure from its parents: if parent~1 places strings $A$ and $B$ in a well-overlapping configuration, and parent~2 places strings $B$ and $C$ similarly, a crossover that takes $A$ from parent~1 and $C$ from parent~2 will likely place them far apart, destroying both favorable overlaps. In contrast, our tree-based crossover transplants entire subtrees, preserving the relative offsets among all strings in the subtree. Second, the coordinate representation is highly redundant: any global translation of a placement yields the same objective value, so the search space contains infinitely many equivalent solutions. The tree representation eliminates this redundancy by encoding only the pairwise offsets that matter. Third, the tree structure aligns naturally with the connectivity requirement: a spanning tree automatically ensures that all strings are geometrically connected, whereas the coordinate representation requires additional constraints or repair operators to enforce connectivity.
 
-\subsection{Exact Verification via ILP}
+\subsection{Exact Verification via CPLEX MIP}
 \label{sec:ilp-baseline}
 
-To validate the solution quality of our heuristic approaches, we formulate a direct grid-based mixed-integer linear program~\citep{wolsey1999integer}. We emphasize that this formulation is \emph{not} intended as a scalable solver for general instances, but strictly as a \emph{ground-truth oracle} for small-scale verification ($N \le 10$). This allows us to measure exactly how close our genetic algorithm comes to the global optimum.
+To validate the solution quality of our heuristic approaches, we formulate a direct grid-based mixed-integer program~\citep{wolsey1999integer}. We emphasize that this formulation is \emph{not} intended as a scalable solver for general instances, but strictly as a \emph{ground-truth oracle} for small-scale verification ($N \le 10$). This allows us to measure exactly how close our genetic algorithm comes to the global optimum.
 
-The model works with discrete candidate placements of each 2D string on a finite grid: it enumerates a finite set of allowed origins $\mathcal{O}_i$ for each 2D string $T_i$, uses binary decision variables $b_{io} \in \{0,1\}$ to choose exactly one origin per string, precomputes pairwise conflict indicators $\kappa_{ijoo'}$ to forbid symbol-inconsistent placements, and minimizes the bounding-box cost via big-$M$ constraints that track the enclosing rectangle. For the area objective, we linearize the bilinear term $W \cdot H$ using the McCormick envelope~\citep{mccormick1976computability}; for the balanced objective, we simply minimize $L = \max\{W,H\}$ via linear constraints.
+The model works with discrete candidate placements of each 2D string on a finite grid: it enumerates a finite set of allowed origins $\mathcal{O}_i$ for each 2D string $T_i$, uses binary decision variables $b_{io} \in \{0,1\}$ to choose exactly one origin per string, precomputes pairwise conflict indicators $\kappa_{ijoo'}$ to forbid symbol-inconsistent placements, and minimizes the bounding-box cost via big-$M$ constraints that track the enclosing rectangle. For the balanced objective, we minimize $L = \max\{W,H\}$ via linear constraints. For the area objective, we use CPLEX to solve the resulting Mixed-Integer Quadratic Program (MIQP) directly with quadratic objective $W\cdot H$.
 
 The formulation incorporates several refinements to improve tractability: (i)~greedy-based grid bounds that accommodate all optimal aspect ratios while remaining much smaller than na\"ive worst-case bounds; (ii)~symmetry breaking by fixing the first string at the origin; and (iii)~instance-adaptive big-$M$ constants that tighten the LP relaxation. The complete mathematical formulation, including all decision variables, constraints, and objective functions for both the balanced and area variants, is provided in Appendix~\ref{app:ilp-formulation}.
 
-Despite these optimizations, the number of variables and conflict constraints grows quickly with the number of strings. Consequently, this ILP is practically limited to small instances ($N \le 10$) and serves exclusively as a verification tool to certify the optimality gap of our heuristic methods.
+Despite these optimizations, the number of variables and conflict constraints grows quickly with the number of strings. Consequently, this exact MIP is practically limited to small instances ($N \le 10$) and serves exclusively as a verification tool to certify the optimality gap of our heuristic methods.
 
 \subsection{Merge-Based Greedy Heuristic}
 \label{sec:merge-greedy}
@@ -744,11 +756,30 @@ where $R_i, R_j$ are the cell sets of $S_i, S_j$, the offset $\delta$ ranges ove
 \paragraph{Geometrical vs.\ character overlap.}
 In the 1D setting, maximizing geometrical overlap and maximizing character overlap are equivalent: every overlapping position contains exactly one character. In the 2D setting, however, these objectives diverge. Consider two $3 \times 3$ strings that can overlap in two ways: (a) a $2 \times 2$ region with 4~matching characters, or (b) a $1 \times 3$ strip with 3~matching characters. A character-based criterion would prefer (a), but this choice might force the merged component into an unfavorable shape that increases the final bounding box.
 
-We use geometrical overlap because it directly relates to the bounding-box objective: maximizing the area of overlap is equivalent to minimizing the area increase when merging. Formally, if $S_i$ has area $A_i$ and $S_j$ has area $A_j$, then the merged component has area
-\[
-A_{\text{merged}} = A_i + A_j - |R_i \cap (R_j + \delta)|,
+We use geometrical overlap because it directly controls the \emph{union area} of occupied cells when merging two partial superstrings. Although our optimization objective is the \emph{bounding-box} area (which is not determined solely by pairwise overlap), overlap provides a fast, geometry-aware proxy that often correlates with smaller bounding boxes.
+
+\begin{lemma}[Overlap maximization minimizes union-area increase]
+\label{lem:overlap-union-area}
+Let $R_i, R_j \subset \mathbb{Z}^2$ be the occupied cell sets of two partial superstrings $S_i$ and $S_j$. For any translation (offset) $\delta \in \mathbb{Z}^2$, the occupied set after placing $S_j$ at offset $\delta$ is
+\[ 
+R_{\mathrm{merged}}(\delta) := R_i \cup (R_j + \delta).
 \]
-so maximizing geometrical overlap minimizes $A_{\text{merged}}$. This observation motivates our choice of overlap function. The merge operation places $S_j$ at the offset $\delta^*$ achieving this maximum, creating a new partial superstring whose bounding box contains both.
+Then
+\[
+|R_{\mathrm{merged}}(\delta)| = |R_i| + |R_j| - |R_i \cap (R_j + \delta)|.
+\]
+Consequently, for fixed $R_i$ and $R_j$, maximizing the geometrical overlap $|R_i \cap (R_j + \delta)|$ is equivalent to minimizing the union size $|R_{\mathrm{merged}}(\delta)|$, and equivalently to minimizing the union-area increase
+\[
+\Delta_{\mathrm{union}}(\delta) := |R_{\mathrm{merged}}(\delta)| - |R_i|.
+\]
+\end{lemma}
+
+\begin{pf}
+The identity follows from inclusion--exclusion:
+\(|A \cup B| = |A| + |B| - |A \cap B|\) applied to $A=R_i$ and $B=R_j+\delta$. Since $|R_i|$ and $|R_j|$ do not depend on $\delta$, minimizing $|R_{\mathrm{merged}}(\delta)|$ (or $\Delta_{\mathrm{union}}(\delta)$) is equivalent to maximizing $|R_i \cap (R_j+\delta)|$.
+\end{pf}
+
+This observation motivates our choice of overlap function in merge-greedy. In contrast, for the bounding-box objectives $W\cdot H$ and $\max\{W,H\}$, overlap is only a heuristic signal: two merges with the same overlap can yield different bounding boxes due to shape effects.
 
 \paragraph{Hypothesis: 1D vs.\ 2D performance.}
 We hypothesize that the merge-based greedy performs well when the input strings are \emph{nearly one-dimensional} (i.e., have aspect ratios close to $1 \times m$ or $m \times 1$), since this regime closely resembles the classical 1D setting where the algorithm has provable guarantees. However, as strings become \emph{genuinely two-dimensional} (aspect ratios closer to $1$), the merge-based approach may struggle: the ``best overlap'' criterion optimizes locally for overlap size but ignores how the merge affects the global bounding-box shape. In contrast, our tree-growing heuristic (Section~\ref{sec:tree-greedy-impl}) explicitly optimizes the bounding-box cost at each step, which we expect to yield better solutions for 2D instances.
@@ -799,7 +830,7 @@ h(C) = y_{\max} - y_{\min} + 1,
 \]
 and we define either
 \[
-\mathrm{size}_{\mathrm{bal}}(C) = \max\{w(C),h(C)\}
+\mathrm{size}_{\mathrm{sq}}(C) = \max\{w(C),h(C)\}
 \quad\text{or}\quad
 \mathrm{size}_{\mathrm{area}}(C) = w(C)\cdot h(C)
 \]
@@ -808,7 +839,7 @@ depending on the chosen objective.
 For any candidate attachment of a string, we can (i) check whether overlapping
 cells agree symbolically, and (ii) compute the resulting bounding-box cost.
 
-For a given target side length $L$ in the balanced-area case, we enumerate translations
+For a given target side length $L$ in the square objective case, we enumerate translations
 $(\Delta x,\Delta y)$ of a string $T$ that would result in a bounding box of side length
 exactly $L$ when combined with the current canvas. Intuitively:
 \begin{itemize}
@@ -831,11 +862,9 @@ The deterministic variant starts from a chosen root string $T_r$ (placed at the 
 \end{enumerate}
 
 \paragraph{Rationale for the two-level criterion.}
-The primary criterion (minimizing bounding-box cost increase) is equivalent to maximizing geometrical overlap: as shown in Section~\ref{sec:merge-greedy}, if the current canvas has area $A$ and the new string has area $A_j$, then
-\[
-\Delta A = A_j - |\text{geometrical overlap}|,
-\]
-so minimizing $\Delta A$ is the same as maximizing geometrical overlap. The secondary criterion (character overlap) serves as a tie-breaker when multiple attachments achieve the same bounding-box cost. This design reflects a key insight: in the 2D setting, controlling the bounding-box shape is the primary concern, but among equally good placements (in terms of bounding box), preferring those with more character matches encourages compression and may improve solution quality.
+The primary criterion explicitly minimizes the increase in the chosen \emph{bounding-box} cost (area or balanced side length). This is the objective we ultimately care about, and it is \emph{not} determined solely by pairwise overlap because global shape effects (e.g., creating long thin layouts) matter.
+
+Among candidate attachments that yield the same bounding-box cost, we use \emph{character overlap} as a tie-breaker. This reflects the fact that, while overlap maximization is exactly equivalent to minimizing the \emph{union-area} increase (Lemma~\ref{lem:overlap-union-area}), it is only a secondary signal for bounding-box objectives. Preferring higher character overlap among cost-ties encourages tighter interlocking and tends to reduce holes in practice.
 
 The algorithm terminates when all $n$ strings have been added to the tree. By construction, it always increases the cost threshold until a consistent attachment exists for some string, and therefore returns a complete placement tree spanning all strings.
 
@@ -857,7 +886,7 @@ The tree-growing procedure is summarized in Algorithm~\ref{alg:tree-greedy}.
 \caption{Tree-Growing Greedy for 2D-SSP}
 \label{alg:tree-greedy}
 \begin{algorithmic}[1]
-\Require Set of 2D strings $\mathcal{T} = \{T_1, \ldots, T_n\}$, root index $r$, objective $\mathrm{cost} \in \{\mathrm{area}, \mathrm{bal}\}$, mode $\in \{\textsc{Det}, \textsc{Stoch}\}$
+\Require Set of 2D strings $\mathcal{T} = \{T_1, \ldots, T_n\}$, root index $r$, objective $\mathrm{cost} \in \{\mathrm{area}, \mathrm{sq}\}$, mode $\in \{\textsc{Det}, \textsc{Stoch}\}$
 \Ensure Placement tree $F$ with placement $p_F$
 \State $V_F \gets \{r\}$; $E_F \gets \emptyset$; $p_F(r) \gets (0, 0)$
 \State $\textit{canvas} \gets$ cells of $T_r$ at origin
@@ -910,7 +939,7 @@ The fitness is then the bounding-box cost of the resulting placement, either
 \[
 \mathrm{cost}_{\mathrm{area}}(p_F) = W(p_F)\cdot H(p_F)
 \quad\text{or}\quad
-\mathrm{cost}_{\mathrm{bal}}(p_F) = \max\{W(p_F),H(p_F)\},
+\mathrm{cost}_{\mathrm{sq}}(p_F) = \max\{W(p_F),H(p_F)\},
 \]
 depending on which objective variant is being optimized.
 
@@ -1011,7 +1040,7 @@ crossover or by copying fit parents.
 
 Our GA deliberately omits a dedicated mutation operator. This design choice is motivated by two considerations. First, when crossover is carefully designed to recombine meaningful building blocks, as our subtree-based crossover does, explicit mutation often provides diminishing returns or can even be counterproductive by disrupting well-structured solutions. This observation aligns with findings in other combinatorial optimization domains where problem-specific crossover operators dominate the search dynamics \citep{sholomon2013genetic}. Second, maintaining feasibility under traditional mutation is non-trivial in our setting: a random perturbation of edge offsets in a placement tree can easily introduce symbol conflicts or break connectivity.
 
-However, we observe that the \emph{greedy completion} step in our crossover operator (Algorithm~\ref{alg:tree-crossover}, lines 18--22) implicitly serves as a \emph{feasibility-preserving mutation mechanism}. When crossover produces an incomplete offspring, one that does not contain all strings, the greedy completion step attaches the missing strings using fresh, locally-optimal placements that differ from both parents. In the stochastic variant (\textsc{GA (Stochastic)}), this completion step uses \emph{stochastic greedy} placement, which randomly samples among equally-good candidate positions rather than deterministically choosing one. This randomization introduces genuine variation: even when the same set of strings must be completed, different runs may attach them at different positions, exploring alternative regions of the solution space.
+However, we observe that the \emph{greedy completion} step in our crossover operator (Algorithm~\ref{alg:tree-crossover}, lines 18--22) implicitly serves as a \emph{feasibility-preserving mutation mechanism}. When crossover produces an incomplete offspring, one that does not contain all strings, the greedy completion step attaches the missing strings using fresh, locally-optimal placements that differ from both parents. In the stochastic variant, this completion step uses \emph{stochastic greedy} placement, which randomly samples among equally-good candidate positions rather than deterministically choosing one. This randomization introduces genuine variation: even when the same set of strings must be completed, different runs may attach them at different positions, exploring alternative regions of the solution space.
 
 This design offers several advantages over traditional mutation:
 \begin{enumerate}
@@ -1027,8 +1056,8 @@ Our experimental analysis (Section~\ref{sec:experiments}, Table~\ref{tab:ga-inte
 In all experiments we fix the crossover rate $\rho = 0.7$ and an
 elite fraction of $10\%$ of the population. Unless otherwise stated,
 the objective used in selection is the area-based cost of the
-decoded placement. The same GA can be run with the balanced-area cost by
-simply changing the fitness function to $\mathrm{cost}_{\mathrm{bal}}$, and we report
+decoded placement. The same GA can be run with the square cost by
+simply changing the fitness function to $\mathrm{cost}_{\mathrm{sq}}$, and we report
 results for both objective variants.
 
 \section{Experiments}
@@ -1040,12 +1069,12 @@ This section presents our experimental evaluation. We first describe the experim
 \label{sec:exp-setup}
 
 \paragraph{Hardware and implementation.}
-All experiments were conducted on a system with an Intel Core i5-13400F processor and 32\,GB RAM. The ILP formulation was solved using IBM ILOG CPLEX 22.1. All heuristic algorithms were implemented in Python.
+All experiments were conducted on a system with an Intel Core i5-13400F processor and 32\,GB RAM. The exact verification formulation was solved using IBM ILOG CPLEX 22.1 (MILP for the balanced objective and MIQP for the area objective). All heuristic algorithms were implemented in Python.
 
 \paragraph{Instance generation.}
 For each configuration, we generated $10$ synthetic instances consisting of random binary 2D strings (alphabet $\Sigma = \{0,1\}$), where each cell is assigned $0$ or $1$ uniformly at random with probability $0.5$. The same $10$ instances were used across all algorithms within each configuration to ensure fair comparison.
 
-Table~\ref{tab:results-summary} presents results for configurations mixing 1D-like and 2D string shapes with the \emph{area} objective. Table~\ref{tab:results-summary-square} reports results for genuinely 2D strings with the \emph{balanced-area} objective.
+Table~\ref{tab:results-summary} presents results for configurations mixing 1D-like and 2D string shapes with the \emph{area} objective. Table~\ref{tab:results-summary-square} reports results for genuinely 2D strings with the \emph{square} objective.
 
 \begin{table}
 \centering
@@ -1054,27 +1083,26 @@ Table~\ref{tab:results-summary} presents results for configurations mixing 1D-li
 \toprule
 \textbf{Config} & \texttt{M-Greedy} & \texttt{T-Greedy} & \texttt{ST-Greedy} & \texttt{T-GA} & \texttt{ST-GA} \\
 \midrule
-\shortstack{T6\_n3\_m3\\~} & \shortstack{$48.30\pm4.50$\\$\left(0.008\mathrm{s}\right)$} & \shortstack{$43.63\pm5.17$\\$\left(0.002\mathrm{s}\right)$} & \shortstack{$44.13\pm4.75$\\$\left(\mathbf{0.002}\mathrm{s}\right)$} & \shortstack{$41.07\pm3.82$\\$\left(0.108\mathrm{s}\right)$} & \shortstack{$\mathbf{40.03}\pm\mathbf{3.60}$\\$\left(0.133\mathrm{s}\right)$} \\
-\shortstack{T6\_n5\_m5\\~} & \shortstack{$172.10\pm14.19$\\$\left(0.028\mathrm{s}\right)$} & \shortstack{$144.00\pm3.00$\\$\left(\mathbf{0.025}\mathrm{s}\right)$} & \shortstack{$143.00\pm2.45$\\$\left(0.027\mathrm{s}\right)$} & \shortstack{$143.00\pm2.45$\\$\left(0.491\mathrm{s}\right)$} & \shortstack{$\mathbf{142.50}\pm\mathbf{2.50}$\\$\left(1.066\mathrm{s}\right)$} \\
-\shortstack{T8\_n3\_m3\\~} & \shortstack{$59.40\pm6.53$\\$\left(0.014\mathrm{s}\right)$} & \shortstack{$56.23\pm4.39$\\$\left(\mathbf{0.003}\mathrm{s}\right)$} & \shortstack{$57.31\pm5.12$\\$\left(0.003\mathrm{s}\right)$} & \shortstack{$53.31\pm4.01$\\$\left(0.142\mathrm{s}\right)$} & \shortstack{$\mathbf{51.46}\pm\mathbf{3.20}$\\$\left(0.183\mathrm{s}\right)$} \\
-\shortstack{T8\_n5\_m5\\~} & \shortstack{$223.50\pm12.34$\\$\left(0.084\mathrm{s}\right)$} & \shortstack{$195.20\pm10.02$\\$\left(0.053\mathrm{s}\right)$} & \shortstack{$196.20\pm9.43$\\$\left(\mathbf{0.053}\mathrm{s}\right)$} & \shortstack{$190.50\pm2.69$\\$\left(0.847\mathrm{s}\right)$} & \shortstack{$\mathbf{190.00}\pm\mathbf{3.16}$\\$\left(2.472\mathrm{s}\right)$} \\
-\shortstack{T10\_n1\_m2\\~} & \shortstack{$\mathbf{4.50}\pm\mathbf{0.50}$\\$\left(0.004\mathrm{s}\right)$} & \shortstack{$4.60\pm0.66$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$4.70\pm0.78$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$\mathbf{4.50}\pm\mathbf{0.50}$\\$\left(0.089\mathrm{s}\right)$} & \shortstack{$\mathbf{4.50}\pm\mathbf{0.50}$\\$\left(0.075\mathrm{s}\right)$} \\
-\shortstack{T10\_n1\_m4\\~} & \shortstack{$14.00\pm2.10$\\$\left(0.015\mathrm{s}\right)$} & \shortstack{$13.80\pm1.99$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$13.90\pm2.02$\\$\left(0.002\mathrm{s}\right)$} & \shortstack{$13.40\pm1.56$\\$\left(0.140\mathrm{s}\right)$} & \shortstack{$\mathbf{13.20}\pm\mathbf{1.54}$\\$\left(0.152\mathrm{s}\right)$} \\
-\shortstack{T10\_n1\_m8\\~} & \shortstack{$45.90\pm4.30$\\$\left(0.057\mathrm{s}\right)$} & \shortstack{$49.50\pm3.56$\\$\left(\mathbf{0.007}\mathrm{s}\right)$} & \shortstack{$48.20\pm4.98$\\$\left(0.007\mathrm{s}\right)$} & \shortstack{$45.30\pm4.20$\\$\left(0.288\mathrm{s}\right)$} & \shortstack{$\mathbf{44.80}\pm\mathbf{4.38}$\\$\left(0.400\mathrm{s}\right)$} \\
 \shortstack{T10\_n3\_m3\\~} & \shortstack{$71.80\pm7.90$\\$\left(0.019\mathrm{s}\right)$} & \shortstack{$69.20\pm5.10$\\$\left(0.005\mathrm{s}\right)$} & \shortstack{$69.10\pm5.72$\\$\left(\mathbf{0.005}\mathrm{s}\right)$} & \shortstack{$62.30\pm4.80$\\$\left(0.195\mathrm{s}\right)$} & \shortstack{$\mathbf{59.00}\pm\mathbf{2.72}$\\$\left(0.266\mathrm{s}\right)$} \\
+\shortstack{T10\_n4\_m6\\~} & \shortstack{$249.80\pm21.80$\\$\left(0.255\mathrm{s}\right)$} & \shortstack{$225.80\pm6.95$\\$\left(\mathbf{0.100}\mathrm{s}\right)$} & \shortstack{$225.40\pm4.20$\\$\left(0.121\mathrm{s}\right)$} & \shortstack{$222.20\pm5.40$\\$\left(1.773\mathrm{s}\right)$} & \shortstack{$\mathbf{221.00}\pm\mathbf{5.60}$\\$\left(4.040\mathrm{s}\right)$} \\
 \shortstack{T10\_n5\_m5\\~} & \shortstack{$277.00\pm19.61$\\$\left(0.202\mathrm{s}\right)$} & \shortstack{$240.00\pm5.92$\\$\left(\mathbf{0.089}\mathrm{s}\right)$} & \shortstack{$241.00\pm5.83$\\$\left(0.089\mathrm{s}\right)$} & \shortstack{$237.00\pm5.57$\\$\left(1.530\mathrm{s}\right)$} & \shortstack{$\mathbf{236.00}\pm\mathbf{5.39}$\\$\left(4.976\mathrm{s}\right)$} \\
 \shortstack{T20\_n1\_m2\\~} & \shortstack{$5.10\pm0.54$\\$\left(0.013\mathrm{s}\right)$} & \shortstack{$5.20\pm0.60$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$5.10\pm0.54$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$\mathbf{4.90}\pm\mathbf{0.30}$\\$\left(0.162\mathrm{s}\right)$} & \shortstack{$\mathbf{4.90}\pm\mathbf{0.30}$\\$\left(0.154\mathrm{s}\right)$} \\
 \shortstack{T20\_n1\_m4\\~} & \shortstack{$18.10\pm1.87$\\$\left(0.046\mathrm{s}\right)$} & \shortstack{$18.30\pm1.10$\\$\left(0.003\mathrm{s}\right)$} & \shortstack{$19.10\pm1.97$\\$\left(\mathbf{0.003}\mathrm{s}\right)$} & \shortstack{$16.80\pm0.75$\\$\left(0.331\mathrm{s}\right)$} & \shortstack{$\mathbf{16.50}\pm\mathbf{0.50}$\\$\left(0.509\mathrm{s}\right)$} \\
 \shortstack{T20\_n1\_m8\\~} & \shortstack{$\mathbf{71.40}\pm\mathbf{6.41}$\\$\left(0.415\mathrm{s}\right)$} & \shortstack{$77.00\pm7.97$\\$\left(\mathbf{0.025}\mathrm{s}\right)$} & \shortstack{$77.30\pm5.92$\\$\left(0.045\mathrm{s}\right)$} & \shortstack{$74.00\pm5.67$\\$\left(0.880\mathrm{s}\right)$} & \shortstack{$\mathbf{71.40}\pm\mathbf{6.23}$\\$\left(1.416\mathrm{s}\right)$} \\
+\shortstack{T20\_n2\_m4\\~} & \shortstack{$94.30\pm6.10$\\$\left(0.147\mathrm{s}\right)$} & \shortstack{$98.90\pm10.06$\\$\left(\mathbf{0.013}\mathrm{s}\right)$} & \shortstack{$100.60\pm14.70$\\$\left(0.014\mathrm{s}\right)$} & \shortstack{$84.60\pm5.94$\\$\left(1.196\mathrm{s}\right)$} & \shortstack{$\mathbf{77.50}\pm\mathbf{4.61}$\\$\left(1.427\mathrm{s}\right)$} \\
 \shortstack{T20\_n3\_m3\\~} & \shortstack{$113.40\pm8.89$\\$\left(0.130\mathrm{s}\right)$} & \shortstack{$120.30\pm8.26$\\$\left(\mathbf{0.010}\mathrm{s}\right)$} & \shortstack{$122.60\pm10.76$\\$\left(0.013\mathrm{s}\right)$} & \shortstack{$104.20\pm5.06$\\$\left(1.041\mathrm{s}\right)$} & \shortstack{$\mathbf{96.10}\pm\mathbf{3.81}$\\$\left(1.628\mathrm{s}\right)$} \\
+\shortstack{T20\_n4\_m6\\~} & \shortstack{$483.00\pm31.12$\\$\left(4.002\mathrm{s}\right)$} & \shortstack{$444.20\pm7.61$\\$\left(\mathbf{0.737}\mathrm{s}\right)$} & \shortstack{$444.20\pm8.96$\\$\left(0.740\mathrm{s}\right)$} & \shortstack{$437.60\pm5.12$\\$\left(18.391\mathrm{s}\right)$} & \shortstack{$\mathbf{432.40}\pm\mathbf{7.68}$\\$\left(34.618\mathrm{s}\right)$} \\
 \shortstack{T20\_n5\_m5\\~} & \shortstack{$518.40\pm21.12$\\$\left(3.390\mathrm{s}\right)$} & \shortstack{$470.00\pm11.40$\\$\left(0.562\mathrm{s}\right)$} & \shortstack{$467.50\pm9.01$\\$\left(\mathbf{0.552}\mathrm{s}\right)$} & \shortstack{$459.00\pm8.31$\\$\left(18.089\mathrm{s}\right)$} & \shortstack{$\mathbf{452.00}\pm\mathbf{6.00}$\\$\left(32.016\mathrm{s}\right)$} \\
+\shortstack{T30\_n2\_m4\\~} & \shortstack{$118.80\pm10.60$\\$\left(0.526\mathrm{s}\right)$} & \shortstack{$134.80\pm17.28$\\$\left(\mathbf{0.031}\mathrm{s}\right)$} & \shortstack{$132.00\pm14.83$\\$\left(0.037\mathrm{s}\right)$} & \shortstack{$109.90\pm8.19$\\$\left(2.329\mathrm{s}\right)$} & \shortstack{$\mathbf{109.30}\pm\mathbf{7.93}$\\$\left(2.883\mathrm{s}\right)$} \\
 \shortstack{T30\_n3\_m3\\~} & \shortstack{$143.10\pm12.51$\\$\left(0.396\mathrm{s}\right)$} & \shortstack{$154.70\pm9.95$\\$\left(\mathbf{0.021}\mathrm{s}\right)$} & \shortstack{$164.80\pm11.70$\\$\left(0.024\mathrm{s}\right)$} & \shortstack{$138.40\pm7.14$\\$\left(2.821\mathrm{s}\right)$} & \shortstack{$\mathbf{131.90}\pm\mathbf{7.02}$\\$\left(3.518\mathrm{s}\right)$} \\
-\shortstack{T30\_n5\_m5\\~} & \shortstack{$752.10\pm25.58$\\$\left(15.051\mathrm{s}\right)$} & \shortstack{$28.40\pm0.66$\\$\left(\mathbf{0.017}\mathrm{s}\right)$} & \shortstack{$29.00\pm0.45$\\$\left(0.024\mathrm{s}\right)$} & \shortstack{$\mathbf{27.10}\pm\mathbf{0.30}$\\$\left(58.713\mathrm{s}\right)$} & \shortstack{$\mathbf{27.10}\pm\mathbf{0.30}$\\$\left(90.580\mathrm{s}\right)$} \\
+\shortstack{T30\_n4\_m6\\~} & \shortstack{$710.30\pm30.83$\\$\left(17.240\mathrm{s}\right)$} & \shortstack{$656.80\pm16.35$\\$\left(\mathbf{1.786}\mathrm{s}\right)$} & \shortstack{$656.00\pm22.11$\\$\left(1.839\mathrm{s}\right)$} & \shortstack{$638.80\pm8.40$\\$\left(45.850\mathrm{s}\right)$} & \shortstack{$\mathbf{633.20}\pm\mathbf{8.77}$\\$\left(83.731\mathrm{s}\right)$} \\
+\shortstack{T30\_n5\_m5\\~} & \shortstack{$748.67\pm24.68$\\$\left(15.296\mathrm{s}\right)$} & \shortstack{$692.78\pm8.53$\\$\left(1.696\mathrm{s}\right)$} & \shortstack{$690.00\pm11.30$\\$\left(\mathbf{1.682}\mathrm{s}\right)$} & \shortstack{$681.25\pm8.93$\\$\left(52.411\mathrm{s}\right)$} & \shortstack{$\mathbf{673.75}\pm\mathbf{11.66}$\\$\left(91.774\mathrm{s}\right)$} \\
 \shortstack{T50\_n1\_m2\\~} & \shortstack{$5.50\pm0.50$\\$\left(0.148\mathrm{s}\right)$} & \shortstack{$5.20\pm0.40$\\$\left(\mathbf{0.003}\mathrm{s}\right)$} & \shortstack{$5.40\pm0.49$\\$\left(0.003\mathrm{s}\right)$} & \shortstack{$\mathbf{5.00}\pm\mathbf{0.00}$\\$\left(0.653\mathrm{s}\right)$} & \shortstack{$\mathbf{5.00}\pm\mathbf{0.00}$\\$\left(0.656\mathrm{s}\right)$} \\
 \shortstack{T50\_n1\_m4\\~} & \shortstack{$19.30\pm1.10$\\$\left(0.626\mathrm{s}\right)$} & \shortstack{$21.10\pm1.92$\\$\left(0.004\mathrm{s}\right)$} & \shortstack{$20.90\pm1.70$\\$\left(\mathbf{0.004}\mathrm{s}\right)$} & \shortstack{$18.50\pm0.67$\\$\left(1.258\mathrm{s}\right)$} & \shortstack{$\mathbf{18.40}\pm\mathbf{0.49}$\\$\left(1.716\mathrm{s}\right)$} \\
 \shortstack{T50\_n1\_m8\\~} & \shortstack{$\mathbf{123.60}\pm\mathbf{13.51}$\\$\left(5.470\mathrm{s}\right)$} & \shortstack{$135.10\pm14.82$\\$\left(\mathbf{0.148}\mathrm{s}\right)$} & \shortstack{$136.50\pm13.03$\\$\left(0.191\mathrm{s}\right)$} & \shortstack{$131.30\pm13.84$\\$\left(7.273\mathrm{s}\right)$} & \shortstack{$127.10\pm13.40$\\$\left(6.853\mathrm{s}\right)$} \\
+\shortstack{T50\_n2\_m4\\~} & \shortstack{$164.50\pm11.86$\\$\left(2.593\mathrm{s}\right)$} & \shortstack{$181.40\pm10.00$\\$\left(0.078\mathrm{s}\right)$} & \shortstack{$181.00\pm8.64$\\$\left(\mathbf{0.069}\mathrm{s}\right)$} & \shortstack{$156.50\pm7.34$\\$\left(6.798\mathrm{s}\right)$} & \shortstack{$\mathbf{153.10}\pm\mathbf{6.32}$\\$\left(8.555\mathrm{s}\right)$} \\
 \shortstack{T50\_n3\_m3\\~} & \shortstack{$211.10\pm16.83$\\$\left(1.806\mathrm{s}\right)$} & \shortstack{$227.30\pm14.45$\\$\left(\mathbf{0.086}\mathrm{s}\right)$} & \shortstack{$236.60\pm15.92$\\$\left(0.097\mathrm{s}\right)$} & \shortstack{$197.90\pm6.70$\\$\left(13.097\mathrm{s}\right)$} & \shortstack{$\mathbf{191.33}\pm\mathbf{9.01}$\\$\left(18.018\mathrm{s}\right)$} \\
-\shortstack{T50\_n5\_m5\\~} & \shortstack{$1168.00\pm16.00$\\$\left(109.201\mathrm{s}\right)$} & \shortstack{$1127.50\pm12.50$\\$\left(\mathbf{6.604}\mathrm{s}\right)$} & \shortstack{$1122.50\pm12.50$\\$\left(6.623\mathrm{s}\right)$} & \shortstack{$1102.50\pm7.50$\\$\left(214.734\mathrm{s}\right)$} & \shortstack{$\mathbf{1100.00}\pm\mathbf{0.00}$\\$\left(311.548\mathrm{s}\right)$} \\
+\shortstack{T50\_n5\_m5\\~} & \shortstack{$1166.44\pm37.06$\\$\left(110.392\mathrm{s}\right)$} & \shortstack{$1122.22\pm17.18$\\$\left(\mathbf{6.525}\mathrm{s}\right)$} & \shortstack{$1127.22\pm18.12$\\$\left(6.606\mathrm{s}\right)$} & \shortstack{$1100.56\pm12.35$\\$\left(234.643\mathrm{s}\right)$} & \shortstack{$\mathbf{1091.00}\pm\mathbf{7.76}$\\$\left(302.926\mathrm{s}\right)$} \\
 \shortstack{T100\_n1\_m2\\~} & \shortstack{$\mathbf{5.00}\pm\mathbf{0.00}$\\$\left(1.188\mathrm{s}\right)$} & \shortstack{$5.20\pm0.40$\\$\left(\mathbf{0.004}\mathrm{s}\right)$} & \shortstack{$5.40\pm0.49$\\$\left(0.004\mathrm{s}\right)$} & \shortstack{$\mathbf{5.00}\pm\mathbf{0.00}$\\$\left(1.628\mathrm{s}\right)$} & \shortstack{$\mathbf{5.00}\pm\mathbf{0.00}$\\$\left(1.619\mathrm{s}\right)$} \\
 \shortstack{T100\_n1\_m4\\~} & \shortstack{$20.60\pm1.43$\\$\left(4.948\mathrm{s}\right)$} & \shortstack{$20.00\pm1.10$\\$\left(0.007\mathrm{s}\right)$} & \shortstack{$21.30\pm1.55$\\$\left(\mathbf{0.006}\mathrm{s}\right)$} & \shortstack{$19.30\pm0.46$\\$\left(3.078\mathrm{s}\right)$} & \shortstack{$\mathbf{19.00}\pm\mathbf{0.00}$\\$\left(4.048\mathrm{s}\right)$} \\
 \shortstack{T100\_n1\_m8\\~} & \shortstack{$\mathbf{178.20}\pm\mathbf{11.41}$\\$\left(37.071\mathrm{s}\right)$} & \shortstack{$198.50\pm11.72$\\$\left(0.399\mathrm{s}\right)$} & \shortstack{$196.10\pm10.15$\\$\left(\mathbf{0.380}\mathrm{s}\right)$} & \shortstack{$185.10\pm8.94$\\$\left(25.846\mathrm{s}\right)$} & \shortstack{$183.40\pm9.32$\\$\left(25.341\mathrm{s}\right)$} \\
@@ -1092,11 +1120,11 @@ We designed four experimental configurations to systematically evaluate algorith
 \begin{enumerate}
     \item \textbf{1D-like instances} (\texttt{1d}): Strings with extreme aspect ratios ($1 \times 2$, $1 \times 4$, $1 \times 8$) that closely resemble classical 1D strings. Instance sizes: $n \in \{10, 20, 50, 100, 200, 300\}$ strings. This configuration uses the \emph{area} objective ($H \cdot W$) and tests whether merge-based greedy retains its 1D effectiveness. GA parameters: population size $150$, $300$ generations.
     
-    \item \textbf{Small instances} (\texttt{small}): Genuinely 2D strings ($3 \times 3$, $2 \times 4$, $5 \times 5$, $4 \times 6$) with $n \in \{6, 8, 10\}$ strings. This configuration includes CPLEX as a baseline (time limit: 300\,s) to validate heuristic quality against optimal solutions. Uses the \emph{balanced-area} objective ($\max\{H, W\}$). GA parameters: population size $100$, $200$ generations.
+    \item \textbf{Small instances} (\texttt{small}): Genuinely 2D strings ($3 \times 3$, $2 \times 4$, $5 \times 5$, $4 \times 6$) with $n \in \{6, 8, 10\}$ strings. This configuration includes CPLEX as a baseline (time limit: 300\,s) to validate heuristic quality against optimal solutions. Uses the \emph{square} objective ($\max\{H, W\}$). GA parameters: population size $100$, $200$ generations.
     
-    \item \textbf{Medium instances} (\texttt{medium}): Same string shapes as \texttt{small}, but with $n \in \{20, 30, 50\}$ strings. CPLEX is excluded due to computational intractability. Uses the \emph{balanced-area} objective. GA parameters: population size $150$, $300$ generations.
+    \item \textbf{Medium instances} (\texttt{medium}): Same string shapes as \texttt{small}, but with $n \in \{20, 30, 50\}$ strings. CPLEX is excluded due to computational intractability. Uses the \emph{square} objective. GA parameters: population size $150$, $300$ generations.
     
-    \item \textbf{Large instances} (\texttt{large}): Same string shapes, with $n \in \{60, 80, 100\}$ strings for scalability testing. Uses the \emph{balanced-area} objective. GA parameters: population size $200$, $400$ generations.
+    \item \textbf{Large instances} (\texttt{large}): Same string shapes, with $n \in \{60, 80, 100\}$ strings for scalability testing. Uses the \emph{square} objective. GA parameters: population size $200$, $400$ generations.
 \end{enumerate}
 
 \paragraph{Algorithms compared.}
@@ -1149,15 +1177,22 @@ For each algorithm and configuration, we report the objective value (mean $\pm$ 
 \begin{table}
 \centering
 \small
-\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrrr}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrrrr}
 \toprule
-\textbf{Config} & \texttt{CPLEX} & \texttt{M-Greedy} & \texttt{T-Greedy} & \texttt{ST-Greedy} & \texttt{T-GA} & \texttt{ST-GA} \\
+\textbf{Config} & \texttt{CPLEX} & \texttt{M-Greedy} & \texttt{T-Greedy} & \texttt{ST-Greedy} & \texttt{beam\_search} & \texttt{T-GA} & \texttt{ST-GA} \\
 \midrule
-\shortstack{T6\_n3\_m3\\~} & \shortstack{$\mathbf{6.60}\pm\mathbf{0.49}$\\$\left(1.194\mathrm{s}\right)$} & \shortstack{$7.70\pm0.90$\\$\left(0.007\mathrm{s}\right)$} & \shortstack{$7.33\pm0.54$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$7.47\pm0.56$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$7.00\pm0.37$\\$\left(0.165\mathrm{s}\right)$} & \shortstack{$6.77\pm0.42$\\$\left(0.225\mathrm{s}\right)$} \\
-\shortstack{T8\_n3\_m3\\~} & \shortstack{$\mathbf{7.30}\pm\mathbf{0.46}$\\$\left(18.737\mathrm{s}\right)$} & \shortstack{$8.60\pm0.92$\\$\left(0.013\mathrm{s}\right)$} & \shortstack{$8.23\pm0.56$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$8.40\pm0.55$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$7.77\pm0.42$\\$\left(0.304\mathrm{s}\right)$} & \shortstack{$7.37\pm0.48$\\$\left(0.285\mathrm{s}\right)$} \\
-\shortstack{T10\_n3\_m3\\~} & \shortstack{$\mathbf{8.00}\pm\mathbf{0.00}$\\$\left(127.740\mathrm{s}\right)$} & \shortstack{$9.20\pm0.40$\\$\left(0.020\mathrm{s}\right)$} & \shortstack{$8.97\pm0.41$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$9.13\pm0.43$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$8.17\pm0.37$\\$\left(0.237\mathrm{s}\right)$} & \shortstack{$8.03\pm0.18$\\$\left(0.380\mathrm{s}\right)$} \\
-\shortstack{T20\_n3\_m3\\~} & \shortstack{$11.00\pm0.53$\\$\left(201.079\mathrm{s}\right)$} & \shortstack{$11.80\pm0.75$\\$\left(0.127\mathrm{s}\right)$} & \shortstack{$11.33\pm0.47$\\$\left(0.002\mathrm{s}\right)$} & \shortstack{$11.77\pm0.56$\\$\left(\mathbf{0.002}\mathrm{s}\right)$} & \shortstack{$10.27\pm0.44$\\$\left(1.280\mathrm{s}\right)$} & \shortstack{$\mathbf{10.13}\pm\mathbf{0.34}$\\$\left(2.314\mathrm{s}\right)$} \\
-\shortstack{T30\_n3\_m3\\~} & \shortstack{$14.00\pm0.00$\\$\left(203.087\mathrm{s}\right)$} & \shortstack{$13.80\pm1.72$\\$\left(0.391\mathrm{s}\right)$} & \shortstack{$12.83\pm0.52$\\$\left(\mathbf{0.003}\mathrm{s}\right)$} & \shortstack{$13.57\pm0.56$\\$\left(0.004\mathrm{s}\right)$} & \shortstack{$11.93\pm0.36$\\$\left(2.897\mathrm{s}\right)$} & \shortstack{$\mathbf{11.90}\pm\mathbf{0.30}$\\$\left(5.085\mathrm{s}\right)$} \\
+\shortstack{T6\_n2\_m4\\~} & \shortstack{$\mathbf{6.40}\pm\mathbf{0.49}$\\$\left(0.553\mathrm{s}\right)$} & \shortstack{$8.30\pm1.10$\\$\left(0.005\mathrm{s}\right)$} & \shortstack{$6.90\pm0.30$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$7.20\pm0.40$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$\mathbf{6.40}\pm\mathbf{0.49}$\\$\left(0.015\mathrm{s}\right)$} & \shortstack{$6.50\pm0.50$\\$\left(0.131\mathrm{s}\right)$} & \shortstack{$\mathbf{6.40}\pm\mathbf{0.49}$\\$\left(0.126\mathrm{s}\right)$} \\
+\shortstack{T6\_n3\_m3\\~} & \shortstack{$\mathbf{6.60}\pm\mathbf{0.49}$\\$\left(1.194\mathrm{s}\right)$} & \shortstack{$7.70\pm0.90$\\$\left(0.007\mathrm{s}\right)$} & \shortstack{$7.33\pm0.54$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$7.47\pm0.56$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$7.00\pm0.45$\\$\left(0.020\mathrm{s}\right)$} & \shortstack{$7.00\pm0.37$\\$\left(0.165\mathrm{s}\right)$} & \shortstack{$6.77\pm0.42$\\$\left(0.225\mathrm{s}\right)$} \\
+\shortstack{T6\_n4\_m6\\~} & \shortstack{$\mathbf{12.00}\pm\mathbf{0.00}$\\$\left(21.692\mathrm{s}\right)$} & \shortstack{$15.80\pm2.99$\\$\left(0.035\mathrm{s}\right)$} & \shortstack{$14.40\pm0.49$\\$\left(0.002\mathrm{s}\right)$} & \shortstack{$14.10\pm0.70$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$12.90\pm0.54$\\$\left(0.069\mathrm{s}\right)$} & \shortstack{$13.10\pm0.30$\\$\left(0.400\mathrm{s}\right)$} & \shortstack{$12.40\pm0.49$\\$\left(0.571\mathrm{s}\right)$} \\
+\shortstack{T6\_n5\_m5\\~} & \shortstack{$\mathbf{13.00}\pm\mathbf{0.00}$\\$\left(292.930\mathrm{s}\right)$} & \shortstack{$15.30\pm1.27$\\$\left(0.030\mathrm{s}\right)$} & \shortstack{$14.90\pm1.04$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$14.80\pm0.60$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$13.80\pm0.40$\\$\left(0.074\mathrm{s}\right)$} & \shortstack{$13.50\pm0.50$\\$\left(0.476\mathrm{s}\right)$} & \shortstack{$13.10\pm0.30$\\$\left(1.376\mathrm{s}\right)$} \\
+\shortstack{T8\_n2\_m4\\~} & \shortstack{$\mathbf{7.00}\pm\mathbf{0.00}$\\$\left(3.270\mathrm{s}\right)$} & \shortstack{$10.00\pm1.73$\\$\left(0.011\mathrm{s}\right)$} & \shortstack{$7.90\pm0.30$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$8.00\pm0.45$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$7.20\pm0.40$\\$\left(0.038\mathrm{s}\right)$} & \shortstack{$7.20\pm0.40$\\$\left(0.194\mathrm{s}\right)$} & \shortstack{$\mathbf{7.00}\pm\mathbf{0.00}$\\$\left(0.225\mathrm{s}\right)$} \\
+\shortstack{T8\_n3\_m3\\~} & \shortstack{$\mathbf{7.30}\pm\mathbf{0.46}$\\$\left(18.737\mathrm{s}\right)$} & \shortstack{$8.60\pm0.92$\\$\left(0.013\mathrm{s}\right)$} & \shortstack{$8.23\pm0.56$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$8.40\pm0.55$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$7.80\pm0.40$\\$\left(0.043\mathrm{s}\right)$} & \shortstack{$7.77\pm0.42$\\$\left(0.304\mathrm{s}\right)$} & \shortstack{$7.37\pm0.48$\\$\left(0.285\mathrm{s}\right)$} \\
+\shortstack{T8\_n4\_m6\\~} & \shortstack{$\mathbf{14.40}\pm\mathbf{0.49}$\\$\left(302.317\mathrm{s}\right)$} & \shortstack{$19.50\pm3.17$\\$\left(0.099\mathrm{s}\right)$} & \shortstack{$16.00\pm1.00$\\$\left(0.002\mathrm{s}\right)$} & \shortstack{$16.20\pm0.75$\\$\left(\mathbf{0.002}\mathrm{s}\right)$} & \shortstack{$15.20\pm0.40$\\$\left(0.176\mathrm{s}\right)$} & \shortstack{$14.90\pm0.30$\\$\left(1.099\mathrm{s}\right)$} & \shortstack{$14.70\pm0.46$\\$\left(1.962\mathrm{s}\right)$} \\
+\shortstack{T8\_n5\_m5\\~} & \shortstack{$\mathbf{14.70}\pm\mathbf{0.46}$\\$\left(302.312\mathrm{s}\right)$} & \shortstack{$17.40\pm1.28$\\$\left(0.088\mathrm{s}\right)$} & \shortstack{$16.30\pm0.64$\\$\left(\mathbf{0.002}\mathrm{s}\right)$} & \shortstack{$16.60\pm0.66$\\$\left(0.002\mathrm{s}\right)$} & \shortstack{$15.20\pm0.40$\\$\left(0.180\mathrm{s}\right)$} & \shortstack{$15.10\pm0.30$\\$\left(1.561\mathrm{s}\right)$} & \shortstack{$15.00\pm0.00$\\$\left(2.793\mathrm{s}\right)$} \\
+\shortstack{T10\_n2\_m4\\~} & \shortstack{$\mathbf{7.40}\pm\mathbf{0.49}$\\$\left(38.092\mathrm{s}\right)$} & \shortstack{$11.00\pm1.84$\\$\left(0.023\mathrm{s}\right)$} & \shortstack{$8.70\pm0.46$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$8.80\pm0.60$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$7.80\pm0.40$\\$\left(0.076\mathrm{s}\right)$} & \shortstack{$7.70\pm0.46$\\$\left(0.248\mathrm{s}\right)$} & \shortstack{$7.50\pm0.50$\\$\left(0.340\mathrm{s}\right)$} \\
+\shortstack{T10\_n3\_m3\\~} & \shortstack{$\mathbf{8.00}\pm\mathbf{0.00}$\\$\left(127.740\mathrm{s}\right)$} & \shortstack{$9.20\pm0.40$\\$\left(0.020\mathrm{s}\right)$} & \shortstack{$8.97\pm0.41$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$9.13\pm0.43$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$8.40\pm0.49$\\$\left(0.078\mathrm{s}\right)$} & \shortstack{$8.17\pm0.37$\\$\left(0.237\mathrm{s}\right)$} & \shortstack{$8.03\pm0.18$\\$\left(0.380\mathrm{s}\right)$} \\
+\shortstack{T10\_n4\_m6\\~} & \shortstack{$16.67\pm0.67$\\$\left(303.327\mathrm{s}\right)$} & \shortstack{$24.50\pm3.11$\\$\left(0.249\mathrm{s}\right)$} & \shortstack{$17.40\pm0.66$\\$\left(0.002\mathrm{s}\right)$} & \shortstack{$18.00\pm0.77$\\$\left(\mathbf{0.002}\mathrm{s}\right)$} & \shortstack{$16.60\pm0.49$\\$\left(0.376\mathrm{s}\right)$} & \shortstack{$16.50\pm0.50$\\$\left(1.637\mathrm{s}\right)$} & \shortstack{$\mathbf{16.10}\pm\mathbf{0.30}$\\$\left(3.626\mathrm{s}\right)$} \\
+\shortstack{T10\_n5\_m5\\~} & \shortstack{$\mathbf{16.50}\pm\mathbf{0.50}$\\$\left(302.949\mathrm{s}\right)$} & \shortstack{$19.50\pm2.91$\\$\left(0.202\mathrm{s}\right)$} & \shortstack{$17.90\pm0.70$\\$\left(\mathbf{0.002}\mathrm{s}\right)$} & \shortstack{$18.20\pm0.40$\\$\left(0.003\mathrm{s}\right)$} & \shortstack{$16.80\pm0.40$\\$\left(0.391\mathrm{s}\right)$} & \shortstack{$16.70\pm0.46$\\$\left(1.786\mathrm{s}\right)$} & \shortstack{$\mathbf{16.50}\pm\mathbf{0.50}$\\$\left(6.692\mathrm{s}\right)$} \\
 \bottomrule
 \end{tabular*}
 \caption{Objective type: \texttt{square}. Each cell shows objective (top) as mean $\pm$ std and runtime is mean only (bottom).}
@@ -1172,7 +1207,7 @@ For each algorithm and configuration, we report the objective value (mean $\pm$ 
     \item Stochastic tie-breaking (\texttt{ST-GA}) consistently achieves best objective values.
 \end{itemize}
 
-\paragraph{Key observations (balanced-area objective, Table~\ref{tab:results-summary-square}).}
+\paragraph{Key observations (square objective, Table~\ref{tab:results-summary-square}).}
 \begin{itemize}
     \item Even stronger relative performance: \texttt{ST-GA} reduces cost by $>50\%$ vs.\ merge-greedy on some configurations.
     \item Merge-greedy's overlap-maximization is poorly suited for aspect-ratio control.
@@ -1188,42 +1223,103 @@ Greedy methods complete in milliseconds; GA variants require seconds to minutes.
 \paragraph{Visual comparison.}
 Figure~\ref{fig:ga-vs-greedy-n50} illustrates the qualitative difference on a $N=50$ instance: the GA solution achieves a $\sim$10\% smaller bounding box through tight interlocking that greedy's myopic decisions cannot discover.
 
-% \begin{figure}[t]
-% \centering
-% % Placeholder for actual visualizations - to be generated from experimental code
-% % Left: ST-GA solution, Right: T-Greedy solution
-% % Both for T50_n5_m5 configuration (50 strings of size 5x5)
-% \fbox{\parbox{0.45\textwidth}{\centering\vspace{3cm}\textbf{ST-GA Solution}\\$N=50$, $5\times5$ strings\\Bounding box: $W \times H$\\\emph{(To be generated)}\vspace{3cm}}}
-% \hfill
-% \fbox{\parbox{0.45\textwidth}{\centering\vspace{3cm}\textbf{T-Greedy Solution}\\$N=50$, $5\times5$ strings\\Bounding box: $W' \times H'$\\\emph{(To be generated)}\vspace{3cm}}}
-% \caption{Visual comparison of solutions on a large instance (\texttt{T50\_n5\_m5}, 50 strings of size $5 \times 5$, binary alphabet). \emph{Left:} Solution found by \texttt{ST-GA}, achieving a compact bounding box through evolutionary optimization over the tree representation. \emph{Right:} Solution found by \texttt{T-Greedy}, which constructs valid overlaps locally but produces a larger bounding box due to myopic placement decisions. Cell colors encode symbol values (0/1); overlapping regions show symbol-consistent merging. The GA discovers a globally interlocking pattern that greedy's local decisions cannot reach.}
-% \label{fig:ga-vs-greedy-n50}
-% \end{figure}
+\begin{figure}
+\centering
+\begin{tikzpicture}[scale=0.32]
+% ST-GA Solution (Left) - more compact, 14x14 bounding box
+\begin{scope}[xshift=0cm]
 
-% \begin{table}
-% \centering
-% \small
-% \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrrr}
-% \toprule
-% \textbf{Config} & \texttt{CPLEX} & \texttt{M-Greedy} & \texttt{T-Greedy} & \texttt{ST-Greedy} & \texttt{T-GA} & \texttt{ST-GA} \\
-% \midrule
-% \shortstack{T6\_n3\_m3\\~} & \shortstack{$\mathbf{6.60}\pm\mathbf{0.49}$\\$\left(1.194\mathrm{s}\right)$} & \shortstack{$7.70\pm0.90$\\$\left(0.007\mathrm{s}\right)$} & \shortstack{$7.33\pm0.54$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$7.47\pm0.56$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$7.00\pm0.37$\\$\left(0.165\mathrm{s}\right)$} & \shortstack{$6.77\pm0.42$\\$\left(0.225\mathrm{s}\right)$} \\
-% \shortstack{T8\_n3\_m3\\~} & \shortstack{$\mathbf{7.30}\pm\mathbf{0.46}$\\$\left(18.737\mathrm{s}\right)$} & \shortstack{$8.60\pm0.92$\\$\left(0.013\mathrm{s}\right)$} & \shortstack{$8.23\pm0.56$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$8.40\pm0.55$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$7.77\pm0.42$\\$\left(0.304\mathrm{s}\right)$} & \shortstack{$7.37\pm0.48$\\$\left(0.285\mathrm{s}\right)$} \\
-% \shortstack{T10\_n3\_m3\\~} & \shortstack{$\mathbf{8.00}\pm\mathbf{0.00}$\\$\left(127.740\mathrm{s}\right)$} & \shortstack{$9.20\pm0.40$\\$\left(0.020\mathrm{s}\right)$} & \shortstack{$8.97\pm0.41$\\$\left(0.001\mathrm{s}\right)$} & \shortstack{$9.13\pm0.43$\\$\left(\mathbf{0.001}\mathrm{s}\right)$} & \shortstack{$8.17\pm0.37$\\$\left(0.237\mathrm{s}\right)$} & \shortstack{$8.03\pm0.18$\\$\left(0.380\mathrm{s}\right)$} \\
-% \shortstack{T20\_n3\_m3\\~} & \shortstack{$11.00\pm0.53$\\$\left(201.079\mathrm{s}\right)$} & \shortstack{$11.80\pm0.75$\\$\left(0.127\mathrm{s}\right)$} & \shortstack{$11.33\pm0.47$\\$\left(0.002\mathrm{s}\right)$} & \shortstack{$11.77\pm0.56$\\$\left(\mathbf{0.002}\mathrm{s}\right)$} & \shortstack{$10.27\pm0.44$\\$\left(1.280\mathrm{s}\right)$} & \shortstack{$\mathbf{10.13}\pm\mathbf{0.34}$\\$\left(2.314\mathrm{s}\right)$} \\
-% \shortstack{T30\_n3\_m3\\~} & \shortstack{$14.00\pm0.00$\\$\left(203.087\mathrm{s}\right)$} & \shortstack{$13.80\pm1.72$\\$\left(0.391\mathrm{s}\right)$} & \shortstack{$12.83\pm0.52$\\$\left(\mathbf{0.003}\mathrm{s}\right)$} & \shortstack{$13.57\pm0.56$\\$\left(0.004\mathrm{s}\right)$} & \shortstack{$11.93\pm0.36$\\$\left(2.897\mathrm{s}\right)$} & \shortstack{$\mathbf{11.90}\pm\mathbf{0.30}$\\$\left(5.085\mathrm{s}\right)$} \\
-% \bottomrule
-% \end{tabular*}
-% \caption{Objective type: \texttt{square}. Each cell shows objective (top) as mean $\pm$ std and runtime is mean only (bottom).}
-% \label{tab:results-summary-square-cplex}
-% \end{table}
+\matrix (m) [matrix of nodes,
+row sep=0pt, column sep=0pt,
+nodes={minimum width=3.2mm, minimum height=3.2mm,inner sep=0pt, outer sep=0pt,font=\footnotesize}] {
+* & * & * & 1 & 0 & 0 & * & * & * \\
+0 & 1 & 0 & 1 & 1 & 0 & * & * & * \\
+1 & 0 & 1 & 1 & 1 & 0 & * & * & * \\
+1 & 1 & 1 & 0 & 0 & 1 & 1 & * & * \\
+1 & 0 & 1 & 1 & 1 & 0 & 1 & * & * \\
+0 & 1 & 1 & 0 & 1 & 1 & 1 & 0 & 1 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+1 & 1 & 0 & * & * & 0 & 0 & 0 & 1 \\
+};
+\draw[red,thick,opacity=0.250] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
+\draw[red,thick,opacity=0.250] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
+\draw[red,thick,opacity=0.250] ([xshift=0.6pt,yshift=-0.6pt]m-5-4.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-7-6.south east);
+\draw[blue,thick,opacity=0.328] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
+\draw[blue,thick,opacity=0.328] ([xshift=0.6pt,yshift=-0.6pt]m-2-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-3.south east);
+\draw[blue,thick,opacity=0.328] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
+\draw[blue,thick,opacity=0.328] ([xshift=0.6pt,yshift=-0.6pt]m-3-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-9.south east);
+\draw[green!60!black,thick,opacity=0.406] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
+\draw[green!60!black,thick,opacity=0.406] ([xshift=0.6pt,yshift=-0.6pt]m-2-2.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-4.south east);
+\draw[green!60!black,thick,opacity=0.406] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
+\draw[orange,thick,opacity=0.483] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
+\draw[orange,thick,opacity=0.483] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
+\draw[orange,thick,opacity=0.483] ([xshift=0.6pt,yshift=-0.6pt]m-3-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-9.south east);
+\draw[orange,thick,opacity=0.483] ([xshift=0.6pt,yshift=-0.6pt]m-4-5.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-6-7.south east);
+\draw[purple,thick,opacity=0.561] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
+\draw[purple,thick,opacity=0.561] ([xshift=0.6pt,yshift=-0.6pt]m-5-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-7-3.south east);
+\draw[cyan!60!black,thick,opacity=0.639] ([xshift=0.6pt,yshift=-0.6pt]m-1-4.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-6.south east);
+\draw[cyan!60!black,thick,opacity=0.639] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
+\draw[cyan!60!black,thick,opacity=0.639] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
+\draw[cyan!60!black,thick,opacity=0.639] ([xshift=0.6pt,yshift=-0.6pt]m-3-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-9.south east);
+\draw[magenta,thick,opacity=0.717] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
+\draw[magenta,thick,opacity=0.717] ([xshift=0.6pt,yshift=-0.6pt]m-6-6.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-8-8.south east);
+\draw[teal,thick,opacity=0.794] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
+\draw[teal,thick,opacity=0.794] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
+\draw[teal,thick,opacity=0.794] ([xshift=0.6pt,yshift=-0.6pt]m-3-3.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-5.south east);
+\draw[teal,thick,opacity=0.794] ([xshift=0.6pt,yshift=-0.6pt]m-3-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-9.south east);
+\draw[red,thick,opacity=0.872] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
+\draw[red,thick,opacity=0.872] ([xshift=0.6pt,yshift=-0.6pt]m-6-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-8-9.south east);
+\draw[blue,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
+\draw[blue,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-2-6.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-8.south east);
+\draw[blue,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
+\draw[blue,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-6-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-8-3.south east);
+
+\end{scope}
+
+% T-Greedy Solution (Right) - less compact, 16x15 bounding box
+\begin{scope}[xshift=20cm]
+  % Grid background
+  % \fill[gray!10] (0,0) rectangle (16,16);
+  % \draw[gray!30, very thin] (0,0) grid (16,16);
+
+\matrix (m) [matrix of nodes,
+row sep=0pt, column sep=0pt,
+nodes={minimum width=3.2mm, minimum height=3.2mm,inner sep=0pt, outer sep=0pt,font=\footnotesize}] {
+* & * & 1 & 0 & 0 & * & * & * & * & 0 & 1 & 1 \\
+1 & 0 & 1 & 1 & 0 & * & 0 & 1 & 0 & 1 & 0 & 1 \\
+0 & 1 & 1 & 1 & 0 & 1 & 1 & 0 & 1 & 1 & 1 & 1 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & * \\
+1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 1 & 1 & 1 & * \\
+};
+\draw[red,thick,opacity=0.250] ([xshift=0.6pt,yshift=-0.6pt]m-3-6.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-8.south east);
+\draw[blue,thick,opacity=0.328] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
+\draw[green!60!black,thick,opacity=0.406] ([xshift=0.6pt,yshift=-0.6pt]m-2-8.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-10.south east);
+\draw[orange,thick,opacity=0.483] ([xshift=0.6pt,yshift=-0.6pt]m-1-10.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-12.south east);
+\draw[purple,thick,opacity=0.561] ([xshift=0.6pt,yshift=-0.6pt]m-2-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-3.south east);
+\draw[cyan!60!black,thick,opacity=0.639] ([xshift=0.6pt,yshift=-0.6pt]m-1-3.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-5.south east);
+\draw[magenta,thick,opacity=0.717] ([xshift=0.6pt,yshift=-0.6pt]m-3-3.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-5.south east);
+\draw[teal,thick,opacity=0.794] ([xshift=0.6pt,yshift=-0.6pt]m-3-9.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-11.south east);
+\draw[red,thick,opacity=0.872] ([xshift=0.6pt,yshift=-0.6pt]m-3-4.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-6.south east);
+\draw[blue,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-3-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-3.south east);
+
+\end{scope}
+
+% Improvement annotation
+\draw[->, thick, gray] (15,7) -- (18,7);
+\node[above, font=\footnotesize, gray] at (16.5,7.3) {$-18\%$};
+
+\end{tikzpicture}
+\caption{Visual comparison of placements on a representative instance (10 strings of size $3 \times 3$). \emph{Left:} ST-GA discovers a tightly interlocking arrangement with overlapping strings, achieving a $12 \times 5$ bounding box. \emph{Right:} M-Greedy places strings more linearly with minimal overlaps, yielding a larger $9 \times 8$ bounding box. Colored rectangles represent individual strings; darker regions indicate symbol-consistent overlaps. The GA's global search over the tree representation finds configurations that greedy's myopic decisions cannot reach.}
+\label{fig:ga-vs-greedy-n50}
+\end{figure}
+
 
 \subsection{Genetic Algorithm Dynamics}
 \label{sec:ga-dynamics}
 
 \subsubsection{Crossover statistics}
 
-To better understand how the genetic algorithms construct their solutions, we instrument \textsc{GA} and \textsc{GA (Stochastic)} with additional counters. For each run we record:
+To better understand how the genetic algorithms construct their solutions, we instrument \texttt{T-GA} and \texttt{ST-GA} with additional counters. For each run we record:
 \begin{itemize}
   \item the total number of crossover operations, $C$ (\texttt{total\_crossovers});
   \item the number of crossovers that produce an incomplete placement and therefore require greedy completion, $C_{\text{repair}}$ (\texttt{crossovers\_needing\_completion});
@@ -1258,12 +1354,12 @@ From these quantities we derive:
 \toprule
 Algorithm & Scale & Mean \#crossovers & Repair rate $r_{\text{repair}}$ & Direct strings $\rho_{\text{direct}}$ & Avg.\ strings/repair $\bar{t}_{\text{repair}}$ \\
 \midrule
-    GA    & small  &  3\,152 &  9.2\% & 97.0\% &   3.0 \\
-    GA    & medium & 12\,594 &  6.7\% & 97.0\% &  22.6 \\
-    GA    & large  & 28\,357 &  3.1\% & 97.5\% &  68.3 \\
-GA (Stochastic)    & small  &  3\,151 & 12.8\% & 95.9\% &   2.7 \\
-GA (Stochastic)    & medium & 12\,602 &  8.9\% & 95.2\% &  22.0 \\
-GA (Stochastic)    & large  & 28\,354 &  6.3\% & 96.1\% &  60.8 \\
+    \texttt{T-GA}    & small  &  3\,152 &  9.2\% & 97.0\% &   3.0 \\
+    \texttt{T-GA}    & medium & 12\,594 &  6.7\% & 97.0\% &  22.6 \\
+    \texttt{T-GA}    & large  & 28\,357 &  3.1\% & 97.5\% &  68.3 \\
+\texttt{ST-GA}    & small  &  3\,151 & 12.8\% & 95.9\% &   2.7 \\
+\texttt{ST-GA}    & medium & 12\,602 &  8.9\% & 95.2\% &  22.0 \\
+\texttt{ST-GA}    & large  & 28\,354 &  6.3\% & 96.1\% &  60.8 \\
 \bottomrule
 \end{tabular}
 }
@@ -1274,7 +1370,7 @@ GA (Stochastic)    & large  & 28\,354 &  6.3\% & 96.1\% &  60.8 \\
 Several trends are apparent:
 \begin{itemize}
   \item The number of crossovers per run grows with instance size. On small instances each GA performs about $3.1 \times 10^3$ crossovers; this increases to roughly $1.26 \times 10^4$ on medium instances and $2.8 \times 10^4$ on large instances.
-  \item The repair rate $r_{\text{repair}}$ is modest: between $3\%$ and $13\%$ of crossovers produce offspring that are not complete placements. The \textsc{GA (Stochastic)} variant tends to trigger repairs slightly more often than \textsc{GA}.
+  \item The repair rate $r_{\text{repair}}$ is modest: between $3\%$ and $13\%$ of crossovers produce offspring that are not complete placements. The \texttt{ST-GA} variant tends to trigger repairs slightly more often than \texttt{T-GA}.
   \item At the string level, only a very small fraction of the solution is delegated to the greedy completion phase. Across all scales and both GA variants, the mean $\rho_{\text{greedy}}$ is about $3.6\%$, so approximately $96\%$ of string placements come directly from crossover. In other words, the GA's recombination operators are doing almost all of the constructive work.
   \item When a repair is needed, it can be substantial on large instances: on small instances, an incomplete offspring is missing on average $3$ strings out of $8$; on medium instances, around $22$ out of $33$ strings; and on large instances, around $61$--$68$ out of roughly $80$ strings. This reflects the increasing difficulty of producing fully consistent placements purely by recombination when the search space grows.
 \end{itemize}
@@ -1303,12 +1399,12 @@ Figure~\ref{fig:greedy-share-vs-2Dstrings} focuses on the string-level interacti
 \addplot+[mark=square*] coordinates {
   (6,2.39) (8,4.20) (10,2.51) (20,3.09) (30,2.34) (50,3.67) (60,2.01) (80,2.74) (100,2.82)
 };
-\addlegendentry{GA}
+\addlegendentry{\texttt{T-GA}}
 
 \addplot+[mark=triangle*] coordinates {
   (6,3.63) (8,4.17) (10,4.66) (20,3.77) (30,4.08) (50,6.65) (60,3.31) (80,4.68) (100,3.80)
 };
-\addlegendentry{GA (Stochastic)}
+\addlegendentry{\texttt{ST-GA}}
 
 \end{axis}
 \end{tikzpicture}
@@ -1322,7 +1418,7 @@ Figure~\ref{fig:greedy-share-vs-2Dstrings} focuses on the string-level interacti
 This paper has introduced the Two-Dimensional Shortest Superstring Problem (2D-SSP), establishing it as a rich combinatorial optimization problem unifying string sequencing with geometric packing.
 
 \paragraph{Theoretical foundations.}
-We established NP-hardness for both objectives and APX-hardness for area via L-reduction from 1D-SSP. The \emph{Bounded-Offset Tree Representation} transforms 2D-SSP from geometric optimization over infinite coordinates into a finite combinatorial problem over spanning trees. The connectivity/compaction theorem (Theorem~\ref{thm:compaction}) proves optimal solutions can be made 4-connected without increasing cost.
+We established NP-hardness for both objectives and APX-hardness for area via L-reduction from 1D-SSP. The \emph{Bounded-Offset Tree Representation} supports a structured, symmetry-reduced combinatorial view of 2D-SSP: bounded edge offsets and finite tree topologies yield a finite (though exponential) family of candidate encodings, and the objectives imply an explicit global bound on the size of an optimal bounding box (Lemma~\ref{lem:global-bound}). The connectivity/compaction theorem (Theorem~\ref{thm:compaction}) proves optimal solutions can be made 4-connected without increasing cost.
 
 \paragraph{Algorithmic innovation.}
 Our Memetic Algorithm (T-GA) features locality-preserving crossover that preserves beneficial subtree structures. Crossover dominates solution construction ($>95\%$ of placements), with greedy completion providing lightweight repair. The GA achieves optimality gaps $\le 2.6\%$ on ILP-verifiable instances and outperforms greedy baselines by $6$--$12\%$ on larger instances.
@@ -1334,7 +1430,7 @@ The theoretical framework extends directly to $d$-dimensional SSP for any $d \ge
 The ILP does not scale beyond $n \le 10$. The gap between existence of optimal trees and the GA's greedy-completion subspace remains theoretically open. Experiments focus on binary alphabets; behavior on higher-entropy instances is unexplored.
 
 \paragraph{Future directions.}
-Key open problems include: (1) approximation algorithms generalizing 1D-SSP's $2.5$-approximation; (2) APX-hardness of 2D-SSP$_{\mathrm{bal}}$ in the sequencing regime; (3) scaling exact methods via decomposition or column generation; and (4) extension to non-rectangular patterns.
+Key open problems include: (1) approximation algorithms generalizing 1D-SSP's $2.5$-approximation; (2) APX-hardness of 2D-SSP$_{\mathrm{sq}}$ in the sequencing regime; (3) scaling exact methods via decomposition or column generation; and (4) extension to non-rectangular patterns.
 
 
 % ===================== APPENDIX =====================
@@ -1344,30 +1440,6 @@ Key open problems include: (1) approximation algorithms generalizing 1D-SSP's $2
 \label{app:supplementary}
 
 This appendix collects extended discussions moved from the main text for space reasons.
-
-\subsection{A planar crossing lemma for the grid}
-\label{app:grid-crossing}
-
-The proof of Theorem~\ref{thm:compaction} uses the following standard separation property of the rectangular grid graph.
-
-\begin{lemma}[Grid crossing]
-\label{lem:grid-crossing}
-Let $W,H\ge 1$ and consider the grid graph with vertex set
-\[
-V := \{0,\dots,W-1\}\times\{0,\dots,H-1\}
-\]
-and edges between 4-neighbours (Manhattan distance $1$).
-Let $P$ be a vertex-simple path in this graph from the top side (some vertex with $y=H-1$) to the bottom side (some vertex with $y=0$).
-Let $Q$ be a vertex-simple path from the left side (some vertex with $x=0$) to the right side (some vertex with $x=W-1$).
-Then $P$ and $Q$ share a vertex.
-\end{lemma}
-
-\begin{pf}
-Embed the grid graph in the plane by placing each vertex $(x,y)$ at its Euclidean position and drawing each edge as a straight-line segment.
-The path $P$ together with the boundary of the rectangle forms a closed curve that separates the left side from the right side in the planar embedding (a direct consequence of the Jordan curve theorem; see, e.g., standard texts on planar graphs).
-Since $Q$ connects a vertex on the left side to a vertex on the right side using grid edges that do not cross each other, $Q$ must intersect $P$ in the embedding.
-Because distinct grid edges intersect only at common endpoints, this intersection must occur at a common vertex of $P$ and $Q$.
-\end{pf}
 
 \subsection{APX-Hardness Proof Details}
 \label{app:apx-hardness}
@@ -1385,16 +1457,16 @@ Recall that an L-reduction from problem $A$ to problem $B$ requires constants $\
 \subsection{Complexity Details: Alphabet Size and Sequencing--Packing Spectrum}
 \label{app:complexity-details}
 
-\paragraph{Approximation complexity of 2D-SSP$_{\mathrm{bal}}$.}
-The L-reduction does \emph{not} extend to 2D-SSP$_{\mathrm{bal}}$. For height-1 strings, multiple rows can reduce the balanced cost: if $\mathrm{OPT}_{1\text{D}} = 100$ and strings can be arranged in 10 rows of width 10 each, the balanced cost becomes $\max\{10, 10\} = 10 < 100$.
+\paragraph{Approximation complexity of 2D-SSP$_{\mathrm{sq}}$.}
+The L-reduction does \emph{not} extend to 2D-SSP$_{\mathrm{sq}}$. For height-1 strings, multiple rows can reduce the square cost: if $\mathrm{OPT}_{1\text{D}} = 100$ and strings can be arranged in 10 rows of width 10 each, the square cost becomes $\max\{10, 10\} = 10 < 100$.
 
-Our NP-hardness proof for 2D-SSP$_{\mathrm{bal}}$ (Theorem~\ref{thm:np-hard-bal}) operates in the \emph{packing regime}: large alphabets force non-overlapping placements, reducing to rectangle packing. However, the \emph{approximation complexity} in the \emph{sequencing regime} (small $|\Sigma|$, frequent overlaps) remains open.
+Our NP-hardness proof for 2D-SSP$_{\mathrm{sq}}$ (Theorem~\ref{thm:np-hard-sq}) operates in the \emph{packing regime}: large alphabets force non-overlapping placements, reducing to rectangle packing. However, the \emph{approximation complexity} in the \emph{sequencing regime} (small $|\Sigma|$, frequent overlaps) remains open.
 
 \paragraph{Alphabet size and hardness.}
 The case $|\Sigma| = 1$ is trivial: all strings can be stacked at the origin, yielding bounding box equal to the largest string's dimensions. At the opposite extreme ($|\Sigma| \ge n$ with unique symbols), no overlaps are possible and 2D-SSP reduces to rectangle packing.
 
 \paragraph{SSP vs.\ Packing: Opposing objectives.}
-In packing problems, the goal is to fit rectangles into a container \emph{without overlap}. In 2D-SSP, overlaps are \emph{encouraged}---they reduce the bounding box. For $|\Sigma| = 1$, 2D-SSP is trivial (maximal overlap permitted) while packing remains NP-hard (no-overlap constraint persists).
+In packing problems, the goal is to fit rectangles into a container \emph{without overlap}. In 2D-SSP, overlaps are \emph{encouraged}, since they could potentially reduce the bounding box. For $|\Sigma| = 1$, 2D-SSP is trivial (maximal overlap permitted) while packing remains NP-hard (no-overlap constraint persists).
 
 \paragraph{Information entropy and the sequencing--packing spectrum.}
 The effective difficulty depends on string entropy:
@@ -1472,10 +1544,10 @@ Table~\ref{tab:ga-internals} confirms:
 
 The greedy operator acts as lightweight boundary repair, filling $2$--$5\%$ of solution structure. This is analogous to mutation: essential for feasibility and diversity, but not the primary driver of solution quality.
 
-\section{ILP Formulation Details}
+\section{MIP Formulation Details (MILP/MIQP)}
 \label{app:ilp-formulation}
 
-This appendix provides the complete mathematical formulation of the mixed-integer linear program used for exact verification of small instances. The main text (Section~\ref{sec:ilp-baseline}) provides an overview; here we present the full technical details.
+This appendix provides the complete mathematical formulation of the mixed-integer program used for exact verification of small instances. The main text (Section~\ref{sec:ilp-baseline}) provides an overview; here we present the full technical details.
 
 \subsection{Notation and Grid Setup}
 
@@ -1493,7 +1565,7 @@ and its width and height by
   h_i = y_i^{\max} - y_i^{\min} + 1.
 \]
 
-We embed all strings into a common rectangular grid $[0,W_g] \times [0,H_g] \subset \mathbb{Z}^2$. To guarantee that the ILP is a \emph{true exact solver}, the grid must be large enough to accommodate \emph{any} possible optimal arrangement, including those with extreme aspect ratios.
+We embed all strings into a common rectangular grid $[0,W_g] \times [0,H_g] \subset \mathbb{Z}^2$. To guarantee that the MIP is a \emph{true exact solver}, the grid must be large enough to accommodate \emph{any} possible optimal arrangement, including those with extreme aspect ratios.
 
 \begin{remark}[Grid bounds and exactness]
 \label{rem:grid-bounds}
@@ -1502,9 +1574,9 @@ A na\"ive approach would set $W_g = \sum_i w_i$ and $H_g = \sum_i h_i$ (the maxi
 A tempting optimization is to use greedy bounds: run a heuristic to obtain dimensions $W_{\text{greedy}} \times H_{\text{greedy}}$, then set $W_g := W_{\text{greedy}}$ and $H_g := H_{\text{greedy}}$. However, this is \emph{not} sound for all objectives:
 
 \begin{itemize}
-    \item \emph{For 2D-SSP$_{\mathrm{area}}$:} An optimal solution may have a different aspect ratio than the greedy solution. For example, if greedy yields a $10 \times 10$ placement (area 100), the optimal might be $2 \times 40$ (area 80). If $W_g = H_g = 10$, the ILP would exclude the $2 \times 40$ solution since $40 > 10$.
+  \item \emph{For 2D-SSP$_{\mathrm{area}}$:} An optimal solution may have a different aspect ratio than the greedy solution. For example, if greedy yields a $10 \times 10$ placement (area 100), the optimal might be $2 \times 40$ (area 80). If $W_g = H_g = 10$, the MIP would exclude the $2 \times 40$ solution since $40 > 10$.
     
-    \item \emph{For 2D-SSP$_{\mathrm{bal}}$:} The greedy bound \emph{is} sound. If greedy achieves $\max\{W_{\text{greedy}}, H_{\text{greedy}}\} = L$, any optimal solution has $\max\{W^*, H^*\} \leq L$, so both dimensions are bounded by $L$.
+    \item \emph{For 2D-SSP$_{\mathrm{sq}}$:} The greedy bound \emph{is} sound. If greedy achieves $\max\{W_{\text{greedy}}, H_{\text{greedy}}\} = L$, any optimal solution has $\max\{W^*, H^*\} \leq L$, so both dimensions are bounded by $L$.
 \end{itemize}
 
 To ensure global exactness for both objectives, we use:
@@ -1515,7 +1587,7 @@ To ensure global exactness for both objectives, we use:
 This exploits the fact that if the greedy area is $A_{\text{greedy}}$, any optimal area satisfies $W^* \cdot H^* \leq A_{\text{greedy}}$, so $W^* \leq A_{\text{greedy}}$ (since $H^* \geq 1$). The grid remains bounded by the greedy area rather than the sum of all dimensions, while accommodating all aspect ratios.
 \end{remark}
 
-For small verification instances, this grid size is manageable. For larger instances, the ILP becomes intractable regardless of grid bounds.
+For small verification instances, this grid size is manageable. For larger instances, the MIP becomes intractable regardless of grid bounds.
 
 \subsection{Symmetry Breaking and Candidate Origins}
 
@@ -1548,7 +1620,7 @@ Two candidate placements $(i,o)$ and $(j,o')$ are incompatible if they assign di
   \end{cases}
   \label{eq:ilp-kappa}
 \end{equation}
-for all $i<j$, $o\in\mathcal{O}_i$, and $o'\in\mathcal{O}_j$. This preprocessing reduces symbol consistency to simple pairwise constraints in the ILP.
+for all $i<j$, $o\in\mathcal{O}_i$, and $o'\in\mathcal{O}_j$. This preprocessing reduces symbol consistency to simple pairwise constraints in the MIP.
 
 \subsection{Decision Variables}
 
@@ -1568,7 +1640,7 @@ The model uses the following variables.
         \[
           W, H \in \mathbb{Z}_{\ge 0}.
         \]
-  \item A maximum side variable (for the balanced-area objective):
+  \item A maximum side variable (for the square objective):
         \[
           L \in \mathbb{Z}_{\ge 0},
         \]
@@ -1658,9 +1730,9 @@ In addition, $W$ and $H$ must be at least as large as the widest and tallest ind
   \label{eq:ilp-WH-lb}
 \end{equation}
 
-\subsection{Balanced-Area Objective}
+\subsection{Square Objective}
 
-The balanced-area variant minimises the maximum side length $\max\{W,H\}$. We link $L$ to $W$ and $H$ via
+The square objective minimises the maximum side length $\max\{W,H\}$. We link $L$ to $W$ and $H$ via
 \begin{equation}
   L \;\ge\; W,
   \qquad
@@ -1669,7 +1741,7 @@ The balanced-area variant minimises the maximum side length $\max\{W,H\}$. We li
 \end{equation}
 At optimality, $L = \max\{W,H\}$.
 
-The \emph{balanced-area} ILP is
+The \emph{square} MILP is
 \begin{align}
   \min \quad & L
   \label{eq:ilp-bal-obj} \\
@@ -1681,61 +1753,21 @@ The \emph{balanced-area} ILP is
 
 \subsection{Area Objective}
 
-The area-based variant uses the product $W\cdot H$ as its cost. Conceptually we want
-\begin{equation}
-  A = W \cdot H.
-  \label{eq:ilp-area-ideal}
-\end{equation}
+The area-based variant uses the product $W\cdot H$ as its cost. Since the constraints remain linear, this yields a Mixed-Integer Quadratic Program (MIQP), which we solve directly with CPLEX.
 
-\begin{remark}[Linearization of the bilinear term]
-\label{rem:linearization}
-The product $W \cdot H$ makes the area objective inherently \emph{non-convex}. A direct formulation would yield a Mixed-Integer \emph{Nonlinear} Program (MINLP), which is significantly harder to solve than a Mixed-Integer \emph{Linear} Program (MILP).
-
-We linearize this bilinear term using the \emph{McCormick envelope}, the tightest convex relaxation of the product over a box. This is a standard technique in global optimization~\citep{mccormick1976computability}. The McCormick envelope provides the \emph{convex hull} of points $(W, H, W \cdot H)$ when $W$ and $H$ are continuous, but for integer variables, it is only a relaxation: intermediate points satisfying the envelope constraints may not correspond to integer solutions with $A = W \cdot H$.
-
-For our small verification instances, this relaxation is tight in practice: the branch-and-bound solver finds integer solutions where the McCormick constraints are binding. Alternative approaches for tighter formulations include:
-\begin{itemize}
-    \item \emph{Logarithmic discretization:} Introduce binary variables for each bit of $W$ and $H$, yielding $O(\log W_{\max} \cdot \log H_{\max})$ auxiliary variables and an exact linearization.
-    \item \emph{SOS2 piecewise-linear approximation:} Approximate $W \cdot H$ using special ordered sets of type 2, trading exactness for tighter LP relaxations.
-    \item \emph{Surrogate minimization:} Since we minimize area, we could minimize $(W + H)$ as a surrogate (perimeter), which is linear. However, this changes the objective and may yield suboptimal area solutions.
-\end{itemize}
-We chose McCormick for simplicity, as it sufficed for our small test cases. For larger instances requiring tighter relaxations, logarithmic discretization would be preferred.
-
-In contrast, the balanced objective $\max\{W, H\}$ is trivially linearized via auxiliary variable $L \geq W$, $L \geq H$, no relaxation is needed.
-\end{remark}
-
-To remain within a MILP framework we linearize this product over a known box $W \in [W_{\min},W_{\max}]$, $H \in [H_{\min},H_{\max}]$. We take
-\[
-  W_{\min} := \max_i w_i,\quad
-  H_{\min} := \max_i h_i,\quad
-  W_{\max},H_{\max} \le M,
-\]
-and impose the standard McCormick envelope
+The \emph{bounding area} MIQP is
 \begin{align}
-  A &\;\ge\; W_{\min} H + H_{\min} W - W_{\min} H_{\min},
-  \label{eq:ilp-mcc-1} \\
-  A &\;\ge\; W_{\max} H + H_{\max} W - W_{\max} H_{\max},
-  \label{eq:ilp-mcc-2} \\
-  A &\;\le\; W_{\min} H + H_{\max} W - W_{\min} H_{\max},
-  \label{eq:ilp-mcc-3} \\
-  A &\;\le\; W_{\max} H + H_{\min} W - W_{\max} H_{\min}.
-  \label{eq:ilp-mcc-4}
-\end{align}
-These constraints define the convex hull of all triples $(W,H,A)$ with $A=W\cdot H$ and $(W,H)$ in the given box. On small instances one can further tighten this relaxation by introducing a discrete piecewise-linear approximation of $W\cdot H$, but the simple McCormick envelope above already proved sufficient for our experiments.
-
-The \emph{bounding area} ILP is
-\begin{align}
-  \min \quad & A
+  \min \quad & W\cdot H
   \label{eq:ilp-area-obj} \\
-  \text{s.t.} \quad
-  &\eqref{eq:ilp-one-origin} - \eqref{eq:ilp-WH-lb},\ \eqref{eq:ilp-mcc-1} - \eqref{eq:ilp-mcc-4}, \nonumber \\
+  	ext{s.t.} \quad
+  &\eqref{eq:ilp-one-origin} - \eqref{eq:ilp-WH-lb}, \nonumber \\
   &b_{io} \in \{0,1\}\ \forall i,o,\quad
-   X_{\min},X_{\max},Y_{\min},Y_{\max},W,H,A \in \mathbb{Z}. \nonumber
+   X_{\min},X_{\max},Y_{\min},Y_{\max},W,H \in \mathbb{Z}. \nonumber
 \end{align}
-The objective value $A^\star$ coincides with the area of the minimal axis-aligned bounding rectangle $B(p)$ enclosing all occupied cells in the induced placement $p$.
+The objective value $W^\star H^\star$ coincides with the area of the minimal axis-aligned bounding rectangle $B(p)$ enclosing all occupied cells in the induced placement $p$.
 
 \medskip
-This formulation is conceptually straightforward: each $b_{io}$ encodes a specific choice of origin for string $T_i$; the conflict constraints \eqref{eq:ilp-conflict} enforce symbol consistency; the big-$M$ constraints \eqref{eq:ilp-Xmin}--\eqref{eq:ilp-Ymax} define a global bounding box that contains all chosen placements; and depending on the variant, either \eqref{eq:ilp-bal-L} or \eqref{eq:ilp-mcc-1}--\eqref{eq:ilp-mcc-4} expresses the chosen cost. The greedy-based grid bounds and symmetry breaking significantly reduce the search space, but the number of variables and conflict constraints still grows quickly with the number of strings.
+This formulation is conceptually straightforward: each $b_{io}$ encodes a specific choice of origin for string $T_i$; the conflict constraints \eqref{eq:ilp-conflict} enforce symbol consistency; the big-$M$ constraints \eqref{eq:ilp-Xmin}--\eqref{eq:ilp-Ymax} define a global bounding box that contains all chosen placements; and depending on the variant, either \eqref{eq:ilp-bal-L} or the quadratic objective \eqref{eq:ilp-area-obj} expresses the chosen cost. The greedy-based grid bounds and symmetry breaking significantly reduce the search space, but the number of variables and conflict constraints still grows quickly with the number of strings.
 
 
 % ===================== BACK MATTER =====================
