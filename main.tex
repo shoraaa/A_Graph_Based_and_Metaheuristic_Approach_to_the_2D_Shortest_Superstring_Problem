@@ -16,6 +16,7 @@
 \usepackage{booktabs}
 \usepackage{pgfplots}
 \usepackage{tikz}
+\usepackage{subcaption}
 \usetikzlibrary{matrix,calc}
 \pgfplotsset{compat=1.18}
 
@@ -62,6 +63,10 @@ We introduce the Two-Dimensional Shortest Superstring Problem (2D-SSP): arrange 
 Shortest superstring problem \sep Two-dimensional strings \sep Genetic algorithm \sep Integer linear programming \sep Combinatorial optimization \sep Bounded-offset tree encoding
 \end{keywords}
 
+\ExplSyntaxOn
+\bool_gset_true:N \g_stm_nologo_bool  % turn off icon email/url/orcid...
+\ExplSyntaxOff
+
 \maketitle
 
 % ===================== MAIN TEXT =====================
@@ -82,13 +87,13 @@ The transition from 1D to 2D introduces three qualitative changes:
 We make the following contributions:
 \begin{enumerate}
     \item \textbf{Problem formalization} (Section~\ref{sec:problem}). We define 2D-SSP precisely, including placement feasibility, symbol consistency, and the two bounding-box objectives.
-    
+
     \item \textbf{Complexity results} (Section~\ref{sec:complexity}). We prove NP-hardness for both objectives and APX-hardness for the area objective via L-reduction from 1D-SSP.
-    
+
     \item \textbf{Compaction theorem} (Theorem~\ref{thm:compaction}). Every optimal placement can be transformed into a 4-connected placement without increasing cost. This is analogous to compaction in VLSI floorplanning but requires a new proof to handle symbol-consistency constraints.
-    
+
     \item \textbf{Bounded-Offset Tree Representation} (Section~\ref{sec:trees}). We show that connected placements correspond to spanning trees with bounded edge labels (Lemma~\ref{lem:bounded-offsets}), and that at least one optimal placement admits such a representation (Corollary~\ref{cor:tree-optimal}). Combined with a global coordinate bound (Lemma~\ref{lem:global-bound}), this yields a finite (though exponential) combinatorial search space.
-    
+
     \item \textbf{Tree-based Genetic Algorithm} (Section~\ref{subsec:ga}). We design a GA whose individuals are placement trees and whose crossover transplants subtrees, preserving spatially coherent clusters. On small instances ($n \le 10$), T-GA achieves optimality gaps $\le 2.6\%$ versus CPLEX; on larger instances, it outperforms greedy baselines by 6--12\%.
 \end{enumerate}
 
@@ -205,29 +210,14 @@ Thus $|S|_{\mathrm{area}}$ is the primary objective, the natural 2D analogue of 
 (total cells in the bounding box), while $|S|_{\mathrm{sq}}$ is the side length of the smallest enclosing square,
 ensuring neither dimension dominates.
 
-
 \begin{figure}
 \centering
-\begin{tikzpicture}[baseline=(m.center)]
-\matrix (m) [matrix of nodes,
-row sep=0pt, column sep=0pt,
-nodes={minimum width=5.2mm, minimum height=5.2mm,inner sep=0pt, outer sep=0pt,font=\footnotesize}] {
-1 & 1 & 1 & 0 & 0 & 0 & * \\
-0 & 1 & 0 & 1 & 0 & 1 & *\\
-1 & 0 & 0 & 1 & 1 & 0 & 0 \\
-1 & 0 & 1 & 1 & 1 & 1 & 1 \\
-1 & 0 & 0 & 1 & 0 & 1 & 0 \\
-};
-\draw[red,thick,opacity=0.250] ([xshift=0.6pt,yshift=-0.6pt]m-3-3.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-5.south east);
-\draw[blue,thick,opacity=0.390] ([xshift=0.6pt,yshift=-0.6pt]m-1-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-3.south east);
-\draw[green!60!black,thick,opacity=0.530] ([xshift=0.6pt,yshift=-0.6pt]m-3-5.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-7.south east);
-\draw[orange,thick,opacity=0.670] ([xshift=0.6pt,yshift=-0.6pt]m-3-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-3.south east);
-\draw[purple,thick,opacity=0.810] ([xshift=0.6pt,yshift=-0.6pt]m-2-3.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-5.south east);
-\draw[cyan!60!black,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-1-4.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-6.south east);
-\end{tikzpicture}
-\caption{A 2D-superstring $S$ (5 rows $\times$ 7 columns) containing six 2D strings $T_1,\dots,T_6$ as 2D-substrings (highlighted rectangles). The cells printed as ``$*$'' are \emph{uncovered} positions (holes) inside the bounding box that are not covered by any input string; ``$*$'' is a \emph{diagrammatic placeholder} (not an alphabet symbol). In any formal $S\in\Sigma^{m\times n}$ these cells can be filled arbitrarily with symbols from $\Sigma$. The area is $|S|_{\mathrm{area}} = 35$, and the square side length is $|S|_{\mathrm{sq}} = 7$.
-}
-\label{fig:cplex-seed342}
+\includegraphics[width=0.3\textwidth]{figure/def_sample.pdf}
+\caption{A 2D-superstring $S$ represented as a binary matrix containing multiple 2D strings as submatrices (highlighted rectangles). 
+Each colored rectangle corresponds to a distinct 2D string embedded within $S$. 
+Cells marked by ``*'' denote uncovered positions (holes) inside the bounding box that are not covered by any input string; ``*'' is a diagrammatic placeholder and does not represent a symbol of the alphabet. 
+In any formal superstring $S \in \Sigma^{m \times n}$, these positions may be filled arbitrarily with symbols from $\Sigma$.}
+\label{fig:def-sample}
 \end{figure}
 
 \begin{remark}[Holes inside the bounding box]
@@ -248,6 +238,16 @@ variants of the Two-Dimensional Shortest Superstring Problem:
 \end{itemize}
 Both objectives depend only on the minimal axis-aligned bounding rectangle of $S$ and penalize all empty cells inside it.
 \end{definition}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.3\textwidth]{figure/obj_compare.pdf}
+\caption{Matrix grid comparing Area vs. Square objectives. 
+The occupied region spans width $7$ and height $3$, so the Area cost is $7\times 3 = 21$. 
+The Square objective uses the maximum side length, $\max(7,3)=7$, giving Square cost $7^2=49$. 
+The hatched region indicates additional cells included when enforcing a square bounding box.}
+\label{fig:obj-compare}
+\end{figure}
 
 \section{Computational Complexity}
 \label{sec:complexity}
@@ -480,7 +480,35 @@ Let $p$ be a symbol-consistent placement of $\mathcal{T}$. The
 Equivalently, strings $i$ and $j$ are adjacent in $G^{\mathrm{ct}}(p)$ if they are in contact under $p$ (overlapping or 4-adjacent).
 \end{definition}
 
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{figure/free_map.pdf}
+\caption{The bijection between the abstract Tree Representation and the physical Grid Realization. The left side shows the abstract \textbf{Placement Tree}, where nodes represent 2D strings and edges encode relative offsets ($\delta$). The right side shows the corresponding \textbf{Grid Realization} on the coordinate plane. The absolute position of each string is determined by summing the offset vectors along the path from the root. This representation decouples the solution structure from absolute coordinates.}
+\label{fig:free-map}
+\end{figure}
+
 The contact graph $G^{\mathrm{ct}}(p)$ records which edges of the placement graph are ``realized'' by a given placement. Different placements of the same instance may realize different subsets of edges.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{figure/contact_graph.pdf}
+\caption{From geometric placement to structural abstraction.
+The left panel shows a symbol-consistent matrix-based placement of four 2D strings, realizing overlap (\(T_1,T_2\)), 4-adjacency (\(T_2,T_3\)), and disconnection (\(T_4\)).
+The right panel depicts the induced abstract contact graph, which records overlap and adjacency relations while abstracting away absolute coordinates.
+This correspondence motivates the graph-based representation used throughout the paper.}
+\label{fig:contact-graph}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{figure/graph_select.pdf}
+\caption{From feasible offsets to a concrete placement.
+The matrix grid represents the placement graph, where all symbol-consistent relative offsets appear as potential edges.
+Choosing one such edge fixes a relative position and collapses the graph into a placement tree, thereby realizing a concrete geometric placement.
+This transition underlies the solver’s decision process.}
+\label{fig:graph-select}
+\end{figure}
+
 
 \begin{remark}
 Our cost functionals depend only on the bounding rectangle $B(p)$, not directly on the cardinality of $R(p)$. In particular, two placements with the same bounding box have the same cost for both 2D-SSP$_{\mathrm{area}}$ and 2D-SSP$_{\mathrm{sq}}$. The area-based objective directly generalizes the 1D shortest superstring objective (string length), while the square objective seeks a compact, near-square layout. Both differ from geometric covering formulations that minimize the area of the union $R(p)$.
@@ -507,6 +535,15 @@ The following theorem shows that optimal solutions can be restricted to connecte
 \label{thm:compaction}
 Let $p$ be an optimal symbol-consistent placement for 2D-SSP under either objective. Then there exists an optimal symbol-consistent placement $p'$ with $\mathrm{cost}(p') \le \mathrm{cost}(p)$ such that $R(p')$ is 4-connected.
 \end{theorem}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{figure/compaction.pdf}
+\caption{Illustration of the compaction principle underlying 2D-SSP. 
+In the initial placement, the strings occupy a $6 \times 5$ bounding box and intersect every row and column, yet the occupied region is disconnected. 
+By translating one component without creating symbol-inconsistent overlaps, the placement becomes 4-connected and fits into a smaller $3 \times 4$ bounding box.}
+\label{fig:compaction}
+\end{figure}
 
 The proof relies on two lemmas. The key observation is that symbol-consistency constrains only \emph{overlapping} cells, not 4-adjacent ones. Thus we can slide disconnected components closer until they become 4-adjacent without creating overlaps, hence without risking symbol conflicts.
 
@@ -918,6 +955,14 @@ The tree-growing procedure is summarized in Algorithm~\ref{alg:tree-greedy}.
 \subsection{Tree-based genetic algorithm}
 \label{subsec:ga}
 
+
+\begin{figure}
+\centering
+\includegraphics[width=0.7\textwidth]{figure/greedy_step.pdf}
+\caption{Visualization of the \textbf{Greedy Heuristic} decision process. The algorithm expands the solution by attaching a new string $T_{new}$ (zeros) to the current canvas (ones). The decision relies on two criteria: \textbf{feasibility} and \textbf{minimal cost}. String C is rejected due to a symbol conflict ($1 \neq 0$). Among valid options, \textbf{String B} is selected over String A because it minimizes the incremental growth ($\Delta$ Cost) of the bounding box.}\label{fig:greedy-step}
+\end{figure}
+
+
 We now describe the tree-based genetic algorithm (GA) used in our experiments. More precisely, our approach is a \emph{Memetic Algorithm}~\citep{moscato1989evolution}, a hybrid that couples global evolutionary search with a problem-specific local completion operator. This design reflects a modern consensus in combinatorial optimization: ``pure'' GAs rarely compete with state-of-the-art methods, but GAs hybridized with domain-specific heuristics consistently achieve top performance on structured problems~\citep{merz2000memetic}. In our setting, the evolutionary process explores the \emph{high-level topology}, which strings cluster together and how subtrees combine, while the greedy completion operator handles the \emph{low-level boundary repair}, attaching the small fraction of strings that cannot be consistently inherited from parents. This division of labor is deliberate: the expensive evolutionary search focuses on the critical structural backbone of the placement tree, while trivial leaf attachments are delegated to fast, deterministic (or stochastic) greedy.
 Recall that a solution is represented as a \emph{placement tree}
 $F = (V,E,r)$ whose vertices are strings, whose directed edges
@@ -1199,6 +1244,25 @@ For each algorithm and configuration, we report the objective value (mean $\pm$ 
 \label{tab:results-summary-square-cplex}
 \end{table}
 
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figure/single_objective_area1d_1d_square2area.pdf}
+        \caption{Objective value comparison on 1D instances}
+        \label{fig:1d_objective}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figure/single_pareto_area1d_1d_square2area.pdf}
+        \caption{Pareto front (Runtime vs Objective) on 1D instances}
+        \label{fig:1d_pareto}
+    \end{subfigure}
+    \caption{Performance on 1D-like instances ($1\times 8$ aspect ratio). Merge-Greedy remains competitive in this regime, matching the performance of tree-based methods.}
+    \label{fig:1d_results}
+\end{figure}
+
 \paragraph{Key observations (area objective, Table~\ref{tab:results-summary}).}
 \begin{itemize}
     \item Tree-based methods outperform merge-greedy by $9$--$15\%$ on genuinely 2D instances.
@@ -1207,6 +1271,34 @@ For each algorithm and configuration, we report the objective value (mean $\pm$ 
     \item Stochastic tie-breaking (\texttt{ST-GA}) consistently achieves best objective values.
 \end{itemize}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figure/group_objective_square_LMS_square2area.pdf}
+    \caption{Objective Comparison (Square)}
+    \label{fig:square_objective_group}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figure/group_pareto_square_LMS_square2area.pdf}
+    \caption{Pareto Analysis (Square)}
+    \label{fig:square_pareto_group}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figure/group_objective_area2d_LMS_square2area.pdf}
+    \caption{Objective Comparison (Area)}
+    \label{fig:area_objective_group}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figure/group_pareto_area2d_LMS_square2area.pdf}
+    \caption{Pareto Analysis (Area)}
+    \label{fig:area_pareto_group}
+\end{figure}
+
 \paragraph{Key observations (square objective, Table~\ref{tab:results-summary-square}).}
 \begin{itemize}
     \item Even stronger relative performance: \texttt{ST-GA} reduces cost by $>50\%$ vs.\ merge-greedy on some configurations.
@@ -1214,102 +1306,35 @@ For each algorithm and configuration, we report the objective value (mean $\pm$ 
     \item All heuristics scale to $n=50$ strings; GA runtimes grow to $\sim$230\,s on large instances.
 \end{itemize}
 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.97\textwidth]{figure/compare_objective_large_square2area.pdf}
+  \caption{Detailed Objective on Large Instances}
+  \label{fig:large_objective}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.97\textwidth]{figure/compare_pareto_large_square2area.pdf}
+  \caption{Pareto Frontier on Large Instances}
+  \label{fig:large_pareto}
+\end{figure}
+
 \paragraph{Comparison with CPLEX (Table~\ref{tab:results-summary-square-cplex}).}
 On small instances where CPLEX finds provably optimal solutions, \texttt{ST-GA} achieves optimality gaps of $0.4$--$2.6\%$. On larger instances (T20--T30), \texttt{ST-GA} outperforms CPLEX (which hits the 300\,s time limit), validating the GA's effectiveness.
 
 \paragraph{Runtime trade-offs.}
 Greedy methods complete in milliseconds; GA variants require seconds to minutes. This defines a Pareto frontier: greedy for interactive or exploratory use, GA for offline optimization where solution quality justifies additional computation time.
 
+
 \paragraph{Visual comparison.}
 Figure~\ref{fig:ga-vs-greedy-n50} illustrates the qualitative difference on a $N=50$ instance: the GA solution achieves a $\sim$10\% smaller bounding box through tight interlocking that greedy's myopic decisions cannot discover.
 
 \begin{figure}
 \centering
-\begin{tikzpicture}[scale=0.32]
-% ST-GA Solution (Left) - more compact, 14x14 bounding box
-\begin{scope}[xshift=0cm]
-
-\matrix (m) [matrix of nodes,
-row sep=0pt, column sep=0pt,
-nodes={minimum width=3.2mm, minimum height=3.2mm,inner sep=0pt, outer sep=0pt,font=\footnotesize}] {
-* & * & * & 1 & 0 & 0 & * & * & * \\
-0 & 1 & 0 & 1 & 1 & 0 & * & * & * \\
-1 & 0 & 1 & 1 & 1 & 0 & * & * & * \\
-1 & 1 & 1 & 0 & 0 & 1 & 1 & * & * \\
-1 & 0 & 1 & 1 & 1 & 0 & 1 & * & * \\
-0 & 1 & 1 & 0 & 1 & 1 & 1 & 0 & 1 \\
-0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
-1 & 1 & 0 & * & * & 0 & 0 & 0 & 1 \\
-};
-\draw[red,thick,opacity=0.250] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
-\draw[red,thick,opacity=0.250] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
-\draw[red,thick,opacity=0.250] ([xshift=0.6pt,yshift=-0.6pt]m-5-4.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-7-6.south east);
-\draw[blue,thick,opacity=0.328] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
-\draw[blue,thick,opacity=0.328] ([xshift=0.6pt,yshift=-0.6pt]m-2-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-3.south east);
-\draw[blue,thick,opacity=0.328] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
-\draw[blue,thick,opacity=0.328] ([xshift=0.6pt,yshift=-0.6pt]m-3-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-9.south east);
-\draw[green!60!black,thick,opacity=0.406] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
-\draw[green!60!black,thick,opacity=0.406] ([xshift=0.6pt,yshift=-0.6pt]m-2-2.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-4.south east);
-\draw[green!60!black,thick,opacity=0.406] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
-\draw[orange,thick,opacity=0.483] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
-\draw[orange,thick,opacity=0.483] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
-\draw[orange,thick,opacity=0.483] ([xshift=0.6pt,yshift=-0.6pt]m-3-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-9.south east);
-\draw[orange,thick,opacity=0.483] ([xshift=0.6pt,yshift=-0.6pt]m-4-5.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-6-7.south east);
-\draw[purple,thick,opacity=0.561] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
-\draw[purple,thick,opacity=0.561] ([xshift=0.6pt,yshift=-0.6pt]m-5-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-7-3.south east);
-\draw[cyan!60!black,thick,opacity=0.639] ([xshift=0.6pt,yshift=-0.6pt]m-1-4.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-6.south east);
-\draw[cyan!60!black,thick,opacity=0.639] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
-\draw[cyan!60!black,thick,opacity=0.639] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
-\draw[cyan!60!black,thick,opacity=0.639] ([xshift=0.6pt,yshift=-0.6pt]m-3-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-9.south east);
-\draw[magenta,thick,opacity=0.717] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
-\draw[magenta,thick,opacity=0.717] ([xshift=0.6pt,yshift=-0.6pt]m-6-6.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-8-8.south east);
-\draw[teal,thick,opacity=0.794] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
-\draw[teal,thick,opacity=0.794] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
-\draw[teal,thick,opacity=0.794] ([xshift=0.6pt,yshift=-0.6pt]m-3-3.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-5.south east);
-\draw[teal,thick,opacity=0.794] ([xshift=0.6pt,yshift=-0.6pt]m-3-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-9.south east);
-\draw[red,thick,opacity=0.872] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
-\draw[red,thick,opacity=0.872] ([xshift=0.6pt,yshift=-0.6pt]m-6-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-8-9.south east);
-\draw[blue,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-1-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-9.south east);
-\draw[blue,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-2-6.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-8.south east);
-\draw[blue,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
-\draw[blue,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-6-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-8-3.south east);
-
-\end{scope}
-
-% T-Greedy Solution (Right) - less compact, 16x15 bounding box
-\begin{scope}[xshift=20cm]
-  % Grid background
-  % \fill[gray!10] (0,0) rectangle (16,16);
-  % \draw[gray!30, very thin] (0,0) grid (16,16);
-
-\matrix (m) [matrix of nodes,
-row sep=0pt, column sep=0pt,
-nodes={minimum width=3.2mm, minimum height=3.2mm,inner sep=0pt, outer sep=0pt,font=\footnotesize}] {
-* & * & 1 & 0 & 0 & * & * & * & * & 0 & 1 & 1 \\
-1 & 0 & 1 & 1 & 0 & * & 0 & 1 & 0 & 1 & 0 & 1 \\
-0 & 1 & 1 & 1 & 0 & 1 & 1 & 0 & 1 & 1 & 1 & 1 \\
-0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & * \\
-1 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 1 & 1 & 1 & * \\
-};
-\draw[red,thick,opacity=0.250] ([xshift=0.6pt,yshift=-0.6pt]m-3-6.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-8.south east);
-\draw[blue,thick,opacity=0.328] ([xshift=0.6pt,yshift=-0.6pt]m-2-7.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-9.south east);
-\draw[green!60!black,thick,opacity=0.406] ([xshift=0.6pt,yshift=-0.6pt]m-2-8.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-10.south east);
-\draw[orange,thick,opacity=0.483] ([xshift=0.6pt,yshift=-0.6pt]m-1-10.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-12.south east);
-\draw[purple,thick,opacity=0.561] ([xshift=0.6pt,yshift=-0.6pt]m-2-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-4-3.south east);
-\draw[cyan!60!black,thick,opacity=0.639] ([xshift=0.6pt,yshift=-0.6pt]m-1-3.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-3-5.south east);
-\draw[magenta,thick,opacity=0.717] ([xshift=0.6pt,yshift=-0.6pt]m-3-3.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-5.south east);
-\draw[teal,thick,opacity=0.794] ([xshift=0.6pt,yshift=-0.6pt]m-3-9.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-11.south east);
-\draw[red,thick,opacity=0.872] ([xshift=0.6pt,yshift=-0.6pt]m-3-4.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-6.south east);
-\draw[blue,thick,opacity=0.950] ([xshift=0.6pt,yshift=-0.6pt]m-3-1.north west) rectangle ([xshift=-0.6pt,yshift=0.6pt]m-5-3.south east);
-
-\end{scope}
-
-% Improvement annotation
-\draw[->, thick, gray] (15,7) -- (18,7);
-\node[above, font=\footnotesize, gray] at (16.5,7.3) {$-18\%$};
-
-\end{tikzpicture}
-\caption{Visual comparison of placements on a representative instance (10 strings of size $3 \times 3$). \emph{Left:} ST-GA discovers a tightly interlocking arrangement with overlapping strings, achieving a $12 \times 5$ bounding box. \emph{Right:} M-Greedy places strings more linearly with minimal overlaps, yielding a larger $9 \times 8$ bounding box. Colored rectangles represent individual strings; darker regions indicate symbol-consistent overlaps. The GA's global search over the tree representation finds configurations that greedy's myopic decisions cannot reach.}
+\includegraphics[width=0.7\textwidth]{figure/ga_greedy.pdf}
+\caption{Visual comparison of placements on a representative instance (10 strings of size $3 \times 3$). \emph{Left:} ST-GA discovers a tightly interlocking arrangement with overlapping strings, achieving a $12 \times 5$ bounding box. \emph{Right:} M-Greedy places strings more linearly with minimal overlaps, yielding a larger $9 \times 8$ bounding box. Colored rectangles represent individual strings; darker regions indicate symbol-consistent overlaps. The GA's global search over the tree representation finds configurations that greedy's myopic decisions cannot reach.Overall, the ST-GA placement achieves an 18\% reduction in bounding-box area relative to M-Greedy on this instance.
+}
 \label{fig:ga-vs-greedy-n50}
 \end{figure}
 
@@ -1490,6 +1515,13 @@ The bound $O(n^2 wh)$ on $|E(G^{\mathrm{pl}})|$ is a worst-case geometric bound.
 
 \subsection{Optimized Offset Enumeration}
 \label{app:offset-enumeration}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{figure/pruning.pdf}
+\caption{Visualization of \textbf{Search Space Pruning} on the matrix grid. The global grid ($W_g \times H_g$) defines the maximum allowable bounds. The \textbf{valid origin space} (green dashed box) encloses all top-left coordinates where a string of size $w_i \times h_i$ can be anchored without overflowing. The blue string $T_i$ represents a valid placement since its origin $o_{ok}$ lies within this safe zone. In contrast, the red string $T_j$ represents an invalid placement; its origin $o_{bad}$ falls into the \textbf{excluded margins} (determined by $w_i-1$ and $h_i-1$), causing the string to violate the global grid boundaries.}
+\label{fig:pruning}
+\end{figure}
 
 The na\"ive approach enumerates all $O(wh)$ candidate offsets per pair. In the sequencing regime, we can improve performance by iterating offsets in order of \emph{bounding-box increase}.
 
